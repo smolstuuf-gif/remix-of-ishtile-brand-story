@@ -42,7 +42,7 @@ export function FeaturedProducts() {
                 </button>
               </div>
               <div className="flex flex-1 flex-col justify-between gap-2 px-2.5 pb-3 pt-2.5 md:px-3">
-                <h3 className="max-w-[11rem] text-[15px] font-medium leading-snug tracking-[-0.01em] md:text-[15px]">
+                <h3 className="max-w-[10rem] text-[15px] font-medium leading-snug tracking-[-0.01em] md:text-[15px]">
                   {p.name}
                 </h3>
                 <p className="text-[15px] font-medium tabular-nums md:text-base">{formatTaka(p.price)}</p>

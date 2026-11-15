@@ -14,7 +14,7 @@ function Headline({ className }: { className?: string }) {
   return (
     <h1
       className={cn(
-        "font-headline font-extrabold italic uppercase leading-[0.88] tracking-[-0.03em]",
+        "font-headline font-extrabold italic uppercase tracking-[-0.03em] [&>span]:leading-[0.9]",
         className,
       )}
     >
@@ -135,7 +135,7 @@ export function MobileHero() {
             />
             <div className="absolute inset-0 bg-gradient-to-b from-ink/30 via-transparent to-ink/80" />
             <div className="absolute bottom-[11%] left-[7%] right-[6%] origin-bottom-left -rotate-[8deg]">
-              <h2 className="font-headline text-[15.5vw] font-extrabold italic uppercase leading-[0.86] tracking-[-0.035em]">
+              <h2 className="font-headline text-[15.5vw] font-extrabold italic uppercase tracking-[-0.035em] [&>span]:leading-[0.88]">
                 {s.lines.map((l) => (
                   <span key={l} className="block text-ink-foreground">
                     {l}

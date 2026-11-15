@@ -12,8 +12,8 @@ import { Sparkle } from "./icons";
 const desktopCollections = [
   { image: colSpring, alt: "Spring '25 — Fresh Fits. New Vibes.", w: 751, h: 370 },
   { image: colSummer, alt: "Summer Essentials '25 — Lightweight. Breathable. Effortless.", w: 751, h: 370 },
-  { image: colFestive, alt: "Festive Collection '25 — Celebrate in Style.", w: 497, h: 245 },
-  { image: colMonsoon, alt: "Monsoon Collection '25 — Stay Stylish. Even in the Rain.", w: 497, h: 245 },
+  { image: colFestive, alt: "Festive Collection '25 — Celebrate in Style.", w: 503, h: 247 },
+  { image: colMonsoon, alt: "Monsoon Collection '25 — Stay Stylish. Even in the Rain.", w: 503, h: 247 },
 ];
 
 export function DesktopCollections() {
