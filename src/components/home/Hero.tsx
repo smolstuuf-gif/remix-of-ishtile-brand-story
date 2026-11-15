@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { ArrowLeft, ArrowRight, Menu, Search, ShoppingBag, User } from "lucide-react";
+import { ArrowLeft, ArrowRight, Menu, Search, ShoppingBag } from "lucide-react";
 import heroDesktop from "@/assets/hero-desktop.jpg";
 import heroMobile from "@/assets/hero-mobile.jpg";
 import cardNewArrivals from "@/assets/card-new-arrivals.jpg";
@@ -9,7 +9,6 @@ import { cn } from "@/lib/utils";
 import { useCart } from "@/lib/store";
 import { Logo } from "./Logo";
 
-const nav = ["Shop", "Brands", "Editorial", "Culture", "About"];
 
 function Headline({ className }: { className?: string }) {
   return (
@@ -27,7 +26,6 @@ function Headline({ className }: { className?: string }) {
 }
 
 export function DesktopHero() {
-  const { openSearch, openCart, openMenu, count } = useCart();
   return (
     <section data-header-theme="dark" className="relative hidden overflow-hidden rounded-2xl bg-ink md:block">
       <img
