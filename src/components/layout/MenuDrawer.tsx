@@ -10,8 +10,11 @@ const links = [
   { label: "Cart", to: "/cart" as const },
   { label: "Checkout", to: "/checkout" as const },
   { label: "Brands", href: "/#brands" },
-  { label: "Editorial", href: "/#editorial" },
-  { label: "About", href: "/#about" },
+  { label: "Editorial", to: "/editorial" as const },
+  { label: "Stores", to: "/stores" as const },
+  { label: "Wishlist", to: "/wishlist" as const },
+  { label: "Account", to: "/account" as const },
+  { label: "About", to: "/about" as const },
 ];
 
 const socials = [
@@ -47,7 +50,7 @@ export function MenuDrawer() {
                     {item.label}
                   </Link>
                 ) : (
-                  <a href={item.href} className="block py-4 font-display text-2xl font-semibold tracking-[-0.02em]">
+                  <a href={item.href} onClick={closeMenu} className="block py-4 font-display text-2xl font-semibold tracking-[-0.02em]">
                     {item.label}
                   </a>
                 )}

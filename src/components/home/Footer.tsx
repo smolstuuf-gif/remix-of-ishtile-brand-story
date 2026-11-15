@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { ArrowRight, ArrowUp, Plus } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import footerBuilding from "@/assets/footer-building.jpg";
 import footerBand from "@/assets/footer-band.jpg";
 import { cn } from "@/lib/utils";
@@ -87,15 +88,42 @@ function AccordionGroup({ title, items }: { title: string; items: readonly strin
         <ul className="overflow-hidden">
           {items.map((item) => (
             <li key={item}>
-              <a href="#" className="block pb-3 text-base text-ink-muted hover:text-lime">
-                {item}
-              </a>
+              <FooterLink item={item} className="block pb-3 text-base text-ink-muted hover:text-lime" />
             </li>
           ))}
         </ul>
       </div>
     </div>
   );
+}
+
+function FooterLink({ item, className }: { item: string; className?: string }) {
+  const destinations: Record<string, string> = {
+    "All Products": "/shop",
+    "New Arrivals": "/shop",
+    "Best Sellers": "/shop",
+    "On Sale": "/shop",
+    "ONEN +": "/shop",
+    FARAK: "/shop",
+    "MOCHA +": "/shop",
+    PILGRIM: "/shop",
+    "More Brands": "/#brands",
+    Editorial: "/editorial",
+    Culture: "/about",
+    Stores: "/stores",
+    About: "/about",
+    Account: "/account",
+    Wishlist: "/wishlist",
+    "Our Story": "/about",
+    Careers: "/about",
+    Contact: "/stores",
+    "Help & FAQ": "/account",
+  };
+  const to = destinations[item] ?? "/shop";
+  if (to.startsWith("/#")) {
+    return <a href={to} className={className}>{item}</a>;
+  }
+  return <Link to={to as "/shop"} className={className}>{item}</Link>;
 }
 
 const toTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
@@ -132,16 +160,14 @@ export function Footer() {
           </div>
           {columns.map(([title, items]) => (
             <div key={title}>
-              <a href="#" className="group inline-flex items-center gap-1.5 text-xl font-semibold">
+              <FooterLink item={title} className="group inline-flex items-center gap-1.5 text-xl font-semibold">
                 {title}
                 <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-0.5" />
-              </a>
+              </FooterLink>
               <ul className="mt-5 space-y-3.5">
                 {items.map((item) => (
                   <li key={item}>
-                    <a href="#" className="text-[17px] text-ink-foreground/85 transition-colors hover:text-lime">
-                      {item}
-                    </a>
+                    <FooterLink item={item} className="text-[17px] text-ink-foreground/85 transition-colors hover:text-lime" />
                   </li>
                 ))}
               </ul>

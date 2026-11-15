@@ -8,6 +8,6 @@ export type { Product } from "@/lib/catalog";
 export const footerLinks = {
   Shop: ["All Products", "New Arrivals", "Best Sellers", "On Sale"],
   Brands: ["ONEN +", "FARAK", "MOCHA +", "PILGRIM", "More Brands"],
-  Explore: ["Editorial", "Culture", "Stores", "About", "Account"],
+  Explore: ["Editorial", "Culture", "Stores", "About", "Account", "Wishlist"],
   About: ["Our Story", "Careers", "Contact", "Help & FAQ"],
 } as const;

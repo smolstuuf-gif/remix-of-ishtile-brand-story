@@ -1,13 +1,14 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Menu, Search, ShoppingBag } from "lucide-react";
+import { Menu, Search, ShoppingBag, UserRound } from "lucide-react";
 import { Logo } from "@/components/home/Logo";
 import { useCart } from "@/lib/store";
 
 const nav = [
   { label: "Shop", to: "/shop" as const },
   { label: "Brands", href: "/#brands" },
-  { label: "Editorial", href: "/#editorial" },
-  { label: "About", href: "/#about" },
+  { label: "Editorial", to: "/editorial" as const },
+  { label: "Stores", to: "/stores" as const },
+  { label: "About", to: "/about" as const },
 ];
 
 function CountBadge({ n }: { n: number }) {
@@ -60,6 +61,9 @@ export function SiteHeader() {
         </nav>
 
         <div className="flex items-center gap-5 text-foreground">
+          <Link to="/account" aria-label="Your account" title="Your account" className="hidden transition-colors hover:text-lime sm:block">
+            <UserRound className="h-5 w-5" strokeWidth={1.7} />
+          </Link>
           <button type="button" aria-label="Search" onClick={openSearch} className="transition-colors hover:text-lime">
             <Search className="h-6 w-6" strokeWidth={1.7} />
           </button>

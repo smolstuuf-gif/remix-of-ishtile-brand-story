@@ -28,3 +28,8 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+## Application architecture
+
+- Keep each public content page in its own TanStack file route and reuse shared page chrome; this preserves direct URLs, route metadata, and predictable navigation.
+- Commerce remains a browser-only prototype using the existing local store until the owner requests connected accounts or order processing.

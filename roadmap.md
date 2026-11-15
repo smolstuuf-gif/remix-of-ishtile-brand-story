@@ -13,11 +13,11 @@ Phase 0 (official logo + starburst from the brand SVG) is done.
 - [x] /checkout 3-step flow + confirmation
 - [x] Verified end-to-end in the preview (desktop + phone)
 
-## Stage 2 — Discovery & Brand pages (next)
-- [ ] /account — profile, order history with status chips
+## Stage 2 — Discovery & Brand pages (in progress)
+- [ ] /account — guest profile, local order history and delivery details
 - [ ] /wishlist — saved items grid
 - [ ] /stores — Dhaka Gulshan 1, Dhanmondi, Banani, Uttara
-- [ ] /editorial — article cards with author + date
+- [ ] /editorial — article cards
 - [ ] /about — manifesto, lotus, counters 5+ / 50K+ / 12+
 
 ## Later
