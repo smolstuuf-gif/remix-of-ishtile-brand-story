@@ -25,29 +25,116 @@ function Headline({ className }: { className?: string }) {
   );
 }
 
+const desktopSlides = [
+  {
+    image: heroDesktop,
+    alt: "Model in sunglasses with a lime crown sketch, lotus and colour arcs collage",
+    lines: ["More", "Fashion."],
+    accent: "More You.",
+    tagline: "Discover Beyond Labels.",
+    link: "Explore Brands",
+  },
+  {
+    image: cardNewArrivals,
+    alt: "New arrivals fashion editorial",
+    lines: ["New", "Arrivals."],
+    accent: "Just Dropped.",
+    tagline: "Fresh perspectives. New essentials.",
+    link: "Shop New Arrivals",
+  },
+  {
+    image: brandFarak,
+    alt: "FARAK fashion editorial",
+    lines: ["Different", "Brands."],
+    accent: "One Universe.",
+    tagline: "Find your own point of view.",
+    link: "Explore Brands",
+  },
+];
+
 export function DesktopHero() {
+  const [index, setIndex] = useState(0);
+  const go = useCallback((dir: number) => {
+    setIndex((current) => (current + dir + desktopSlides.length) % desktopSlides.length);
+  }, []);
+
+  useEffect(() => {
+    const timer = setInterval(() => go(1), 7000);
+    return () => clearInterval(timer);
+  }, [go]);
+
+  const slide = desktopSlides[index];
+
   return (
-    <section data-header-theme="dark" className="relative hidden w-full overflow-hidden bg-ink md:block">
-      <img
-        src={heroDesktop}
-        alt="Model in sunglasses with a lime crown sketch, lotus and colour arcs collage"
-        width={1920}
-        height={640}
-        className="absolute inset-0 h-full w-full object-cover object-right"
-      />
+    <section
+      data-header-theme="dark"
+      className="relative hidden w-full overflow-hidden bg-ink md:block"
+      aria-roledescription="carousel"
+      aria-label="Featured fashion stories"
+    >
+      {desktopSlides.map((item, i) => (
+        <div
+          key={item.alt}
+          className={cn(
+            "absolute inset-0 transition-opacity duration-700",
+            i === index ? "opacity-100" : "pointer-events-none opacity-0",
+          )}
+          aria-hidden={i !== index}
+        >
+          <img
+            src={item.image}
+            alt={item.alt}
+            className="h-full w-full object-cover object-center"
+            loading={i === 0 ? "eager" : "lazy"}
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/65 via-black/15 to-transparent" />
+        </div>
+      ))}
+
       <div className="relative z-10 aspect-[1570/600] min-h-[500px]">
-        <div className="absolute left-[5.5%] top-[17%]">
-          <Headline className="text-[clamp(3rem,5.3vw,6rem)]" />
+        <div className="absolute bottom-[13%] left-[4.2%] max-w-[48%]">
+          <h1 className="font-headline text-[clamp(2.8rem,5.3vw,6rem)] font-extrabold italic uppercase tracking-[-0.03em] [&>span]:block [&>span]:leading-[0.88]">
+            {slide.lines.map((line) => (
+              <span key={line} className="text-ink-foreground">{line}</span>
+            ))}
+            <span className="text-lime">{slide.accent}</span>
+          </h1>
+          <p className="mt-3 text-[clamp(.9rem,1.25vw,1.2rem)] font-medium text-ink-foreground">
+            {slide.tagline}
+          </p>
           <a
             href="#shop"
-            className="group mt-[clamp(1.25rem,2.6vw,2.5rem)] inline-flex items-center gap-3 text-[clamp(1rem,1.35vw,1.3rem)] font-medium text-ink-foreground"
+            className="group mt-5 inline-flex items-center gap-3 text-[clamp(.85rem,1.05vw,1rem)] font-semibold text-ink-foreground underline decoration-1 underline-offset-[6px] transition-colors hover:decoration-lime"
           >
-            <span className="underline decoration-1 underline-offset-[6px] group-hover:decoration-lime">
-              Discover Beyond Labels.
-            </span>
-            <ArrowRight className="h-5 w-5" />
-            <ArrowRight className="h-5 w-5 text-lime transition-transform group-hover:translate-x-1" strokeWidth={2.6} />
+            {slide.link}
+            <ArrowRight className="h-4 w-4 text-lime transition-transform group-hover:translate-x-1" />
           </a>
+        </div>
+
+        <div className="absolute bottom-[6%] left-[4.2%] z-20 flex items-center gap-3 text-ink-foreground">
+          <span className="text-xs font-medium tabular-nums tracking-wider">
+            {String(index + 1).padStart(2, "0")}
+          </span>
+          <span className="h-px w-8 bg-ink-foreground/80" />
+          <span className="text-xs font-medium tabular-nums tracking-wider text-ink-foreground/70">
+            {String(desktopSlides.length).padStart(2, "0")}
+          </span>
+          <button
+            type="button"
+            onClick={() => go(-1)}
+            aria-label="Previous hero slide"
+            className="ml-1 grid h-8 w-8 place-items-center text-ink-foreground transition-colors hover:text-lime"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            onClick={() => go(1)}
+            aria-label="Next hero slide"
+            className="grid h-8 w-8 place-items-center text-ink-foreground transition-colors hover:text-lime"
+          >
+            <ArrowRight className="h-4 w-4" />
+          </button>
         </div>
       </div>
     </section>
