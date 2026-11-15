@@ -6,6 +6,7 @@ import cardNewArrivals from "@/assets/card-new-arrivals.jpg";
 import brandFarak from "@/assets/brand-farak.jpg";
 import cardWinter from "@/assets/card-winter.jpg";
 import { cn } from "@/lib/utils";
+import { useCart } from "@/lib/store";
 import { Logo } from "./Logo";
 
 const nav = ["Shop", "Brands", "Editorial", "Culture", "About"];
@@ -26,6 +27,7 @@ function Headline({ className }: { className?: string }) {
 }
 
 export function DesktopHero() {
+  const { openSearch, openCart, openMenu, count } = useCart();
   return (
     <section className="relative hidden overflow-hidden rounded-2xl bg-ink md:block">
       <img
@@ -51,14 +53,23 @@ export function DesktopHero() {
           ))}
         </nav>
         <div className="flex items-center gap-6 text-ink-foreground">
-          <button aria-label="Search" className="transition-colors hover:text-lime">
+          <button aria-label="Search" onClick={openSearch} className="transition-colors hover:text-lime">
             <Search className="h-6 w-6" strokeWidth={1.7} />
           </button>
-          <button aria-label="Account" className="transition-colors hover:text-lime">
+          <button aria-label="Account" onClick={openMenu} className="transition-colors hover:text-lime">
             <User className="h-6 w-6" strokeWidth={1.7} />
           </button>
-          <button aria-label="Bag" className="transition-colors hover:text-lime">
+          <button
+            aria-label={`Bag, ${count} item${count === 1 ? "" : "s"}`}
+            onClick={openCart}
+            className="relative transition-colors hover:text-lime"
+          >
             <ShoppingBag className="h-6 w-6" strokeWidth={1.7} />
+            {count > 0 && (
+              <span className="absolute -right-1.5 -top-1.5 grid h-4 min-w-4 place-items-center rounded-full bg-lime px-1 text-[10px] font-semibold tabular-nums text-primary-foreground">
+                {count > 99 ? "99+" : count}
+              </span>
+            )}
           </button>
         </div>
       </header>
@@ -89,6 +100,7 @@ const slides = [
 ];
 
 export function MobileHero() {
+  const { openSearch, openCart, openMenu } = useCart();
   const [index, setIndex] = useState(0);
   const go = useCallback((dir: number) => setIndex((i) => (i + dir + slides.length) % slides.length), []);
 
@@ -105,13 +117,13 @@ export function MobileHero() {
           <Logo />
         </a>
         <div className="flex items-center gap-4">
-          <button aria-label="Search">
+          <button aria-label="Search" onClick={openSearch}>
             <Search className="h-5 w-5" strokeWidth={1.8} />
           </button>
-          <button aria-label="Bag">
+          <button aria-label="Bag" onClick={openCart}>
             <ShoppingBag className="h-5 w-5" strokeWidth={1.8} />
           </button>
-          <button aria-label="Menu">
+          <button aria-label="Menu" onClick={openMenu}>
             <Menu className="h-5 w-5" strokeWidth={1.8} />
           </button>
         </div>
