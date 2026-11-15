@@ -27,12 +27,39 @@ export function SiteHeader() {
     const updateTheme = () => {
       const probeY = 36;
       let nextTheme: "dark" | "light" = "light";
+      let matchedSection = false;
       document.querySelectorAll<HTMLElement>("[data-header-theme]").forEach((section) => {
         const rect = section.getBoundingClientRect();
         if (rect.top <= probeY && rect.bottom > probeY) {
           nextTheme = section.dataset.headerTheme === "dark" ? "dark" : "light";
+          matchedSection = true;
         }
       });
+
+      // For untagged sections, inspect the actual surface beneath the center of the header.
+      if (!matchedSection) {
+        const stack = document.elementsFromPoint(window.innerWidth / 2, probeY);
+        for (const element of stack) {
+          if (element.closest(".site-header")) continue;
+          let current: HTMLElement | null = element instanceof HTMLElement ? element : null;
+          while (current && current !== document.body) {
+            const color = window.getComputedStyle(current).backgroundColor;
+            const match = color.match(/rgba?\\(([^)]+)\\)/);
+            if (match) {
+              const channels = match[1].split(/[\\s,\\/]+/).filter(Boolean).map(Number);
+              const alpha = channels[3] ?? 1;
+              if (channels.length >= 3 && alpha > 0.12 && channels.slice(0, 3).every(Number.isFinite)) {
+                const luminance = (0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2]) / 255;
+                nextTheme = luminance < 0.48 ? "dark" : "light";
+                break;
+              }
+            }
+            current = current.parentElement;
+          }
+          break;
+        }
+      }
+
       setTheme((current) => current === nextTheme ? current : nextTheme);
     };
     updateTheme();
