@@ -1,0 +1,87 @@
+import { ArrowRight } from "lucide-react";
+import colSpring from "@/assets/col-spring.jpg";
+import colSummer from "@/assets/col-summer.jpg";
+import colFestive from "@/assets/col-festive.jpg";
+import colMonsoon from "@/assets/col-monsoon.jpg";
+import cardNewArrivals from "@/assets/card-new-arrivals.jpg";
+import cardSummer from "@/assets/card-summer.jpg";
+import cardWinter from "@/assets/card-winter.jpg";
+import { Logo } from "./Logo";
+
+const desktopCollections = [
+  { image: colSpring, alt: "Spring '25 — Fresh Fits. New Vibes.", w: 751, h: 370 },
+  { image: colSummer, alt: "Summer Essentials '25 — Lightweight. Breathable. Effortless.", w: 751, h: 370 },
+  { image: colFestive, alt: "Festive Collection '25 — Celebrate in Style.", w: 503, h: 247 },
+  { image: colMonsoon, alt: "Monsoon Collection '25 — Stay Stylish. Even in the Rain.", w: 503, h: 247 },
+];
+
+export function DesktopCollections() {
+  return (
+    <section aria-label="Collections" className="hidden gap-3 md:grid md:grid-cols-2 lg:grid-cols-4">
+      {desktopCollections.map((c) => (
+        <a
+          key={c.alt}
+          href="#shop"
+          className="group block overflow-hidden rounded-xl bg-ink shadow-[0_1px_0_0_var(--border)]"
+        >
+          <img
+            src={c.image}
+            alt={c.alt}
+            width={c.w}
+            height={c.h}
+            loading="lazy"
+            className="aspect-[2.03/1] w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+          />
+        </a>
+      ))}
+    </section>
+  );
+}
+
+function TextCard({ image, alt, title }: { image: string; alt: string; title: [string, string] }) {
+  return (
+    <a
+      href="#shop"
+      className="relative block aspect-[6/7] w-[42%] shrink-0 snap-start overflow-hidden rounded-2xl"
+    >
+      <img src={image} alt={alt} loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
+      <div className="absolute inset-x-[12%] top-[38%]">
+        <p className="text-[6.2vw] font-semibold leading-[1.08] tracking-[-0.02em] text-foreground">
+          {title[0]}
+          <br />
+          {title[1]}
+        </p>
+        <ArrowRight className="mt-[18%] h-7 w-7 text-foreground" strokeWidth={2.2} />
+      </div>
+    </a>
+  );
+}
+
+export function MobileCollections() {
+  return (
+    <section aria-label="Collections" className="md:hidden">
+      <div className="no-scrollbar -mr-3 flex snap-x snap-mandatory gap-3 overflow-x-auto pr-3">
+        <TextCard image={cardNewArrivals} alt="New arrivals" title={["New", "Arrivals"]} />
+        <TextCard image={cardSummer} alt="Summer essentials" title={["Summer", "Essentials"]} />
+        <a
+          href="#shop"
+          className="relative block aspect-[6/7] w-[42%] shrink-0 snap-start overflow-hidden rounded-2xl"
+        >
+          <img src={cardWinter} alt="Winter collection" loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
+          <div className="absolute inset-x-[10%] top-[12%] text-foreground">
+            <Logo className="text-[3.6vw]" />
+            <p className="mt-[16%] font-wide text-[8.4vw] font-extrabold uppercase leading-[0.9] tracking-[-0.03em]">
+              Winter
+              <br />
+              Collection
+            </p>
+            <p className="mt-3 text-[2.6vw] font-semibold uppercase tracking-[0.3em]">Wrap in style</p>
+            <span className="mt-4 inline-flex rounded-full bg-ink px-3 py-1.5 text-[2.8vw] font-medium text-ink-foreground">
+              Explore
+            </span>
+          </div>
+        </a>
+      </div>
+    </section>
+  );
+}
