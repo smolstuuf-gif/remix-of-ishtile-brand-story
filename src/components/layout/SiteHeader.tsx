@@ -46,10 +46,13 @@ export function SiteHeader() {
             const color = window.getComputedStyle(current).backgroundColor;
             const match = color.match(/rgba?\(([^)]+)\)/);
             if (match) {
-              const channels = match[1].split(/[\s,/]+/).filter(Boolean).map(Number);
+              const channels = (match[1] ?? "").split(/[\s,/]+/).filter(Boolean).map(Number);
               const alpha = channels[3] ?? 1;
+              const red = channels[0] ?? 255;
+              const green = channels[1] ?? red;
+              const blue = channels[2] ?? red;
               if (channels.length >= 3 && alpha > 0.12 && channels.slice(0, 3).every(Number.isFinite)) {
-                const luminance = (0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2]) / 255;
+                const luminance = (0.2126 * red + 0.7152 * green + 0.0722 * blue) / 255;
                 nextTheme = luminance < 0.48 ? "dark" : "light";
                 break;
               }
