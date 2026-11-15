@@ -22,7 +22,7 @@ const tiles: Tile[] = [
 ];
 
 const tileBase =
-  "relative aspect-[29/30] w-[21vw] min-w-[84px] shrink-0 snap-start overflow-hidden rounded-xl md:w-auto md:min-w-0 md:flex-1";
+  "relative aspect-[29/31] w-[23vw] min-w-[84px] shrink-0 snap-start overflow-hidden rounded-xl md:w-auto md:min-w-0 md:flex-1";
 
 function BrandTile({ tile }: { tile: Tile }) {
   if (tile.kind === "photo") {
@@ -76,8 +76,8 @@ export function Brands() {
       aria-labelledby="brands-title"
       className="flex items-center gap-3 rounded-xl py-6 md:gap-[2%] md:border md:border-border/70 md:bg-panel/60 md:px-[3.5%] md:py-3"
     >
-      <div className="w-[33%] shrink-0 md:w-[17%]">
-        <h2 id="brands-title" className="font-display text-[2.4rem] font-bold leading-[0.95] tracking-[-0.035em] md:text-[clamp(1.6rem,2.1vw,2.1rem)]">
+      <div className="w-[34%] shrink-0 md:w-[17%]">
+        <h2 id="brands-title" className="font-display text-[2.1rem] font-bold leading-[0.95] tracking-[-0.035em] md:text-[clamp(1.6rem,2.1vw,2.1rem)]">
           Our <br className="md:hidden" />
           Brands.
         </h2>

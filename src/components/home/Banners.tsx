@@ -19,6 +19,7 @@ export function Banners() {
           loading="lazy"
           className="absolute inset-0 h-full w-full object-cover object-right transition-transform duration-700 group-hover:scale-[1.02]"
         />
+        <div className="absolute inset-y-0 left-0 w-[62%] bg-gradient-to-r from-ink via-ink/85 to-transparent md:hidden" />
         <div className="relative px-[6%] py-6 md:py-[7%]">
           <h2 className="font-display text-[2.2rem] font-bold leading-none tracking-[-0.03em] text-ink-foreground md:text-[clamp(2rem,2.6vw,2.6rem)]">
             Editorial.

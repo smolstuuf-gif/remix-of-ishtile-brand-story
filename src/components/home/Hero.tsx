@@ -134,8 +134,8 @@ export function MobileHero() {
               loading={i === 0 ? "eager" : "lazy"}
             />
             <div className="absolute inset-0 bg-gradient-to-b from-ink/30 via-transparent to-ink/80" />
-            <div className="absolute bottom-[11%] left-[7%] right-[6%] origin-bottom-left -rotate-[8deg]">
-              <h2 className="font-headline text-[15.5vw] font-extrabold italic uppercase tracking-[-0.035em] [&>span]:leading-[0.88]">
+            <div className="absolute bottom-[12%] left-[7%] right-[6%] origin-bottom-left -rotate-[7deg]">
+              <h2 className="font-headline text-[12.6vw] font-extrabold italic uppercase tracking-[-0.035em] [&>span]:leading-[0.88]">
                 {s.lines.map((l) => (
                   <span key={l} className="block text-ink-foreground">
                     {l}
@@ -145,7 +145,7 @@ export function MobileHero() {
               </h2>
               <a
                 href="#shop"
-                className="mt-4 inline-block text-[6.4vw] font-semibold text-ink-foreground underline decoration-lime decoration-2 underline-offset-[7px]"
+                className="mt-4 inline-block text-[5.6vw] font-semibold text-ink-foreground underline decoration-lime decoration-2 underline-offset-[7px]"
               >
                 Discover Beyond Labels.
               </a>

@@ -7,7 +7,6 @@ import cardNewArrivals from "@/assets/card-new-arrivals.jpg";
 import cardSummer from "@/assets/card-summer.jpg";
 import cardWinter from "@/assets/card-winter.jpg";
 import { Logo } from "./Logo";
-import { Sparkle } from "./icons";
 
 const desktopCollections = [
   { image: colSpring, alt: "Spring '25 — Fresh Fits. New Vibes.", w: 751, h: 370 },
@@ -46,7 +45,6 @@ function TextCard({ image, alt, title }: { image: string; alt: string; title: [s
       className="relative block aspect-[6/7] w-[42%] shrink-0 snap-start overflow-hidden rounded-2xl"
     >
       <img src={image} alt={alt} loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
-      <Sparkle className="absolute left-[12%] top-[11%] h-7 w-7 text-ink-foreground/90" />
       <div className="absolute inset-x-[12%] top-[38%]">
         <p className="text-[6.2vw] font-semibold leading-[1.08] tracking-[-0.02em] text-foreground">
           {title[0]}

@@ -192,7 +192,7 @@ export function Footer() {
         <div className="mt-10 border-t border-ink-foreground/40 md:mt-12" />
         <div className="flex flex-wrap items-center justify-between gap-y-5 py-5 text-base md:text-[15px]">
           <p className="order-3 w-full md:order-1 md:w-auto">© 2025 ISHTILE+. All rights reserved.</p>
-          <ul className="order-1 flex gap-8 md:order-2 md:gap-8">
+          <ul className="order-1 flex gap-7 md:order-2 md:gap-8">
             {["Privacy", "Terms", "Cookies"].map((l) => (
               <li key={l}>
                 <a href="#" className="hover:text-lime">
@@ -213,7 +213,7 @@ export function Footer() {
         width={1536}
         height={264}
         loading="lazy"
-        className="relative mt-4 block aspect-[1536/264] w-full object-cover max-md:aspect-[1536/380] max-md:object-[70%_50%]"
+        className="relative mt-4 block aspect-[1536/264] w-full object-cover max-md:aspect-[1536/330]"
       />
     </footer>
   );
