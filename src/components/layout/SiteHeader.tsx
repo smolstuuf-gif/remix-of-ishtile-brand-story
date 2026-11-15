@@ -26,7 +26,7 @@ export function SiteHeader() {
   useEffect(() => {
     const updateTheme = () => {
       const probeY = 36;
-      let nextTheme: "dark" | "light" = isHome ? "dark" : "light";
+      let nextTheme: "dark" | "light" = "light";
       document.querySelectorAll<HTMLElement>("[data-header-theme]").forEach((section) => {
         const rect = section.getBoundingClientRect();
         if (rect.top <= probeY && rect.bottom > probeY) {
