@@ -1,12 +1,13 @@
 import type { SVGProps } from "react";
+import { STAR_PATH } from "./brand-paths";
 
 type IconProps = SVGProps<SVGSVGElement>;
 
-/** Four-point brand sparkle. */
+/** Official ISHTILE organic starburst (from brand vector file). */
 export function Sparkle(props: IconProps) {
   return (
-    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" {...props}>
-      <path d="M12 0C12.7 7.6 16.4 11.3 24 12C16.4 12.7 12.7 16.4 12 24C11.3 16.4 7.6 12.7 0 12C7.6 11.3 11.3 7.6 12 0Z" />
+    <svg viewBox="466 70 112 120" fill="currentColor" aria-hidden="true" {...props}>
+      <path d={STAR_PATH} />
     </svg>
   );
 }
