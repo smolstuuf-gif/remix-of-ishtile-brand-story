@@ -132,7 +132,7 @@ export function Footer() {
   const columns = (["Shop", "Brands", "Explore"] as const).map((k) => [k, footerLinks[k]] as const);
 
   return (
-    <footer id="about" className="relative overflow-hidden bg-ink text-ink-foreground">
+    <footer id="about" data-header-theme="dark" className="relative overflow-hidden bg-ink text-ink-foreground">
       <div className="absolute inset-x-0 top-0">
         <img
           src={footerBuilding}
