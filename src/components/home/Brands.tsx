@@ -134,7 +134,7 @@ export function TrustBar() {
             )}
           >
             <Icon className={cn("shrink-0 max-md:h-4 max-md:w-4", iconClass)} strokeWidth={1.5} />
-            <span className="text-[9px] leading-tight md:text-[15px]">
+            <span className="text-[10px] leading-tight md:text-[15px]">
               {top}
               <br />
               {bottom}
