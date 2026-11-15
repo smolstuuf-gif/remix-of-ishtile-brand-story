@@ -29,7 +29,7 @@ function Headline({ className }: { className?: string }) {
 export function DesktopHero() {
   const { openSearch, openCart, openMenu, count } = useCart();
   return (
-    <section className="relative hidden overflow-hidden rounded-2xl bg-ink md:block">
+    <section data-header-theme="dark" className="relative hidden overflow-hidden rounded-2xl bg-ink md:block">
       <img
         src={heroDesktop}
         alt="Model in sunglasses with a lime crown sketch, lotus and colour arcs collage"
@@ -37,42 +37,6 @@ export function DesktopHero() {
         height={640}
         className="absolute inset-0 h-full w-full object-cover object-right"
       />
-      <header className="relative z-10 flex items-center justify-between px-[3%] pt-6">
-        <a href="/" aria-label="ISHTILE+ home" className="text-[1.35rem] text-ink-foreground">
-          <Logo />
-        </a>
-        <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-10 lg:flex">
-          {nav.map((item) => (
-            <a
-              key={item}
-              href={`#${item.toLowerCase()}`}
-              className="text-[15px] font-medium text-ink-foreground transition-colors hover:text-lime"
-            >
-              {item}
-            </a>
-          ))}
-        </nav>
-        <div className="flex items-center gap-6 text-ink-foreground">
-          <button aria-label="Search" onClick={openSearch} className="transition-colors hover:text-lime">
-            <Search className="h-6 w-6" strokeWidth={1.7} />
-          </button>
-          <button aria-label="Account" onClick={openMenu} className="transition-colors hover:text-lime">
-            <User className="h-6 w-6" strokeWidth={1.7} />
-          </button>
-          <button
-            aria-label={`Bag, ${count} item${count === 1 ? "" : "s"}`}
-            onClick={openCart}
-            className="relative transition-colors hover:text-lime"
-          >
-            <ShoppingBag className="h-6 w-6" strokeWidth={1.7} />
-            {count > 0 && (
-              <span className="absolute -right-1.5 -top-1.5 grid h-4 min-w-4 place-items-center rounded-full bg-lime px-1 text-[10px] font-semibold tabular-nums text-primary-foreground">
-                {count > 99 ? "99+" : count}
-              </span>
-            )}
-          </button>
-        </div>
-      </header>
       <div className="relative z-10 aspect-[1570/410] min-h-[360px]">
         <div className="absolute left-[5.5%] top-[17%]">
           <Headline className="text-[clamp(3rem,5.3vw,6rem)]" />
@@ -110,24 +74,7 @@ export function MobileHero() {
   }, [go, index]);
 
   return (
-    <section className="relative overflow-hidden bg-ink md:hidden" aria-roledescription="carousel">
-      {/* minimal overlay header */}
-      <header className="absolute inset-x-0 top-0 z-20 flex items-center justify-between px-5 pt-5 text-ink-foreground">
-        <a href="/" aria-label="ISHTILE+ home" className="text-lg">
-          <Logo />
-        </a>
-        <div className="flex items-center gap-4">
-          <button aria-label="Search" onClick={openSearch}>
-            <Search className="h-5 w-5" strokeWidth={1.8} />
-          </button>
-          <button aria-label="Bag" onClick={openCart}>
-            <ShoppingBag className="h-5 w-5" strokeWidth={1.8} />
-          </button>
-          <button aria-label="Menu" onClick={openMenu}>
-            <Menu className="h-5 w-5" strokeWidth={1.8} />
-          </button>
-        </div>
-      </header>
+    <section data-header-theme="dark" className="relative overflow-hidden bg-ink md:hidden" aria-roledescription="carousel">
 
       <div className="relative aspect-[1185/1680]">
         {slides.map((s, i) => (
