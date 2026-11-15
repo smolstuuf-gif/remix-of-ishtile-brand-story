@@ -6,7 +6,7 @@ export function Logo({ className, tagline = false }: { className?: string; spark
   const vb = tagline ? "40 68 540 124" : "40 68 540 124";
   return (
     <span className={cn("inline-flex items-center leading-none", className)} role="img" aria-label="ISHTILE">
-      <svg viewBox={vb} fill="currentColor" className="h-[1em] w-auto" aria-hidden="true">
+      <svg viewBox={vb} fill="currentColor" className="h-[1.3em] w-auto" aria-hidden="true">
         {WORDMARK_PATHS.map((d, i) => <path key={i} d={d} />)}
         <path d={STAR_PATH} />
         {tagline && TAGLINE_PATHS.map((d, i) => <path key={`t${i}`} d={d} />)}
