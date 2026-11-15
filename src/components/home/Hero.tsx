@@ -35,7 +35,7 @@ export function DesktopHero() {
         height={640}
         className="absolute inset-0 h-full w-full object-cover object-right"
       />
-      <div className="relative z-10 aspect-[1570/410] min-h-[360px]">
+      <div className="relative z-10 aspect-[1570/500] min-h-[420px]">
         <div className="absolute left-[5.5%] top-[17%]">
           <Headline className="text-[clamp(3rem,5.3vw,6rem)]" />
           <a
@@ -74,7 +74,7 @@ export function MobileHero() {
   return (
     <section data-header-theme="dark" className="relative overflow-hidden bg-ink md:hidden" aria-roledescription="carousel">
 
-      <div className="relative aspect-[1185/1680]">
+      <div className="relative aspect-[1185/1850]">
         {slides.map((s, i) => (
           <div
             key={s.alt}
