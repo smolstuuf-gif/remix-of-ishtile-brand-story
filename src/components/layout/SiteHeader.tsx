@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { Menu, Search, ShoppingBag, UserRound } from "lucide-react";
 import { Logo } from "@/components/home/Logo";
@@ -13,72 +14,52 @@ const nav = [
 
 function CountBadge({ n }: { n: number }) {
   if (n <= 0) return null;
-  return (
-    <span className="absolute -right-1.5 -top-1.5 grid h-4 min-w-4 place-items-center rounded-full bg-lime px-1 text-[10px] font-semibold tabular-nums text-primary-foreground">
-      {n > 99 ? "99+" : n}
-    </span>
-  );
+  return <span className="absolute -right-1.5 -top-1.5 grid h-4 min-w-4 place-items-center rounded-full bg-lime px-1 text-[10px] font-semibold tabular-nums text-primary-foreground">{n > 99 ? "99+" : n}</span>;
 }
 
-/**
- * Site-wide bar shown on every page except the homepage, which carries its own
- * header inside the opening photo.
- */
+/** Persistent transparent navigation whose foreground follows the section underneath. */
 export function SiteHeader() {
   const isHome = useRouterState({ select: (s) => s.location.pathname === "/" });
+  const [theme, setTheme] = useState<"dark" | "light">(isHome ? "dark" : "light");
   const { count, openCart, openSearch, openMenu } = useCart();
 
-  if (isHome) return null;
+  useEffect(() => {
+    const updateTheme = () => {
+      const probeY = 36;
+      let nextTheme: "dark" | "light" = isHome ? "dark" : "light";
+      document.querySelectorAll<HTMLElement>("[data-header-theme]").forEach((section) => {
+        const rect = section.getBoundingClientRect();
+        if (rect.top <= probeY && rect.bottom > probeY) {
+          nextTheme = section.dataset.headerTheme === "dark" ? "dark" : "light";
+        }
+      });
+      setTheme((current) => current === nextTheme ? current : nextTheme);
+    };
+    updateTheme();
+    window.addEventListener("scroll", updateTheme, { passive: true });
+    window.addEventListener("resize", updateTheme);
+    return () => {
+      window.removeEventListener("scroll", updateTheme);
+      window.removeEventListener("resize", updateTheme);
+    };
+  }, [isHome]);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border/70 bg-background/85 backdrop-blur-md">
+    <header data-theme={theme} className={`site-header z-50 w-full text-[color:var(--header-foreground)] ${isHome ? "fixed inset-x-0 top-0" : "sticky top-0"}`}>
       <div className="mx-auto flex h-16 max-w-[1600px] items-center justify-between gap-4 px-4 md:h-[72px] md:px-6">
-        <Link to="/" aria-label="ISHTILE+ home" className="text-[1.35rem] text-foreground">
-          <Logo />
-        </Link>
-
+        <Link to="/" aria-label="ISHTILE+ home" className="text-[1.35rem]"><Logo /></Link>
         <nav className="hidden items-center gap-9 md:flex">
-          {nav.map((item) =>
-            "to" in item ? (
-              <Link
-                key={item.label}
-                to={item.to}
-                activeProps={{ className: "text-foreground" }}
-                className="text-[15px] font-medium text-muted-foreground transition-colors hover:text-foreground"
-              >
-                {item.label}
-              </Link>
-            ) : (
-              <a
-                key={item.label}
-                href={item.href}
-                className="text-[15px] font-medium text-muted-foreground transition-colors hover:text-foreground"
-              >
-                {item.label}
-              </a>
-            ),
-          )}
+          {nav.map((item) => "to" in item ? (
+            <Link key={item.label} to={item.to} activeProps={{ className: "opacity-100" }} className="text-[15px] font-medium opacity-85 transition-colors hover:text-lime hover:opacity-100">{item.label}</Link>
+          ) : (
+            <a key={item.label} href={item.href} className="text-[15px] font-medium opacity-85 transition-colors hover:text-lime hover:opacity-100">{item.label}</a>
+          ))}
         </nav>
-
-        <div className="flex items-center gap-5 text-foreground">
-          <Link to="/account" aria-label="Your account" title="Your account" className="hidden transition-colors hover:text-lime sm:block">
-            <UserRound className="h-5 w-5" strokeWidth={1.7} />
-          </Link>
-          <button type="button" aria-label="Search" onClick={openSearch} className="transition-colors hover:text-lime">
-            <Search className="h-6 w-6" strokeWidth={1.7} />
-          </button>
-          <button
-            type="button"
-            aria-label={`Bag, ${count} item${count === 1 ? "" : "s"}`}
-            onClick={openCart}
-            className="relative transition-colors hover:text-lime"
-          >
-            <ShoppingBag className="h-6 w-6" strokeWidth={1.7} />
-            <CountBadge n={count} />
-          </button>
-          <button type="button" aria-label="Menu" onClick={openMenu} className="md:hidden">
-            <Menu className="h-6 w-6" strokeWidth={1.7} />
-          </button>
+        <div className="flex items-center gap-5">
+          <Link to="/account" aria-label="Your account" title="Your account" className="hidden transition-colors hover:text-lime sm:block"><UserRound className="h-5 w-5" strokeWidth={1.7} /></Link>
+          <button type="button" aria-label="Search" onClick={openSearch} className="transition-colors hover:text-lime"><Search className="h-6 w-6" strokeWidth={1.7} /></button>
+          <button type="button" aria-label={`Bag, ${count} item${count === 1 ? "" : "s"}`} onClick={openCart} className="relative transition-colors hover:text-lime"><ShoppingBag className="h-6 w-6" strokeWidth={1.7} /><CountBadge n={count} /></button>
+          <button type="button" aria-label="Menu" onClick={openMenu} className="transition-colors hover:text-lime md:hidden"><Menu className="h-6 w-6" strokeWidth={1.7} /></button>
         </div>
       </div>
     </header>
