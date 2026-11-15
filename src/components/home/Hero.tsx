@@ -27,7 +27,7 @@ function Headline({ className }: { className?: string }) {
 
 export function DesktopHero() {
   return (
-    <section data-header-theme="dark" className="relative hidden overflow-hidden rounded-2xl bg-ink md:block">
+    <section data-header-theme="dark" className="relative hidden w-full overflow-hidden bg-ink md:block">
       <img
         src={heroDesktop}
         alt="Model in sunglasses with a lime crown sketch, lotus and colour arcs collage"
