@@ -31,8 +31,8 @@ function Index() {
   return (
     <div className="min-h-screen">
       <MobileHero />
+      <DesktopHero />
       <main className="mx-auto flex max-w-[1600px] flex-col gap-4 px-3 pb-6 pt-3 md:gap-4 md:px-6 md:pt-6">
-        <DesktopHero />
         <DesktopCollections />
         <MobileCollections />
         <div className="pt-4 md:pt-2">
