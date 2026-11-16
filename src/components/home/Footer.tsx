@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { ArrowRight, ArrowUp, Plus } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import footerBuilding from "@/assets/footer-building.jpg";
@@ -6,6 +6,7 @@ import footerBand from "@/assets/footer-band.jpg";
 import { cn } from "@/lib/utils";
 import { footerLinks } from "./data";
 import { Logo } from "./Logo";
+import { fetchPublicBrandInfo, type PublicBrandInfo } from "@/lib/public-store";
 import { FacebookIcon, InstagramIcon, Sparkle, WhatsAppIcon } from "./icons";
 
 const socials = [
@@ -14,10 +15,10 @@ const socials = [
   { label: "WhatsApp", href: "https://wa.me/8801627397098", icon: WhatsAppIcon },
 ];
 
-function Socials({ className }: { className?: string }) {
+function Socials({ className, items = socials }: { className?: string; items?: typeof socials }) {
   return (
     <ul className={cn("flex items-center gap-11 md:gap-9", className)}>
-      {socials.map(({ label, href, icon: Icon }) => (
+      {items.map(({ label, href, icon: Icon }) => (
         <li key={label}>
           <a href={href} target="_blank" rel="noopener noreferrer" aria-label={label} className="block text-ink-foreground transition-colors hover:text-lime">
             <Icon className="h-6 w-6" />
@@ -128,6 +129,10 @@ function FooterLink({ item, className, children }: { item: string; className?: s
 const toTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
 
 export function Footer() {
+  const [brandInfo, setBrandInfo] = useState<PublicBrandInfo | null>(null);
+  useEffect(() => { let live = true; fetchPublicBrandInfo().then((value) => { if (live) setBrandInfo(value); }).catch(() => undefined); return () => { live = false; }; }, []);
+  const socialItems = socials.map((item) => ({ ...item, href: brandInfo?.social_links?.[item.label.toLowerCase()] || item.href }));
+  const motto = brandInfo?.motto || "Fashion, culture and beyond. Explore. Discover. Belong.";
   const columns = (["Shop", "Brands", "Explore"] as const).map((k) => [k, footerLinks[k]] as const);
 
   return (
