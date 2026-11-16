@@ -14,7 +14,7 @@ export type PublicHeroSlide = {
 };
 export type PublicCollection = {
   id: string; title: string; image_url: string | null; description: string | null;
-  campaign_label: string | null; slug: string;
+  campaign_label: string | null; slug: string; show_homepage: boolean;
 };
 
 export async function fetchHeroContent() {
@@ -26,7 +26,7 @@ export async function fetchHeroContent() {
 }
 
 export async function fetchHomepageCollections() {
-  return publicRows<PublicCollection>("collections?select=id,title,image_url,description,campaign_label,slug&show_homepage=eq.true&is_active=eq.true&image_url=not.is.null&order=sort_order.asc");
+  return publicRows<PublicCollection>("collections?select=id,title,image_url,description,campaign_label,slug,show_homepage&is_active=eq.true&order=sort_order.asc");
 }
 
 export type PublicBrand = { id: string; name: string; logo_url: string | null; image_url: string | null };
