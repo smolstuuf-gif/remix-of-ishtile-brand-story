@@ -54,8 +54,8 @@ function AboutPage() {
   return (
     <div className="min-h-screen overflow-hidden bg-[#f1eadb] text-[#171717]">
       <main className="mx-auto max-w-[1600px] px-5 pb-8 pt-8 md:px-10 md:pb-14 md:pt-12">
-        <section className="relative grid min-h-[calc(100svh-6rem)] grid-cols-1 items-center gap-0 md:min-h-[min(780px,calc(100svh-7rem))] md:grid-cols-[0.9fr_1.1fr] md:gap-4">
-          <div className="relative z-10 order-1 max-w-[620px] pb-4 pt-4 md:pb-20 md:pt-0">
+        <section className="relative min-h-[790px] md:min-h-[min(780px,calc(100svh-7rem))]">
+          <div className="relative z-10 w-[66%] max-w-[620px] pb-4 pt-7 md:w-[48%] md:pb-20 md:pt-0">
             <p className="mb-5 text-[10px] font-semibold uppercase tracking-[0.28em] text-[#6e675c] md:text-xs">Our story · ISHTILE+</p>
             <h1 className="max-w-[540px] font-display text-[clamp(3.1rem,11vw,7.8rem)] font-extrabold leading-[0.83] tracking-[-0.075em]">
               About<br/>ISHTILE<span className="text-[#171717]">.</span>
@@ -71,11 +71,11 @@ function AboutPage() {
             </Link>
           </div>
 
-          <div className="relative order-2 -mt-2 md:absolute md:inset-y-0 md:right-[-4%] md:mt-0 md:w-[62%]">
+          <div className="pointer-events-none absolute right-[-23%] top-[2%] z-0 w-[82%] md:inset-y-0 md:right-[-4%] md:top-0 md:w-[62%]">
             <BrandArtwork />
           </div>
 
-          <div className="relative z-20 order-3 -mt-2 grid grid-cols-3 overflow-hidden rounded-xl bg-[#171717] text-[#f4eddf] shadow-[0_16px_38px_rgba(0,0,0,0.2)] md:absolute md:bottom-0 md:left-0 md:mt-0 md:w-[min(650px,58%)]">
+          <div className="absolute bottom-0 left-0 z-20 grid w-full grid-cols-3 overflow-hidden rounded-xl bg-[#171717] text-[#f4eddf] shadow-[0_16px_38px_rgba(0,0,0,0.2)] md:w-[min(650px,58%)]">
             {[
               { value: "5+", label: "Brands" },
               { value: "50K+", label: "Customers" },
