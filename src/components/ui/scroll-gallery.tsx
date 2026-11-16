@@ -56,13 +56,13 @@ export const SCROLL_GALLERY_STUDIO_CLASSES = {
   infoInner: "flex gap-8 px-9",
   prefix: "flex-1 max-[1000px]:hidden",
   prefixText:
-    "font-medium text-[36px] text-white leading-none tracking-[-0.02rem] antialiased will-change-transform max-[1000px]:text-[18px]",
+    "font-extrabold text-[36px] text-[var(--sg-text-color,#F0EAE0)] leading-none tracking-[-0.02rem] antialiased will-change-transform max-[1000px]:text-[18px]",
   title: "relative h-10 flex-[2] overflow-hidden max-[1000px]:h-[22px]",
   titleText:
-    "font-medium text-[36px] text-white leading-none tracking-[-0.02rem] antialiased will-change-transform [clip-path:polygon(0_0,100%_0,100%_100%,0%_100%)] max-[1000px]:text-[18px]",
+    "font-extrabold text-[36px] text-[var(--sg-text-color,#F0EAE0)] leading-none tracking-[-0.02rem] antialiased will-change-transform [clip-path:polygon(0_0,100%_0,100%_100%,0%_100%)] max-[1000px]:text-[18px]",
   link: "flex flex-1 justify-end",
   linkText:
-    "font-medium text-[36px] text-white leading-none tracking-[-0.02rem] no-underline antialiased will-change-transform max-[1000px]:text-[18px]",
+    "font-extrabold text-[36px] text-[var(--sg-link-color,#D5FE00)] leading-none tracking-[-0.02rem] no-underline antialiased will-change-transform max-[1000px]:text-[18px]",
 } as const;
 
 export interface ScrollGallerySlide {
@@ -366,6 +366,36 @@ function createScaleSetter(el: HTMLElement, initialScale: number) {
   return apply;
 }
 
+function applyBrandTextContrast(image: HTMLImageElement, section: HTMLElement) {
+  if (!image.complete || !image.naturalWidth || !image.naturalHeight) {
+    return;
+  }
+  try {
+    const canvas = document.createElement("canvas");
+    canvas.width = 24;
+    canvas.height = 12;
+    const context = canvas.getContext("2d", { willReadFrequently: true });
+    if (!context) return;
+    context.drawImage(image, 0, 0, canvas.width, canvas.height);
+    const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
+    let luminance = 0;
+    let count = 0;
+    for (let i = 0; i < pixels.length; i += 4) {
+      const r = pixels[i] / 255;
+      const g = pixels[i + 1] / 255;
+      const b = pixels[i + 2] / 255;
+      luminance += 0.2126 * r + 0.7152 * g + 0.0722 * b;
+      count++;
+    }
+    const isLightBackground = luminance / count >= 0.52;
+    section.style.setProperty("--sg-text-color", isLightBackground ? "#171717" : "#F0EAE0");
+    section.style.setProperty("--sg-link-color", isLightBackground ? "#171717" : "#D5FE00");
+  } catch {
+    section.style.setProperty("--sg-text-color", "#F0EAE0");
+    section.style.setProperty("--sg-link-color", "#D5FE00");
+  }
+}
+
 function imageScaleStyle(scale: number): CSSProperties {
   return {
     backfaceVisibility: "hidden",
@@ -516,7 +546,7 @@ export function ScrollGallery({
 
         const stripBounds = createStripBounds(stripsCount);
         const totalSlides = slides.length;
-        const setFirstImgScale = createScaleSetter(firstSlideImg, scaleFrom);
+        const setFirstImgScale = createScaleSetter(firstSlideImg, scaleFrom);\n        const updateContrast = (image: HTMLImageElement) => applyBrandTextContrast(image, section);\n        if (firstSlideImg.complete) updateContrast(firstSlideImg);\n        else firstSlideImg.addEventListener("load", () => updateContrast(firstSlideImg), { once: true });
 
         interface SlideLayer {
           img: HTMLImageElement;
