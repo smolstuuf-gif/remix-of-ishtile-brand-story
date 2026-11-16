@@ -6,21 +6,20 @@ import footerBand from "@/assets/footer-band.jpg";
 import { cn } from "@/lib/utils";
 import { footerLinks } from "./data";
 import { Logo } from "./Logo";
-import { FacebookIcon, InstagramIcon, Sparkle, TikTokIcon, YoutubeIcon } from "./icons";
+import { FacebookIcon, InstagramIcon, Sparkle, WhatsAppIcon } from "./icons";
 
 const socials = [
-  { label: "Instagram", icon: InstagramIcon },
-  { label: "YouTube", icon: YoutubeIcon },
-  { label: "TikTok", icon: TikTokIcon },
-  { label: "Facebook", icon: FacebookIcon },
+  { label: "Instagram", href: "https://www.instagram.com/ishtilewear/", icon: InstagramIcon },
+  { label: "Facebook", href: "https://www.facebook.com/profile.php?id=61596685345300", icon: FacebookIcon },
+  { label: "WhatsApp", href: "https://wa.me/8801627397098", icon: WhatsAppIcon },
 ];
 
 function Socials({ className }: { className?: string }) {
   return (
     <ul className={cn("flex items-center gap-11 md:gap-9", className)}>
-      {socials.map(({ label, icon: Icon }) => (
+      {socials.map(({ label, href, icon: Icon }) => (
         <li key={label}>
-          <a href="#" aria-label={label} className="block text-ink-foreground transition-colors hover:text-lime">
+          <a href={href} target="_blank" rel="noopener noreferrer" aria-label={label} className="block text-ink-foreground transition-colors hover:text-lime">
             <Icon className="h-6 w-6" />
           </a>
         </li>
