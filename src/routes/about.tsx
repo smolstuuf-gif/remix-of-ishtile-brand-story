@@ -1,7 +1,9 @@
+import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowUpRight, Plus, Sparkle } from "lucide-react";
 import { Footer } from "@/components/home/Footer";
 import { CountingNumber } from "@/components/ui/counting-number";
+import { fetchPublicBrandInfo, type PublicBrandInfo } from "@/lib/public-store";
 
 export const Route = createFileRoute("/about")({
   head: () => ({
@@ -53,6 +55,8 @@ function BrandArtwork() {
 }
 
 function AboutPage() {
+  const [brandInfo, setBrandInfo] = useState<PublicBrandInfo | null>(null);
+  useEffect(() => { let live = true; fetchPublicBrandInfo().then((value) => { if (live) setBrandInfo(value); }).catch(() => undefined); return () => { live = false; }; }, []);
   return (
     <div className="min-h-screen overflow-hidden bg-[#f1eadb] text-[#171717]">
       <main className="mx-auto max-w-[1600px] px-5 pb-10 pt-8 md:px-10 md:pb-16 md:pt-12">
@@ -62,11 +66,11 @@ function AboutPage() {
             <h1 className="max-w-[540px] font-display text-[clamp(3.1rem,11vw,7.8rem)] font-extrabold leading-[0.83] tracking-[-0.075em]">
               About<br/>ISHTILE<span className="text-[#171717]">.</span>
             </h1>
-            <p className="mt-6 max-w-[330px] text-base font-medium leading-snug md:mt-8 md:text-xl">
-              More than a brand.<br/>A cultural destination.
+            <p className="mt-6 max-w-[330px] whitespace-pre-line text-base font-medium leading-snug md:mt-8 md:text-xl">
+              {brandInfo?.motto || "More than a brand.\nA cultural destination."}
             </p>
-            <p className="mt-7 max-w-[390px] text-[13px] leading-[1.65] text-[#39352f] md:mt-10 md:text-base">
-              ISHTILE is a celebration of fashion, culture and everything in between. From timeless traditions to contemporary trends, we bring you a curated universe of style.
+            <p className="mt-7 max-w-[390px] whitespace-pre-line text-[13px] leading-[1.65] text-[#39352f] md:mt-10 md:text-base">
+              {brandInfo?.about_text || "ISHTILE is a celebration of fashion, culture and everything in between. From timeless traditions to contemporary trends, we bring you a curated universe of style."}
             </p>
             <Link to="/editorial" className="mt-5 inline-flex items-center gap-2 border-b border-[#171717] pb-1 text-xs font-semibold transition-all hover:gap-3 md:mt-7 md:text-sm">
               Our Vision <ArrowUpRight className="h-4 w-4"/>
