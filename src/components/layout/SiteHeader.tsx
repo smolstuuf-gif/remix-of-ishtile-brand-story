@@ -21,6 +21,7 @@ function CountBadge({ n }: { n: number }) {
 /** Persistent transparent navigation whose foreground follows the section underneath. */
 export function SiteHeader() {
   const isHome = useRouterState({ select: (s) => s.location.pathname === "/" });
+  const isBrands = useRouterState({ select: (s) => s.location.pathname === "/brands" });
   const [theme, setTheme] = useState<"dark" | "light">(isHome ? "dark" : "light");
   const { count, openCart, openSearch, openMenu } = useCart();
 
@@ -76,7 +77,7 @@ export function SiteHeader() {
   }, [isHome]);
 
   return (
-    <header data-theme={theme} className={`site-header z-50 w-full text-[color:var(--header-foreground)] ${isHome ? "fixed inset-x-0 top-0" : "sticky top-0"}`}>
+    <header data-theme={theme} className={`site-header z-50 w-full text-[color:var(--header-foreground)] ${isHome || isBrands ? "fixed inset-x-0 top-0" : "sticky top-0"}`}>
       <div className="mx-auto flex h-16 max-w-[1600px] items-center justify-between gap-4 px-4 md:h-[72px] md:px-6">
         <Link to="/" aria-label="ISHTILE+ home" className="text-[1.35rem]"><Logo /></Link>
         <nav className="hidden items-center gap-9 md:flex">
