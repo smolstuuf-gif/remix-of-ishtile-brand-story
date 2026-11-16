@@ -8,6 +8,7 @@ import cardWinter from "@/assets/card-winter.jpg";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/lib/store";
 import { Logo } from "./Logo";
+import { fetchHeroContent } from "@/lib/public-store";
 
 
 function Headline({ className }: { className?: string }) {
@@ -33,6 +34,7 @@ const desktopSlides = [
     accent: "More You.",
     tagline: "Discover Beyond Labels.",
     link: "Explore Brands",
+    href: "#shop",
   },
   {
     image: cardNewArrivals,
@@ -41,6 +43,7 @@ const desktopSlides = [
     accent: "Just Dropped.",
     tagline: "Fresh perspectives. New essentials.",
     link: "Shop New Arrivals",
+    href: "#shop",
   },
   {
     image: brandFarak,
@@ -49,21 +52,36 @@ const desktopSlides = [
     accent: "One Universe.",
     tagline: "Find your own point of view.",
     link: "Explore Brands",
+    href: "#shop",
   },
 ];
 
 export function DesktopHero() {
+  const [slides, setSlides] = useState(desktopSlides);
+  const [intervalMs, setIntervalMs] = useState(7000);
   const [index, setIndex] = useState(0);
-  const go = useCallback((dir: number) => {
-    setIndex((current) => (current + dir + desktopSlides.length) % desktopSlides.length);
-  }, []);
-
   useEffect(() => {
-    const timer = setInterval(() => go(1), 7000);
+    let live = true;
+    fetchHeroContent().then(({ slides: remote, interval }) => {
+      if (!live) return;
+      setIntervalMs(interval);
+      if (remote.length) setSlides(remote.map((item) => ({
+        image: item.image_url, alt: item.title || "ISHTILE featured story",
+        lines: [item.title || "Discover Beyond Labels"], accent: item.subtitle || "",
+        tagline: item.subtitle || "Discover Beyond Labels.", link: "Explore",
+        href: item.link_url || "#shop",
+      })));
+    }).catch(() => undefined);
+    return () => { live = false; };
+  }, []);
+  const go = useCallback((dir: number) => {
+    setIndex((current) => (current + dir + slides.length) % slides.length);
+  }, [slides.length]);
+  useEffect(() => {
+    const timer = setInterval(() => go(1), intervalMs);
     return () => clearInterval(timer);
-  }, [go]);
-
-  const slide = desktopSlides[index] ?? desktopSlides[0]!;
+  }, [go, intervalMs]);
+  const slide = slides[index] ?? slides[0]!;
 
   return (
     <section
@@ -72,7 +90,7 @@ export function DesktopHero() {
       aria-roledescription="carousel"
       aria-label="Featured fashion stories"
     >
-      {desktopSlides.map((item, i) => (
+      {slides.map((item, i) => (
         <div
           key={item.alt}
           className={cn(
@@ -103,7 +121,7 @@ export function DesktopHero() {
             {slide.tagline}
           </p>
           <a
-            href="#shop"
+            href={slide.href}
             className="group mt-5 inline-flex items-center gap-3 text-[clamp(.85rem,1.05vw,1rem)] font-semibold text-ink-foreground underline decoration-1 underline-offset-[6px] transition-colors hover:decoration-lime"
           >
             {slide.link}
@@ -117,7 +135,7 @@ export function DesktopHero() {
           </span>
           <span className="h-px w-8 bg-ink-foreground/80" />
           <span className="text-xs font-medium tabular-nums tracking-wider text-ink-foreground/70">
-            {String(desktopSlides.length).padStart(2, "0")}
+            {String(slides.length).padStart(2, "0")}
           </span>
           <button
             type="button"
@@ -150,19 +168,34 @@ const slides = [
 
 export function MobileHero() {
   const { openSearch, openCart, openMenu } = useCart();
+  const [activeSlides, setActiveSlides] = useState(slides);
+  const [intervalMs, setIntervalMs] = useState(6000);
   const [index, setIndex] = useState(0);
-  const go = useCallback((dir: number) => setIndex((i) => (i + dir + slides.length) % slides.length), []);
-
   useEffect(() => {
-    const t = setInterval(() => go(1), 6000);
+    let live = true;
+    fetchHeroContent().then(({ slides: remote, interval }) => {
+      if (!live) return;
+      setIntervalMs(interval);
+      if (remote.length) setActiveSlides(remote.map((item) => ({
+        image: item.mobile_image_url || item.image_url,
+        alt: item.title || "ISHTILE featured story",
+        lines: [item.title || "Discover"], accent: item.subtitle || "",
+        href: item.link_url || "#shop",
+      })));
+    }).catch(() => undefined);
+    return () => { live = false; };
+  }, []);
+  const go = useCallback((dir: number) => setIndex((i) => (i + dir + activeSlides.length) % activeSlides.length), [activeSlides.length]);
+  useEffect(() => {
+    const t = setInterval(() => go(1), intervalMs);
     return () => clearInterval(t);
-  }, [go, index]);
+  }, [go, intervalMs]);
 
   return (
     <section data-header-theme="dark" className="relative overflow-hidden bg-ink md:hidden" aria-roledescription="carousel">
 
       <div className="relative aspect-[1185/2200]">
-        {slides.map((s, i) => (
+        {activeSlides.map((s, i) => (
           <div
             key={s.alt}
             className={cn(
@@ -188,7 +221,7 @@ export function MobileHero() {
                 <span className="block text-lime">{s.accent}</span>
               </h2>
               <a
-                href="#shop"
+                href={s.href || "#shop"}
                 className="mt-4 inline-block text-[5.6vw] font-semibold text-ink-foreground underline decoration-lime decoration-2 underline-offset-[7px]"
               >
                 Discover Beyond Labels.
@@ -199,7 +232,7 @@ export function MobileHero() {
 
         <div className="absolute bottom-[5.5%] right-4 z-10 flex items-center gap-3 text-ink-foreground">
           <span className="mr-1 text-sm font-medium tabular-nums">
-            {index + 1} / {slides.length}
+            {index + 1} / {activeSlides.length}
           </span>
           <button
             onClick={() => go(-1)}
