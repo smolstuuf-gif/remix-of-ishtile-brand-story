@@ -22,7 +22,7 @@ async function parse<T>(response: Response): Promise<T> {
 export async function adminData<T>(path: string, session: AdminSession): Promise<T> {
   const { url, key } = config();
   return parse<T>(await fetch(`${url}/rest/v1/${path}`, {
-    headers: { apikey: key, Authorization: `Bearer ${session.access_token}\ },
+    headers: { apikey: key, Authorization: `Bearer ${session.access_token}` },
   }));
 }
 
