@@ -16,10 +16,13 @@ import { formatTaka, galleryViews, productById, products } from "@/lib/catalog";
 import { MAX_QTY } from "@/lib/commerce";
 import { useCart } from "@/lib/store";
 import { cn } from "@/lib/utils";
+import { fetchPublicProduct } from "@/lib/public-store";
 
 export const Route = createFileRoute("/shop/$productId")({
-  loader: ({ params }) => {
-    const product = productById(params.productId);
+  loader: async ({ params }) => {
+    const remoteProduct = await fetchPublicProduct(params.productId);
+    if (remoteProduct === null) throw notFound({ data: { productId: params.productId } });
+    const product = remoteProduct ?? productById(params.productId);
     if (!product) throw notFound({ data: { productId: params.productId } });
     return product;
   },
