@@ -98,7 +98,7 @@ export type CustomerProfile = {
 export type AdminOrder = {
   id: string; order_number: string; customer_phone: string; created_at: string;
   total: number | string; payment_status: string; fulfillment_status: string;
-  order_items: { brand_name: string; quantity: number; line_total: number | string }[];
+  order_items?: { brand_name: string; quantity: number; line_total: number | string }[] | null;
 };
 
 export async function loadAdminWorkspace(session: AdminSession) {
