@@ -105,7 +105,7 @@ export function Brands() {
         ref={scroller}
         className="no-scrollbar -mr-3 flex min-w-0 flex-1 snap-x snap-mandatory gap-2.5 overflow-x-auto pr-3 md:mr-0 md:gap-[1.2%] md:overflow-visible md:pr-0"
       >
-        {liveBrands?.length ? liveBrands.map((brand) => (
+        {liveBrands?.some((brand) => brand.image_url || brand.logo_url) ? liveBrands.map((brand) => (
           <a key={brand.id} href="/brands" aria-label={`Explore ${brand.name}`} className={cn(tileBase, "group flex items-center justify-center bg-ink p-3 text-ink-foreground")}>
             {brand.image_url ? <img src={brand.image_url} alt={brand.name} className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" /> : brand.logo_url ? <img src={brand.logo_url} alt={brand.name} className="max-h-[55%] max-w-[80%] object-contain" /> : <span className="text-center text-[clamp(.9rem,1.4vw,1.35rem)] font-semibold">{brand.name}</span>}
           </a>
