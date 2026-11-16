@@ -41,7 +41,6 @@ export function Component(){
   <canvas ref={canvasRef} className="lumina-brands__canvas" aria-hidden="true"/>
   {!ready&&<img className="lumina-brands__fallback" src={slide.image} alt=""/>}
   <div className="lumina-brands__shade"/>
-  <div className="lumina-brands__topline"><span>ISHTILE+ / THE BRAND UNIVERSE</span><span>INDEPENDENT LABELS · ONE POINT OF VIEW</span></div>
   <section className="lumina-brands__copy" aria-live="polite"><h1 ref={titleRef}>{slide.name.split("").map((char,i)=><span key={i}>{char===" "?"\u00a0":char}</span>)}</h1><p ref={descRef}>{slide.title}</p><span className="lumina-brands__description">{slide.description}</span></section>
   <div className="lumina-brands__bottom"><nav className="lumina-brands__nav" aria-label="Choose a brand">{slides.map((item,i)=><button key={item.name} onClick={()=>changeRef.current(i)} className={active===i?"is-active":""} aria-current={active===i?"true":undefined}><span className="lumina-brands__track"><span/></span><span>{item.name}</span></button>)}</nav><div className="lumina-brands__controls"><span>{String(active+1).padStart(2,"0")} / 0{slides.length}</span><button aria-label="Previous brand" onClick={()=>changeRef.current(active-1)}>←</button><button aria-label="Next brand" onClick={()=>changeRef.current(active+1)}>→</button></div></div>
   <div className="lumina-brands__progress"><div ref={progressRef}/></div>
