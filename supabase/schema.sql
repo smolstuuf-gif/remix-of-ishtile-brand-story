@@ -32,6 +32,15 @@ create table if not exists public.products (
   updated_at timestamptz not null default now()
 );
 
+create table if not exists public.customer_profiles (
+  id uuid primary key default gen_random_uuid(),
+  full_name text not null check (char_length(trim(full_name)) between 2 and 120),
+  mobile_number text not null unique check (char_length(trim(mobile_number)) between 8 and 20),
+  delivery_address text not null check (char_length(trim(delivery_address)) between 6 and 500),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
 create table if not exists public.admin_users (
   user_id uuid primary key references auth.users(id) on delete cascade,
   created_at timestamptz not null default now()
@@ -93,6 +102,7 @@ grant execute on function private.is_admin() to authenticated;
 alter table public.brands enable row level security;
 alter table public.products enable row level security;
 alter table public.admin_users enable row level security;
+alter table public.customer_profiles enable row level security;
 alter table public.orders enable row level security;
 alter table public.order_items enable row level security;
 
@@ -110,6 +120,13 @@ drop policy if exists "Admins manage products" on public.products;
 create policy "Admins manage products" on public.products
 for all to authenticated using ((select private.is_admin())) with check ((select private.is_admin()));
 
+drop policy if exists "Anyone can create a customer profile" on public.customer_profiles;
+create policy "Anyone can create a customer profile" on public.customer_profiles
+for insert to anon, authenticated with check (true);
+drop policy if exists "Admins can view customer profiles" on public.customer_profiles;
+create policy "Admins can view customer profiles" on public.customer_profiles
+for select to authenticated using ((select private.is_admin()));
+
 drop policy if exists "Admins can read own admin record" on public.admin_users;
 create policy "Admins can read own admin record" on public.admin_users
 for select to authenticated using (user_id = (select auth.uid()) or (select private.is_admin()));
@@ -125,6 +142,8 @@ create policy "Admins manage order items" on public.order_items
 for all to authenticated using ((select private.is_admin())) with check ((select private.is_admin()));
 
 grant select on public.brands, public.products to anon, authenticated;
+grant insert on public.customer_profiles to anon, authenticated;
+grant select on public.customer_profiles to authenticated;
 grant select, insert, update, delete on public.brands, public.products, public.admin_users, public.orders, public.order_items to authenticated;
 
 insert into public.brands (slug, name, description, sort_order) values
