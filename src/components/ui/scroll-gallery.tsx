@@ -38,24 +38,22 @@ function buildStripMask(progress: number, stripsCount: number) {
   const stops: string[] = [];
   const stripHeight = 100 / stripsCount;
 
-  for (let index = 0; index < stripsCount; index++) {
-    const fromBottom = stripsCount - index - 1;
-    const top = fromBottom * stripHeight;
-    const bottom = (fromBottom + 1) * stripHeight;
-    const stripProgress = Math.max(0, Math.min(1, (progress - index / stripsCount) * stripsCount));
+  for (let row = 0; row < stripsCount; row++) {
+    const top = row * stripHeight;
+    const bottom = (row + 1) * stripHeight;
+    const delay = (stripsCount - row - 1) / stripsCount;
+    const stripProgress = Math.max(0, Math.min(1, (progress - delay) * stripsCount));
     const revealTop = bottom - stripProgress * stripHeight;
 
-    if (stripProgress > 0) {
-      stops.push(`black ${revealTop}%`, `black ${bottom}%`);
-    }
-    if (index < stripsCount - 1) {
-      stops.push(`transparent ${bottom}%`, `transparent ${(bottom + stripHeight * 0.012)}%`);
-    }
+    stops.push(
+      `transparent ${top}%`,
+      `transparent ${revealTop}%`,
+      `black ${revealTop}%`,
+      `black ${bottom}%`,
+    );
   }
 
-  return stops.length
-    ? `linear-gradient(to bottom, ${stops.join(", ")})`
-    : "linear-gradient(to bottom, transparent 0%, transparent 100%)";
+  return `linear-gradient(to bottom, ${stops.join(", ")})`;
 }
 
 export function ScrollGallery({
@@ -87,7 +85,6 @@ export function ScrollGallery({
     safeSlides.slice(1).forEach((slide) => {
       const layer = document.createElement("div");
       layer.className = "absolute inset-0 h-full w-full";
-      layer.style.transform = "translateZ(0) scale(1.2)";
       const image = document.createElement("img");
       image.src = slide.image;
       image.alt = slide.title;
