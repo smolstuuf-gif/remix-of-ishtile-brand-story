@@ -1,6 +1,7 @@
+import { productById, type Product } from "@/lib/catalog";
+
 const url = (import.meta.env.VITE_SUPABASE_URL as string | undefined)?.replace(/\/$/, "");
 const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined;
-import { productById, type Product } from "@/lib/catalog";
 
 async function publicRows<T>(path: string): Promise<T[]> {
   if (!url || !key) return [];
