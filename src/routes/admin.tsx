@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
+import { AccountAccess } from "@/components/account/AccountAccess";
 import {
   Activity,
   ArrowUpRight,
@@ -11,7 +12,6 @@ import {
   LogOut,
   Package,
   RefreshCw,
-  ShieldCheck,
   ShoppingBag,
   TrendingUp,
 } from "lucide-react";
@@ -27,7 +27,6 @@ import {
 import {
   getDashboardData,
   restoreAdminSession,
-  signInAdmin,
   signOutAdmin,
   type AdminSession,
   type DashboardData,
@@ -65,11 +64,6 @@ function AdminPage() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [days, setDays] = useState(30);
   const [refreshKey, setRefreshKey] = useState(0);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loginError, setLoginError] = useState("");
-  const [dataError, setDataError] = useState("");
-  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -86,104 +80,7 @@ function AdminPage() {
   }, []);
 
   useEffect(() => {
-    if (!session) {
-      setData(null);
-      return;
-    }
-    let active = true;
-    setLoading(true);
-    setDataError("");
-    getDashboardData(session, days)
-      .then((result) => {
-        if (active) setData(result);
-      })
-      .catch((error: unknown) => {
-        if (active) setDataError(error instanceof Error ? error.message : "Could not load dashboard data.");
-      })
-      .finally(() => {
-        if (active) setLoading(false);
-      });
-    return () => {
-      active = false;
-    };
-  }, [session, days, refreshKey]);
-
-  async function handleLogin(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setBusy(true);
-    setLoginError("");
-    try {
-      const next = await signInAdmin(email, password);
-      setSession(next);
-      setPassword("");
-    } catch (error) {
-      setLoginError(error instanceof Error ? error.message : "Sign-in failed. Check your details and try again.");
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  async function handleSignOut() {
-    if (session) await signOutAdmin(session);
-    setSession(null);
-    setData(null);
-  }
-
-  if (checking) {
-    return (
-      <div className="grid min-h-screen place-items-center bg-[#F0EAE0] text-[#171717]">
-        <LoaderCircle className="h-7 w-7 animate-spin" />
-      </div>
-    );
-  }
-
-  if (!session) {
-    return (
-      <main className="flex min-h-screen items-center justify-center bg-[#F0EAE0] px-5 py-16 text-[#171717]">
-        <section className="w-full max-w-md border border-black/15 bg-[#F7F3EC] p-7 shadow-[10px_10px_0_#171717] sm:p-10">
-          <div className="mb-10 flex items-center justify-between">
-            <span className="font-display text-xl font-black tracking-[-0.06em]">ISHTILE<span className="text-[#171717]/45">+</span></span>
-            <span className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em]"><ShieldCheck className="h-4 w-4" /> Admin access</span>
-          </div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-black/50">Private workspace</p>
-          <h1 className="mt-3 font-display text-4xl font-black leading-none tracking-[-0.06em]">Sign in.</h1>
-          <p className="mt-3 text-sm leading-6 text-black/60">Use your authorised ISHTILE administrator account to continue.</p>
-          <form onSubmit={handleLogin} className="mt-8 space-y-5">
-            <label className="block text-xs font-bold uppercase tracking-[0.12em]">
-              Email
-              <input
-                type="email"
-                autoComplete="username"
-                required
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                className="mt-2 h-12 w-full rounded-none border border-black/20 bg-white/70 px-3 text-sm font-normal outline-none transition focus:border-[#171717] focus:ring-2 focus:ring-[#D5FE00]"
-                placeholder="admin@ishtile.com"
-              />
-            </label>
-            <label className="block text-xs font-bold uppercase tracking-[0.12em]">
-              Password
-              <input
-                type="password"
-                autoComplete="current-password"
-                required
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                className="mt-2 h-12 w-full rounded-none border border-black/20 bg-white/70 px-3 text-sm font-normal outline-none transition focus:border-[#171717] focus:ring-2 focus:ring-[#D5FE00]"
-                placeholder="Your password"
-              />
-            </label>
-            {loginError && <p role="alert" className="border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-800">{loginError}</p>}
-            <button disabled={busy} className="flex h-12 w-full items-center justify-center gap-2 bg-[#171717] px-4 text-xs font-bold uppercase tracking-[0.16em] text-[#F0EAE0] transition hover:bg-black disabled:cursor-wait disabled:opacity-60">
-              {busy ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-4 w-4" />}
-              {busy ? "Verifying access" : "Enter dashboard"}
-            </button>
-          </form>
-          <p className="mt-7 text-[11px] leading-5 text-black/45">Protected by Supabase Auth and row-level security. Only accounts listed as administrators can enter.</p>
-        </section>
-      </main>
-    );
-  }
+    if (!session) return <AccountAccess defaultMode="admin" />;
 
   return <Dashboard session={session} data={data} days={days} setDays={setDays} loading={loading} error={dataError} onRefresh={() => setRefreshKey((value) => value + 1)} onSignOut={handleSignOut} />;
 }
