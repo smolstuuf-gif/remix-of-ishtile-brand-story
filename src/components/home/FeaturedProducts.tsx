@@ -1,10 +1,16 @@
+import { useEffect, useState } from "react";
 import { ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatTaka, products } from "@/lib/catalog";
 import { useCart } from "@/lib/store";
+import { fetchPublicProducts } from "@/lib/public-store";
+import type { Product } from "@/lib/catalog";
 
 export function FeaturedProducts() {
   const { toggleWish, isWished } = useCart();
+  const [liveProducts, setLiveProducts] = useState<Product[] | null>(null);
+  useEffect(() => { let live = true; fetchPublicProducts().then((items) => { if (live && items !== null) setLiveProducts(items); }).catch(() => undefined); return () => { live = false; }; }, []);
+  const visibleProducts = liveProducts ?? products;
 
   return (
     <section id="shop" aria-labelledby="featured-title" className="rounded-2xl md:border md:border-border/70 md:bg-panel/60 md:px-[4%] md:py-8">
@@ -19,7 +25,7 @@ export function FeaturedProducts() {
       </div>
 
       <ul className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-x-8 md:gap-y-4 lg:grid-cols-4">
-        {products.map((p, i) => {
+        {visibleProducts.slice(0, 8).map((p, i) => {
           const wished = isWished(p.id);
           return (
             <li key={p.id} className={cn(i >= 6 && "hidden md:block")}>
