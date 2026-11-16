@@ -1,4 +1,5 @@
 import { ArrowRight } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import colSpring from "@/assets/col-spring.jpg";
 import colSummer from "@/assets/col-summer.jpg";
 import colFestive from "@/assets/col-festive.jpg";
@@ -19,9 +20,10 @@ export function DesktopCollections() {
   return (
     <section aria-label="Collections" className="hidden gap-3 md:grid md:grid-cols-2 lg:grid-cols-4">
       {desktopCollections.map((c) => (
-        <a
+        <Link
           key={c.alt}
-          href="#shop"
+          to="/collections"
+          aria-label={`Explore ${c.alt}`}
           className="group block overflow-hidden rounded-xl bg-ink shadow-[0_1px_0_0_var(--border)]"
         >
           <img
@@ -32,7 +34,7 @@ export function DesktopCollections() {
             loading="lazy"
             className="aspect-[2.03/1] w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
           />
-        </a>
+        </Link>
       ))}
     </section>
   );
@@ -40,8 +42,9 @@ export function DesktopCollections() {
 
 function TextCard({ image, alt, title }: { image: string; alt: string; title: [string, string] }) {
   return (
-    <a
-      href="#shop"
+    <Link
+      to="/collections"
+      aria-label={`Explore ${title.join(" ")}`}
       className="relative block aspect-[6/7] w-[42%] shrink-0 snap-start overflow-hidden rounded-2xl"
     >
       <img src={image} alt={alt} loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
@@ -53,7 +56,7 @@ function TextCard({ image, alt, title }: { image: string; alt: string; title: [s
         </p>
         <ArrowRight className="mt-[18%] h-7 w-7 text-foreground" strokeWidth={2.2} />
       </div>
-    </a>
+    </Link>
   );
 }
 
@@ -63,8 +66,9 @@ export function MobileCollections() {
       <div className="no-scrollbar -mr-3 flex snap-x snap-mandatory gap-3 overflow-x-auto pr-3">
         <TextCard image={cardNewArrivals} alt="New arrivals" title={["New", "Arrivals"]} />
         <TextCard image={cardSummer} alt="Summer essentials" title={["Summer", "Essentials"]} />
-        <a
-          href="#shop"
+        <Link
+          to="/collections"
+          aria-label="Explore Winter Collection"
           className="relative block aspect-[6/7] w-[42%] shrink-0 snap-start overflow-hidden rounded-2xl"
         >
           <img src={cardWinter} alt="Winter collection" loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
@@ -80,7 +84,7 @@ export function MobileCollections() {
               Explore
             </span>
           </div>
-        </a>
+        </Link>
       </div>
     </section>
   );
