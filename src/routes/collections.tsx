@@ -33,11 +33,6 @@ function CollectionsPage() {
     <div className="min-h-screen">
       <main>
         <ScrollGallery slides={slides} prefixLabel="ISHTILE+ / COLLECTIONS" linkLabel="Explore" />
-        <section className="mx-auto max-w-[1600px] px-5 py-12 md:px-10 md:py-16">
-          <p className="max-w-2xl font-display text-2xl font-medium leading-tight tracking-tight md:text-4xl">
-            A considered edit for every season, mood and moment. Discover the collections that move with you.
-          </p>
-        </section>
       </main>
       <Footer />
     </div>
