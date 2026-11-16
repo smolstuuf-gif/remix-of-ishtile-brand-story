@@ -28,3 +28,8 @@ export async function fetchHeroContent() {
 export async function fetchHomepageCollections() {
   return publicRows<PublicCollection>("collections?select=id,title,image_url,description,campaign_label,slug&show_homepage=eq.true&is_active=eq.true&image_url=not.is.null&order=sort_order.asc");
 }
+
+export type PublicBrand = { id: string; name: string; logo_url: string | null; image_url: string | null };
+export async function fetchPublicBrands() {
+  return publicRows<PublicBrand[]>("brands?select=id,name,logo_url,image_url&is_active=eq.true&order=sort_order.asc");
+}
