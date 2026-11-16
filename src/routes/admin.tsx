@@ -64,6 +64,7 @@ function AdminPage() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [days, setDays] = useState(30);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [dataError, setDataError] = useState("");
 
   useEffect(() => {
     let active = true;
@@ -80,7 +81,43 @@ function AdminPage() {
   }, []);
 
   useEffect(() => {
-    if (!session) return <AccountAccess defaultMode="admin" />;
+    if (!session) {
+      setData(null);
+      return;
+    }
+    let active = true;
+    setLoading(true);
+    setDataError("");
+    getDashboardData(session, days)
+      .then((result) => {
+        if (active) setData(result);
+      })
+      .catch((error: unknown) => {
+        if (active) setDataError(error instanceof Error ? error.message : "Could not load dashboard data.");
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [session, days, refreshKey]);
+
+  async function handleSignOut() {
+    if (session) await signOutAdmin(session);
+    setSession(null);
+    setData(null);
+  }
+
+  if (checking) {
+    return (
+      <div className="grid min-h-screen place-items-center bg-[#F0EAE0] text-[#171717]">
+        <LoaderCircle className="h-7 w-7 animate-spin" />
+      </div>
+    );
+  }
+
+  if (!session) return <AccountAccess defaultMode="admin" />;
 
   return <Dashboard session={session} data={data} days={days} setDays={setDays} loading={loading} error={dataError} onRefresh={() => setRefreshKey((value) => value + 1)} onSignOut={handleSignOut} />;
 }
