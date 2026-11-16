@@ -55,7 +55,7 @@ function BrandArtwork() {
 function AboutPage() {
   return (
     <div className="min-h-screen overflow-hidden bg-[#f1eadb] text-[#171717]">
-      <main className="mx-auto max-w-[1600px] px-5 pb-0 pt-8 md:px-10 md:pb-0 md:pt-12">
+      <main className="mx-auto max-w-[1600px] px-5 pb-10 pt-8 md:px-10 md:pb-16 md:pt-12">
         <section className="relative min-h-[660px] md:min-h-[min(700px,calc(100svh-5rem))]">
           <div className="relative z-10 w-[66%] max-w-[620px] pb-4 pt-7 md:w-[48%] md:pb-20 md:pt-0">
             <p className="mb-5 text-[10px] font-semibold uppercase tracking-[0.28em] text-[#6e675c] md:text-xs">Our story · ISHTILE+</p>
@@ -77,7 +77,7 @@ function AboutPage() {
             <BrandArtwork />
           </div>
 
-          <div className="absolute bottom-0 left-0 z-20 grid w-full grid-cols-3 overflow-hidden rounded-xl bg-[#171717] text-[#f4eddf] shadow-[0_16px_38px_rgba(0,0,0,0.2)] md:w-[min(650px,58%)]">
+          <div className="absolute bottom-6 left-0 z-20 grid w-full grid-cols-3 md:bottom-10 overflow-hidden rounded-xl bg-[#171717] text-[#f4eddf] shadow-[0_16px_38px_rgba(0,0,0,0.2)] md:w-[min(650px,58%)]">
             {[
               { target: 5, suffix: "+", label: "Brands" },
               { target: 50, suffix: "K+", label: "Customers" },
