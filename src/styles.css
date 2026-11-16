@@ -227,3 +227,37 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+
+/* Digit roll animation shared by all quantity steppers. */
+.stepper-digit {
+  animation-duration: 260ms;
+  animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+  animation-fill-mode: both;
+}
+
+.stepper-digit-up {
+  animation-name: stepper-roll-up;
+}
+
+.stepper-digit-down {
+  animation-name: stepper-roll-down;
+}
+
+@keyframes stepper-roll-up {
+  from { opacity: 0; transform: translate3d(0, 0.7em, 0) scale(0.72); filter: blur(2px); }
+  65% { opacity: 1; transform: translate3d(0, -0.08em, 0) scale(1.06); filter: blur(0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); filter: blur(0); }
+}
+
+@keyframes stepper-roll-down {
+  from { opacity: 0; transform: translate3d(0, -0.7em, 0) scale(0.72); filter: blur(2px); }
+  65% { opacity: 1; transform: translate3d(0, 0.08em, 0) scale(1.06); filter: blur(0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); filter: blur(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stepper-digit {
+    animation: none !important;
+  }
+}
