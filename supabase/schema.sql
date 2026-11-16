@@ -142,8 +142,9 @@ create policy "Admins manage order items" on public.order_items
 for all to authenticated using ((select private.is_admin())) with check ((select private.is_admin()));
 
 grant select on public.brands, public.products to anon, authenticated;
-grant insert on public.customer_profiles to anon, authenticated;
-grant select on public.customer_profiles to authenticated;
+revoke all on table public.customer_profiles from public, anon, authenticated;
+grant insert on table public.customer_profiles to anon, authenticated;
+grant select on table public.customer_profiles to authenticated;
 grant select, insert, update, delete on public.brands, public.products, public.admin_users, public.orders, public.order_items to authenticated;
 
 insert into public.brands (slug, name, description, sort_order) values
