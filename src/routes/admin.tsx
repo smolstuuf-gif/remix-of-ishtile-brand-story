@@ -66,6 +66,7 @@ function AdminPage() {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<DashboardData | null>(null);
   const [days, setDays] = useState(30);
+  const [refreshKey, setRefreshKey] = useState(0);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState("");
@@ -107,7 +108,7 @@ function AdminPage() {
     return () => {
       active = false;
     };
-  }, [session, days]);
+  }, [session, days, refreshKey]);
 
   async function handleLogin(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -186,7 +187,7 @@ function AdminPage() {
     );
   }
 
-  return <Dashboard session={session} data={data} days={days} setDays={setDays} loading={loading} error={dataError} onRefresh={() => setDays((value) => value)} onSignOut={handleSignOut} />;
+  return <Dashboard session={session} data={data} days={days} setDays={setDays} loading={loading} error={dataError} onRefresh={() => setRefreshKey((value) => value + 1)} onSignOut={handleSignOut} />;
 }
 
 function Dashboard({
