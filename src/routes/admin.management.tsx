@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   ArrowLeft, Check, ChevronRight, ImagePlus, LoaderCircle, LogOut, Plus, RefreshCw,
@@ -115,7 +115,7 @@ function ManagementPage() {
   );
 }
 
-function PanelHeading({ eyebrow, title, detail, action }: { eyebrow: string; title: string; detail: string; action?: React.ReactNode }) {
+function PanelHeading({ eyebrow, title, detail, action }: { eyebrow: string; title: string; detail: string; action?: ReactNode }) {
   return <div className="mb-5 flex flex-wrap items-end justify-between gap-3"><div><p className="text-[9px] font-bold uppercase tracking-[0.2em] text-black/45">{eyebrow}</p><h2 className="mt-1 text-xl font-black tracking-tight">{title}</h2><p className="mt-1 max-w-2xl text-xs leading-5 text-black/50">{detail}</p></div>{action}</div>;
 }
 function Field({ label, name, value, onChange, type = "text", placeholder, required = false }: { label: string; name: string; value: string | number; onChange: (value: string) => void; type?: string; placeholder?: string; required?: boolean }) {
