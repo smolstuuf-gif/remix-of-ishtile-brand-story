@@ -1,10 +1,11 @@
 import { Link } from "@tanstack/react-router";
-import { Minus, Plus, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { Sparkle } from "@/components/home/icons";
 import { formatTaka } from "@/lib/catalog";
 import { FREE_SHIPPING_OVER, MAX_QTY } from "@/lib/commerce";
 import { useCart } from "@/lib/store";
+import { Stepper } from "@/components/ui/stepper";
 
 export function QtyStepper({
   qty,
@@ -16,29 +17,14 @@ export function QtyStepper({
   label: string;
 }) {
   return (
-    <div className="inline-flex items-center rounded-full border border-border">
-      <button
-        type="button"
-        onClick={() => onChange(qty - 1)}
-        disabled={qty <= 1}
-        aria-label={`Decrease ${label}`}
-        className="grid h-8 w-8 place-items-center rounded-l-full transition-colors hover:bg-accent disabled:opacity-40"
-      >
-        <Minus className="h-3.5 w-3.5" strokeWidth={2} />
-      </button>
-      <span className="w-7 text-center text-sm tabular-nums" aria-live="polite">
-        {qty}
-      </span>
-      <button
-        type="button"
-        onClick={() => onChange(qty + 1)}
-        disabled={qty >= MAX_QTY}
-        aria-label={`Increase ${label}`}
-        className="grid h-8 w-8 place-items-center rounded-r-full transition-colors hover:bg-accent disabled:opacity-40"
-      >
-        <Plus className="h-3.5 w-3.5" strokeWidth={2} />
-      </button>
-    </div>
+    <Stepper
+      value={qty}
+      min={1}
+      max={MAX_QTY}
+      onChange={onChange}
+      label={label}
+      size="sm"
+    />
   );
 }
 
