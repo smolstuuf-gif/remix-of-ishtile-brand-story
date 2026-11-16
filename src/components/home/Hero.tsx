@@ -160,10 +160,10 @@ export function DesktopHero() {
 }
 
 const slides = [
-  { image: heroMobile, alt: "Model in sunglasses looking up, black and white", lines: ["More", "Fashion."], accent: "More You." },
-  { image: cardNewArrivals, alt: "Model with dreadlocks on a beige wall", lines: ["New", "Arrivals."], accent: "Just Dropped." },
-  { image: brandFarak, alt: "Model in a black dress against a lilac wall", lines: ["Different", "Brands."], accent: "One Universe." },
-  { image: cardWinter, alt: "Model wrapped in a paisley shawl", lines: ["Winter", "Edit."], accent: "Wrap Up." },
+  { image: heroMobile, alt: "Model in sunglasses looking up, black and white", lines: ["More", "Fashion."], accent: "More You.", href: "#shop" },
+  { image: cardNewArrivals, alt: "Model with dreadlocks on a beige wall", lines: ["New", "Arrivals."], accent: "Just Dropped.", href: "#shop" },
+  { image: brandFarak, alt: "Model in a black dress against a lilac wall", lines: ["Different", "Brands."], accent: "One Universe.", href: "#shop" },
+  { image: cardWinter, alt: "Model wrapped in a paisley shawl", lines: ["Winter", "Edit."], accent: "Wrap Up.", href: "#shop" },
 ];
 
 export function MobileHero() {
