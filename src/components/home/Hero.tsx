@@ -63,7 +63,7 @@ export function DesktopHero() {
     return () => clearInterval(timer);
   }, [go]);
 
-  const slide = desktopSlides[index];
+  const slide = desktopSlides[index] ?? desktopSlides[0]!;
 
   return (
     <section

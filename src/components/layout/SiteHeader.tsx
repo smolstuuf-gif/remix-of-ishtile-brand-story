@@ -31,7 +31,7 @@ export function SiteHeader() {
       document.querySelectorAll<HTMLElement>("[data-header-theme]").forEach((section) => {
         const rect = section.getBoundingClientRect();
         if (rect.top <= probeY && rect.bottom > probeY) {
-          nextTheme = section.dataset.headerTheme === "dark" ? "dark" : "light";
+          nextTheme = section.dataset["headerTheme"] === "dark" ? "dark" : "light";
           matchedSection = true;
         }
       });

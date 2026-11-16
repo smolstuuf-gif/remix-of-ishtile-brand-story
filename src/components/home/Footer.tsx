@@ -97,7 +97,7 @@ function AccordionGroup({ title, items }: { title: string; items: readonly strin
   );
 }
 
-function FooterLink({ item, className }: { item: string; className?: string }) {
+function FooterLink({ item, className, children }: { item: string; className?: string; children?: React.ReactNode }) {
   const destinations: Record<string, string> = {
     "All Products": "/shop",
     "New Arrivals": "/shop",
@@ -121,9 +121,9 @@ function FooterLink({ item, className }: { item: string; className?: string }) {
   };
   const to = destinations[item] ?? "/shop";
   if (to.startsWith("/#")) {
-    return <a href={to} className={className}>{item}</a>;
+    return <a href={to} className={className}>{children ?? item}</a>;
   }
-  return <Link to={to as "/shop"} className={className}>{item}</Link>;
+  return <Link to={to as "/shop"} className={className}>{children ?? item}</Link>;
 }
 
 const toTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
