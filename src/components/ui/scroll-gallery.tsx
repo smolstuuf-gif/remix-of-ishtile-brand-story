@@ -73,14 +73,15 @@ export function ScrollGallery({
   const linkRef = useRef<HTMLAnchorElement>(null);
   const firstSlide = slides[0];
 
-  const safeSlides = useMemo(() => slides.filter((slide) => slide.image && slide.title), [slides]);
+  const safeSlides = slides.filter((slide) => slide.image && slide.title);
 
   useGSAP(() => {
     const section = sectionRef.current;
     const stack = imageStackRef.current;
     const title = titleRef.current;
     const link = linkRef.current;
-    if (!section || !stack || !title || !link || safeSlides.length < 2) return;
+    const firstImage = firstImageRef.current;
+    if (!section || !stack || !title || !link || !firstImage || safeSlides.length < 2) return;
 
     const layers: HTMLDivElement[] = [];
     safeSlides.slice(1).forEach((slide) => {
@@ -114,7 +115,9 @@ export function ScrollGallery({
       scrub: 1,
       invalidateOnRefresh: true,
       onUpdate: (self) => {
-        const progress = self.progress * (safeSlides.length - 1);\n        const firstScale = 1.2 - Math.min(1, Math.max(0, progress / 2)) * 0.2;\n        firstImage.style.transform = `translate3d(0,0,0) scale(${firstScale})`;
+        const progress = self.progress * (safeSlides.length - 1);
+        const firstScale = 1.2 - Math.min(1, Math.max(0, progress / 2)) * 0.2;
+        firstImage.style.transform = `translate3d(0,0,0) scale(${firstScale})`;
         const current = Math.min(safeSlides.length - 2, Math.floor(progress));
         const within = progress >= safeSlides.length - 1 ? 1 : progress - current;
 
