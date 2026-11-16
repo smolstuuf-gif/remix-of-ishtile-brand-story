@@ -5,6 +5,7 @@ import { formatTaka, products } from "@/lib/catalog";
 import { useCart } from "@/lib/store";
 import { fetchPublicProducts } from "@/lib/public-store";
 import type { Product } from "@/lib/catalog";
+import { FavoriteButton } from "@/components/ui/favorite-button";
 
 export function FeaturedProducts() {
   const { toggleWish, isWished } = useCart();
@@ -41,24 +42,11 @@ export function FeaturedProducts() {
                       className="aspect-[1.75/1] w-full object-cover object-[50%_25%] transition-transform duration-500 group-hover:scale-[1.04] md:aspect-[2.3/1]"
                     />
                   </a>
-                  <button
-                    type="button"
-                    onClick={() => toggleWish(p.id)}
-                    aria-label={wished ? `Remove ${p.name} from wishlist` : `Add ${p.name} to wishlist`}
-                    aria-pressed={wished}
-                    className="absolute right-2.5 top-2.5 grid h-8 w-8 place-items-center rounded-full text-foreground transition-colors hover:bg-background/60"
-                  >
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill={wished ? "currentColor" : "none"}
-                      stroke="currentColor"
-                      strokeWidth={1.6}
-                      className="h-[22px] w-[22px]"
-                      aria-hidden="true"
-                    >
-                      <path d="M12 20.5s-7.5-4.7-7.5-10a4.5 4.5 0 0 1 7.5-3.3A4.5 4.5 0 0 1 19.5 10.5c0 5.3-7.5 10-7.5 10Z" />
-                    </svg>
-                  </button>
+                  <FavoriteButton
+                    active={wished}
+                    onToggle={() => toggleWish(p.id)}
+                    label={wished ? `Remove ${p.name} from wishlist` : `Add ${p.name} to wishlist`}
+                  />
                 </div>
                 <div className="flex flex-1 flex-col justify-between gap-2 px-2.5 pb-3 pt-2.5 md:px-3">
                   <h3 className="max-w-[10rem] text-[15px] font-medium leading-snug tracking-[-0.01em] md:text-[15px]">
