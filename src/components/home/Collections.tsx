@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { ArrowRight } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import colSpring from "@/assets/col-spring.jpg";
@@ -8,6 +9,7 @@ import cardNewArrivals from "@/assets/card-new-arrivals.jpg";
 import cardSummer from "@/assets/card-summer.jpg";
 import cardWinter from "@/assets/card-winter.jpg";
 import { Logo } from "./Logo";
+import { fetchHomepageCollections } from "@/lib/public-store";
 
 const desktopCollections = [
   { image: colSpring, alt: "Spring '25 — Fresh Fits. New Vibes.", w: 751, h: 370 },
@@ -17,9 +19,12 @@ const desktopCollections = [
 ];
 
 export function DesktopCollections() {
+  const [liveCollections, setLiveCollections] = useState<typeof desktopCollections>([]);
+  useEffect(() => { let live = true; fetchHomepageCollections().then((items) => { if (live && items.length) setLiveCollections(items.map((item) => ({ image: item.image_url || "", alt: item.title, w: 751, h: 370 }))); }).catch(() => undefined); return () => { live = false; }; }, []);
+  const visibleCollections = liveCollections.length ? liveCollections : desktopCollections;
   return (
     <section aria-label="Collections" className="hidden gap-3 md:grid md:grid-cols-2 lg:grid-cols-4">
-      {desktopCollections.map((c) => (
+      {visibleCollections.map((c) => (
         <Link
           key={c.alt}
           to="/collections"
@@ -61,6 +66,11 @@ function TextCard({ image, alt, title }: { image: string; alt: string; title: [s
 }
 
 export function MobileCollections() {
+  const [liveCollections, setLiveCollections] = useState<{ id: string; image: string; title: string }[]>([]);
+  useEffect(() => { let live = true; fetchHomepageCollections().then((items) => { if (live && items.length) setLiveCollections(items.map((item) => ({ id: item.id, image: item.image_url || "", title: item.title }))); }).catch(() => undefined); return () => { live = false; }; }, []);
+  if (liveCollections.length) return (
+    <section aria-label="Collections" className="md:hidden"><div className="no-scrollbar -mr-3 flex snap-x snap-mandatory gap-3 overflow-x-auto pr-3">{liveCollections.map((item) => <Link key={item.id} to="/collections" aria-label={`Explore ${item.title}`} className="relative block aspect-[6/7] w-[42%] shrink-0 snap-start overflow-hidden rounded-2xl"><img src={item.image} alt={item.title} loading="lazy" className="absolute inset-0 h-full w-full object-cover" /><div className="absolute inset-x-[10%] bottom-[12%] text-white"><p className="text-[6vw] font-bold leading-tight">{item.title}</p><ArrowRight className="mt-3 h-6 w-6" /></div></Link>)}</div></section>
+  );
   return (
     <section aria-label="Collections" className="md:hidden">
       <div className="no-scrollbar -mr-3 flex snap-x snap-mandatory gap-3 overflow-x-auto pr-3">
