@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
 import { Logo } from "@/components/home/Logo";
-import { FacebookIcon, InstagramIcon, Sparkle, TikTokIcon, YoutubeIcon } from "@/components/home/icons";
+import { FacebookIcon, InstagramIcon, Sparkle, WhatsAppIcon } from "@/components/home/icons";
 import { useCart } from "@/lib/store";
 
 const links = [
@@ -19,10 +19,9 @@ const links = [
 ];
 
 const socials = [
-  { label: "Instagram", icon: InstagramIcon },
-  { label: "YouTube", icon: YoutubeIcon },
-  { label: "TikTok", icon: TikTokIcon },
-  { label: "Facebook", icon: FacebookIcon },
+  { label: "Instagram", href: "https://www.instagram.com/ishtilewear/", icon: InstagramIcon },
+  { label: "Facebook", href: "https://www.facebook.com/profile.php?id=61596685345300", icon: FacebookIcon },
+  { label: "WhatsApp", href: "https://wa.me/8801627397098", icon: WhatsAppIcon },
 ];
 
 export function MenuDrawer() {
@@ -62,9 +61,9 @@ export function MenuDrawer() {
 
         <div className="border-t border-white/15 px-6 py-5">
           <ul className="flex items-center gap-5">
-            {socials.map(({ label, icon: Icon }) => (
+            {socials.map(({ label, href, icon: Icon }) => (
               <li key={label}>
-                <a href="#" aria-label={label} className="block transition-colors hover:text-lime">
+                <a href={href} target="_blank" rel="noopener noreferrer" aria-label={label} className="block transition-colors hover:text-lime">
                   <Icon className="h-5 w-5" />
                 </a>
               </li>
