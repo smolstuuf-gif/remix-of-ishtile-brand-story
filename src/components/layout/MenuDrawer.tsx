@@ -30,7 +30,7 @@ export function MenuDrawer() {
 
   return (
     <Sheet open={menuOpen} onOpenChange={(open) => (open ? undefined : closeMenu())}>
-      <SheetContent side="left" className="flex w-full flex-col gap-0 border-white/15 bg-ink p-0 text-cream sm:max-w-sm">
+      <SheetContent side="left" className="flex w-full flex-col gap-0 border-white/15 bg-ink p-0 text-[#f5f0e6] sm:max-w-sm">
         <SheetTitle className="sr-only">Menu</SheetTitle>
         <SheetDescription className="sr-only">Site navigation</SheetDescription>
 
@@ -70,7 +70,7 @@ export function MenuDrawer() {
               </li>
             ))}
           </ul>
-          <p className="mt-4 inline-flex items-center gap-2 text-xs text-cream/65">
+          <p className="mt-4 inline-flex items-center gap-2 text-xs text-[#bdb7aa]">
             <Sparkle className="h-3.5 w-3.5 text-lime" />
             Discover beyond labels.
           </p>
