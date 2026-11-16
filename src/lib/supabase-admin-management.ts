@@ -95,9 +95,14 @@ export type SiteBrandInfo = {
 export type CustomerProfile = {
   id: string; full_name: string; mobile_number: string; delivery_address: string; created_at: string;
 };
+export type AdminOrder = {
+  id: string; order_number: string; customer_phone: string; created_at: string;
+  total: number | string; payment_status: string; fulfillment_status: string;
+  order_items: { brand_name: string; quantity: number; line_total: number | string }[];
+};
 
 export async function loadAdminWorkspace(session: AdminSession) {
-  const [brands, products, slides, collections, customers, admins, settings] = await Promise.all([
+  const [brands, products, slides, collections, customers, admins, settings, orders] = await Promise.all([
     adminData<AdminBrand[]>("brands?select=*&order=sort_order.asc,name.asc", session),
     adminData<AdminProduct[]>("products?select=*&order=created_at.desc", session),
     adminData<HeroSlide[]>("hero_slides?select=*&order=sort_order.asc,created_at.desc", session),
@@ -105,8 +110,9 @@ export async function loadAdminWorkspace(session: AdminSession) {
     adminData<CustomerProfile[]>("customer_profiles?select=*&order=created_at.desc&limit=500", session),
     adminData<{ user_id: string; created_at: string }[]>("admin_users?select=user_id,created_at&order=created_at.asc", session),
     adminData<SiteBrandInfo[]>("site_brand_info?select=*&id=eq.1&limit=1", session),
+    adminData<AdminOrder[]>("orders?select=id,order_number,customer_phone,created_at,total,payment_status,fulfillment_status,order_items(brand_name,quantity,line_total)&order=created_at.desc&limit=500", session),
   ]);
-  return { brands, products, slides, collections, customers, admins, settings: settings[0] };
+  return { brands, products, slides, collections, customers, admins, settings: settings[0], orders };
 }
 
 export function slugify(value: string) {
