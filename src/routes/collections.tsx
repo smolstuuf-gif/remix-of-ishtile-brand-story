@@ -32,7 +32,7 @@ function CollectionsPage() {
   return (
     <div className="min-h-screen">
       <main>
-        <ScrollGallery slides={slides} prefixLabel="ISHTILE+ / COLLECTIONS" linkLabel="Explore" />
+        <ScrollGallery slides={slides} variant="studio" prefixLabel="ISHTILE+ / COLLECTIONS" linkLabel="Explore" />
       </main>
       <Footer />
     </div>
