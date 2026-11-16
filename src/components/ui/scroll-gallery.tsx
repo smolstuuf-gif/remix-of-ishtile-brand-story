@@ -546,7 +546,10 @@ export function ScrollGallery({
 
         const stripBounds = createStripBounds(stripsCount);
         const totalSlides = slides.length;
-        const setFirstImgScale = createScaleSetter(firstSlideImg, scaleFrom);\n        const updateContrast = (image: HTMLImageElement) => applyBrandTextContrast(image, section);\n        if (firstSlideImg.complete) updateContrast(firstSlideImg);\n        else firstSlideImg.addEventListener("load", () => updateContrast(firstSlideImg), { once: true });
+        const setFirstImgScale = createScaleSetter(firstSlideImg, scaleFrom);
+        const updateContrast = (image: HTMLImageElement) => applyBrandTextContrast(image, section);
+        if (firstSlideImg.complete) updateContrast(firstSlideImg);
+        else firstSlideImg.addEventListener("load", () => updateContrast(firstSlideImg), { once: true });
 
         interface SlideLayer {
           img: HTMLImageElement;
