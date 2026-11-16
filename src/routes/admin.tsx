@@ -215,7 +215,7 @@ function Dashboard({
               <h1 className="mt-1 font-display text-2xl font-black tracking-[-0.055em] md:text-3xl">Overview<span className="text-black/25">.</span></h1>
             </div>
             <div className="flex items-center gap-2">
-              <Link to="/admin/management" className="hidden h-10 items-center gap-2 bg-[#171717] px-3 text-xs font-bold uppercase tracking-wide text-[#F0EAE0] transition hover:bg-black/80 sm:inline-flex">Manage store</Link>
+              <Link to="/admin/management" className="inline-flex h-10 items-center gap-2 bg-[#171717] px-3 text-xs font-bold uppercase tracking-wide text-[#F0EAE0] transition hover:bg-black/80">Manage store</Link>
               <select value={days} onChange={(event) => setDays(Number(event.target.value))} className="h-10 border border-black/15 bg-transparent px-3 text-xs font-semibold outline-none focus:border-black">
                 <option value={7}>Weekly performance · 7 days</option>
                 <option value={30}>Monthly performance · 30 days</option>
