@@ -187,6 +187,7 @@ function Dashboard({
   const lowStock = (data?.products ?? []).filter((product) => product.stock_quantity !== null && product.stock_quantity <= 5);
   const untrackedStock = (data?.products ?? []).filter((product) => product.stock_quantity === null).length;
   const pendingOrders = validOrders.filter((order) => order.fulfillment_status === "new" || order.fulfillment_status === "confirmed" || order.fulfillment_status === "processing").length;
+  const rankedBrands = [...brandStats].sort((a, b) => b.revenue - a.revenue);
 
   return (
     <main className="min-h-screen bg-[#F0EAE0] text-[#171717]">
@@ -216,8 +217,8 @@ function Dashboard({
             <div className="flex items-center gap-2">
               <Link to="/admin/management" className="hidden h-10 items-center gap-2 bg-[#171717] px-3 text-xs font-bold uppercase tracking-wide text-[#F0EAE0] transition hover:bg-black/80 sm:inline-flex">Manage store</Link>
               <select value={days} onChange={(event) => setDays(Number(event.target.value))} className="h-10 border border-black/15 bg-transparent px-3 text-xs font-semibold outline-none focus:border-black">
-                <option value={7}>Last 7 days</option>
-                <option value={30}>Last 30 days</option>
+                <option value={7}>Weekly performance · 7 days</option>
+                <option value={30}>Monthly performance · 30 days</option>
                 <option value={90}>Last 90 days</option>
               </select>
               <button onClick={onRefresh} aria-label="Refresh dashboard" className="grid h-10 w-10 place-items-center border border-black/15 transition hover:bg-black hover:text-[#F0EAE0]"><RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} /></button>
@@ -281,6 +282,25 @@ function Dashboard({
                       ))}
                     </div>
                     {!paidOrders.length && <p className="mt-5 border-t border-white/10 pt-4 text-xs leading-5 text-white/45">Brand totals will populate automatically from paid order items. No sample sales are being displayed.</p>}
+                  </div>
+                </section>
+
+                <section className="grid gap-4 xl:grid-cols-2">
+                  <div className="border border-black/10 bg-[#F7F3EC] p-4 md:p-5">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-black/45">Brand ranking</p>
+                    <h2 className="mt-1 text-base font-black">Top-selling brands</h2>
+                    <div className="mt-3 divide-y divide-black/10">
+                      {rankedBrands.slice(0, 5).map((brand, index) => <div key={brand.id} className="flex items-center justify-between gap-3 py-2.5 text-xs"><span><b className="mr-2 text-black/35">{String(index + 1).padStart(2, "0")}</b>{brand.name}</span><b className="tabular-nums">{money(brand.revenue)}</b></div>)}
+                    </div>
+                    {!paidOrders.length && <p className="mt-2 text-[10px] text-black/45">No paid sales in the selected period.</p>}
+                  </div>
+                  <div className="border border-black/10 bg-[#F7F3EC] p-4 md:p-5">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-black/45">Brand ranking</p>
+                    <h2 className="mt-1 text-base font-black">Least-selling brands</h2>
+                    <div className="mt-3 divide-y divide-black/10">
+                      {[...rankedBrands].reverse().slice(0, 5).map((brand, index) => <div key={brand.id} className="flex items-center justify-between gap-3 py-2.5 text-xs"><span><b className="mr-2 text-black/35">{String(index + 1).padStart(2, "0")}</b>{brand.name}</span><b className="tabular-nums">{money(brand.revenue)}</b></div>)}
+                    </div>
+                    {!paidOrders.length && <p className="mt-2 text-[10px] text-black/45">No paid sales in the selected period.</p>}
                   </div>
                 </section>
 
