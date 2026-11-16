@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowUpRight, Plus, Sparkle } from "lucide-react";
+import { Footer } from "@/components/home/Footer";
 
 export const Route = createFileRoute("/about")({
   head: () => ({
@@ -15,7 +16,7 @@ export const Route = createFileRoute("/about")({
 
 function BrandArtwork() {
   return (
-    <div aria-hidden="true" className="pointer-events-none relative mx-auto aspect-[4/5] w-full max-w-[560px] overflow-hidden">
+    <div aria-hidden="true" className="pointer-events-none relative mx-auto aspect-[4/5] w-full max-w-[500px] overflow-hidden">
       <div className="absolute -right-[22%] top-[3%] h-[72%] w-[82%] rounded-[48%] bg-[#d6ed27] rotate-[-24deg]" />
       <div className="absolute right-[-15%] top-[13%] h-[66%] w-[72%] rounded-[48%] border-[26px] border-[#171717] bg-[#31b8d1] rotate-[-24deg]" />
       <div className="absolute right-[-7%] top-[21%] h-[57%] w-[62%] rounded-[48%] border-[18px] border-[#f4b42a] bg-[#f07a32] rotate-[-24deg]" />
@@ -53,8 +54,8 @@ function BrandArtwork() {
 function AboutPage() {
   return (
     <div className="min-h-screen overflow-hidden bg-[#f1eadb] text-[#171717]">
-      <main className="mx-auto max-w-[1600px] px-5 pb-8 pt-8 md:px-10 md:pb-14 md:pt-12">
-        <section className="relative min-h-[790px] md:min-h-[min(780px,calc(100svh-7rem))]">
+      <main className="mx-auto max-w-[1600px] px-5 pb-0 pt-8 md:px-10 md:pb-0 md:pt-12">
+        <section className="relative min-h-[660px] md:min-h-[min(700px,calc(100svh-5rem))]">
           <div className="relative z-10 w-[66%] max-w-[620px] pb-4 pt-7 md:w-[48%] md:pb-20 md:pt-0">
             <p className="mb-5 text-[10px] font-semibold uppercase tracking-[0.28em] text-[#6e675c] md:text-xs">Our story · ISHTILE+</p>
             <h1 className="max-w-[540px] font-display text-[clamp(3.1rem,11vw,7.8rem)] font-extrabold leading-[0.83] tracking-[-0.075em]">
@@ -89,6 +90,7 @@ function AboutPage() {
           </div>
         </section>
       </main>
+      <Footer />
     </div>
   );
 }
