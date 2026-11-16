@@ -68,7 +68,7 @@ export function DesktopHero() {
       if (remote.length) setSlides(remote.map((item) => ({
         image: item.image_url, alt: item.title || "ISHTILE featured story",
         lines: [item.title || "Discover Beyond Labels"], accent: item.subtitle || "",
-        tagline: item.subtitle || "Discover Beyond Labels.", link: "Explore",
+        tagline: "", link: "Explore",
         href: item.link_url || "#shop",
       })));
     }).catch(() => undefined);
@@ -115,11 +115,9 @@ export function DesktopHero() {
             {slide.lines.map((line) => (
               <span key={line} className="text-ink-foreground">{line}</span>
             ))}
-            <span className="text-lime">{slide.accent}</span>
+            {slide.accent && <span className="text-lime">{slide.accent}</span>}
           </h1>
-          <p className="mt-3 text-[clamp(.9rem,1.25vw,1.2rem)] font-medium text-ink-foreground">
-            {slide.tagline}
-          </p>
+          {slide.tagline && <p className="mt-3 text-[clamp(.9rem,1.25vw,1.2rem)] font-medium text-ink-foreground">{slide.tagline}</p>}
           <a
             href={slide.href}
             className="group mt-5 inline-flex items-center gap-3 text-[clamp(.85rem,1.05vw,1rem)] font-semibold text-ink-foreground underline decoration-1 underline-offset-[6px] transition-colors hover:decoration-lime"
