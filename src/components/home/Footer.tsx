@@ -154,7 +154,7 @@ export function Footer() {
         {/* desktop */}
         <div className="hidden md:grid md:grid-cols-[1.25fr_0.6fr_0.55fr_0.7fr_1.35fr] md:gap-6">
           <div>
-            {brandInfo?.logo_url ? <img src={brandInfo.logo_url} alt="ISHTILE" className="max-h-12 max-w-[220px] object-contain object-left" /> : <Logo className="text-[clamp(2rem,3vw,2.9rem)]" />}
+            <div className="flex items-center gap-3">{brandInfo?.logo_url ? <img src={brandInfo.logo_url} alt="ISHTILE" className="max-h-12 max-w-[220px] object-contain object-left" /> : <Logo className="text-[clamp(2rem,3vw,2.9rem)]" />}{brandInfo?.symbol_url && <img src={brandInfo.symbol_url} alt="" className="h-8 w-8 object-contain" />}</div>
             <p className="mt-5 max-w-sm whitespace-pre-line text-[17px] leading-snug text-ink-foreground">{motto}</p>
             {brandInfo?.about_text && <p className="mt-3 max-w-sm text-sm leading-relaxed text-ink-muted">{brandInfo.about_text}</p>}
             <Socials className="mt-14" items={socialItems} />
@@ -187,7 +187,7 @@ export function Footer() {
 
         {/* mobile */}
         <div className="md:hidden">
-          {brandInfo?.logo_url ? <img src={brandInfo.logo_url} alt="ISHTILE" className="max-h-12 max-w-[220px] object-contain object-left" /> : <Logo className="text-[2.6rem]" />}
+          <div className="flex items-center gap-3">{brandInfo?.logo_url ? <img src={brandInfo.logo_url} alt="ISHTILE" className="max-h-12 max-w-[220px] object-contain object-left" /> : <Logo className="text-[2.6rem]" />}{brandInfo?.symbol_url && <img src={brandInfo.symbol_url} alt="" className="h-8 w-8 object-contain" />}</div>
           <p className="mt-5 whitespace-pre-line text-xl leading-snug">{motto}</p>
           {brandInfo?.about_text && <p className="mt-3 text-sm leading-relaxed text-ink-muted">{brandInfo.about_text}</p>}
           <svg viewBox="0 0 220 16" className="mt-1 h-4 w-56 text-lime" aria-hidden="true">
