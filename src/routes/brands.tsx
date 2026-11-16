@@ -2,7 +2,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { gsap } from "gsap";
 import { ArrowLeft, ArrowRight, ArrowUpRight, Pause, Play } from "lucide-react";
-import { Footer } from "@/components/home/Footer";
 import brandOnen from "@/assets/brand-onen.jpg";
 import brandFarak from "@/assets/brand-farak.jpg";
 import brandMocha from "@/assets/brand-mocha.jpg";
@@ -68,9 +67,9 @@ void main() {
   vec2 uv2 = coverUv(vUv, uToSize);
   vec2 pixel = vUv * uResolution;
   vec2 center = uResolution * 0.5;
+  float edge = 22.0 + 14.0 * sin(uTime * 1.2);
   float radius = uProgress * length(uResolution) * 0.82 - edge * 1.2;
   float distanceFromCenter = length(pixel - center);
-  float edge = 22.0 + 14.0 * sin(uTime * 1.2);
   float reveal = 1.0 - smoothstep(radius - edge, radius + edge, distanceFromCenter);
   vec2 direction = normalize(pixel - center + vec2(0.001));
   float ring = exp(-pow((distanceFromCenter - radius) / max(edge * 0.7, 1.0), 2.0));
@@ -202,8 +201,6 @@ function BrandsPage() {
           frame = requestAnimationFrame(draw);
         };
         frame = requestAnimationFrame(draw);
-        };
-        frame = requestAnimationFrame(draw);
         void loaded;
       }).catch((error) => { console.error(error); setWebglFailed(true); });
     } catch (error) {
@@ -295,15 +292,14 @@ function BrandsPage() {
   };
 
   return (
-    <div className="bg-[#171717] text-[#F0EAE0]">
-      <main data-header-theme="dark" className="relative isolate min-h-[calc(100svh-4rem)] overflow-hidden bg-[#171717] md:min-h-[calc(100svh-4.5rem)]">
-        <canvas ref={canvasRef} aria-hidden="true" className="absolute inset-0 h-full min-h-[calc(100svh-4rem)] w-full object-cover md:min-h-[calc(100svh-4.5rem)]" />
+      <main data-header-theme="dark" className="relative isolate h-svh min-h-svh w-full overflow-hidden bg-[#171717] text-[#F0EAE0]">
+        <canvas ref={canvasRef} aria-hidden="true" className="absolute inset-0 h-full w-full" />
         {(!webglReady || webglFailed) && (
           <img src={brand.image} alt="" className="absolute inset-0 h-full w-full object-cover opacity-80" />
         )}
         <div className="absolute inset-0 bg-gradient-to-r from-[#171717]/80 via-[#171717]/25 to-[#171717]/5" />
         <div className="absolute inset-0 bg-gradient-to-t from-[#171717]/70 via-transparent to-[#171717]/15" />
-        <div className="relative mx-auto flex min-h-[calc(100svh-4rem)] max-w-[1600px] flex-col px-5 pb-7 pt-8 md:min-h-[calc(100svh-4.5rem)] md:px-10 md:pb-9 md:pt-10">
+        <div className="relative mx-auto flex h-full w-full max-w-[1600px] flex-col px-5 pb-7 pt-8 md:px-10 md:pb-9 md:pt-10">
           <div className="flex items-center justify-between">
             <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-[#F0EAE0]/75 md:text-xs">ISHTILE+ / The brand universe</p>
             <span className="hidden text-[10px] uppercase tracking-[0.24em] text-[#F0EAE0]/65 md:block">Independent labels · One point of view</span>
@@ -347,8 +343,6 @@ function BrandsPage() {
         </div>
         {!webglReady && !webglFailed && <span className="sr-only" role="status">Loading brand visuals</span>}
       </main>
-      <Footer />
-    </div>
   );
 }
 
