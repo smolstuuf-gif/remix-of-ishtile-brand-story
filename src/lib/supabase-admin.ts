@@ -66,6 +66,35 @@ function config() {
   return { url: SUPABASE_URL.replace(/\/$/, ""), key: SUPABASE_KEY };
 }
 
+export async function createCustomerProfile(input: {
+  full_name: string;
+  mobile_number: string;
+  delivery_address: string;
+}): Promise<void> {
+  const { url, key } = config();
+  const response = await fetch(`${url}/rest/v1/customer_profiles`, {
+    method: "POST",
+    headers: {
+      apikey: key,
+      Authorization: `Bearer ${key}`,
+      "Content-Type": "application/json",
+      Prefer: "return=minimal",
+    },
+    body: JSON.stringify({
+      full_name: input.full_name.trim(),
+      mobile_number: input.mobile_number.trim(),
+      delivery_address: input.delivery_address.trim(),
+    }),
+  });
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    if (response.status === 409 || body.code === "23505") {
+      throw new Error("An account with this mobile number already exists.");
+    }
+    throw new Error(body.message || body.msg || "We couldn't save your details. Please try again.");
+  }
+}
+
 async function responseJson<T>(response: Response): Promise<T> {
   const body = await response.json().catch(() => ({}));
   if (!response.ok) {
