@@ -30,28 +30,28 @@ export function MenuDrawer() {
 
   return (
     <Sheet open={menuOpen} onOpenChange={(open) => (open ? undefined : closeMenu())}>
-      <SheetContent side="left" className="flex w-full flex-col gap-0 p-0 sm:max-w-sm">
+      <SheetContent side="left" className="flex w-full flex-col gap-0 border-white/15 bg-ink p-0 text-cream sm:max-w-sm">
         <SheetTitle className="sr-only">Menu</SheetTitle>
         <SheetDescription className="sr-only">Site navigation</SheetDescription>
 
-        <div className="border-b border-border px-6 pb-5 pt-6 pr-12">
+        <div className="border-b border-white/15 px-6 pb-5 pt-6 pr-12">
           <Logo className="text-[1.6rem]" />
         </div>
 
         <nav className="flex-1 overflow-y-auto px-6 py-4">
-          <ul className="divide-y divide-border">
+          <ul className="divide-y divide-white/15">
             {links.map((item) => (
               <li key={item.label}>
                 {"to" in item ? (
                   <Link
                     to={item.to}
                     onClick={closeMenu}
-                    className="block py-4 font-display text-2xl font-semibold tracking-[-0.02em]"
+                    className="block py-4 font-display text-2xl font-semibold tracking-[-0.02em] transition-colors hover:text-lime"
                   >
                     {item.label}
                   </Link>
                 ) : (
-                  <a href={item.href} onClick={closeMenu} className="block py-4 font-display text-2xl font-semibold tracking-[-0.02em]">
+                  <a href={item.href} onClick={closeMenu} className="block py-4 font-display text-2xl font-semibold tracking-[-0.02em] transition-colors hover:text-lime">
                     {item.label}
                   </a>
                 )}
@@ -60,7 +60,7 @@ export function MenuDrawer() {
           </ul>
         </nav>
 
-        <div className="border-t border-border px-6 py-5">
+        <div className="border-t border-white/15 px-6 py-5">
           <ul className="flex items-center gap-5">
             {socials.map(({ label, icon: Icon }) => (
               <li key={label}>
@@ -70,7 +70,7 @@ export function MenuDrawer() {
               </li>
             ))}
           </ul>
-          <p className="mt-4 inline-flex items-center gap-2 text-xs text-muted-foreground">
+          <p className="mt-4 inline-flex items-center gap-2 text-xs text-cream/65">
             <Sparkle className="h-3.5 w-3.5 text-lime" />
             Discover beyond labels.
           </p>
