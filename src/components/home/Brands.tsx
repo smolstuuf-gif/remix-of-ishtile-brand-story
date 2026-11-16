@@ -27,7 +27,7 @@ const tileBase =
 function BrandTile({ tile }: { tile: Tile }) {
   if (tile.kind === "photo") {
     return (
-      <a href="#brands" className={cn(tileBase, "group")}>
+      <a href="/brands" className={cn(tileBase, "group")}>
         <img
           src={tile.image}
           alt={tile.alt}
@@ -41,7 +41,7 @@ function BrandTile({ tile }: { tile: Tile }) {
   }
   if (tile.kind === "more") {
     return (
-      <a href="#brands" className={cn(tileBase, "group hidden bg-ink md:block")}>
+      <a href="/brands" className={cn(tileBase, "group hidden bg-ink md:block")}>
         <div className="absolute -bottom-6 -right-6 h-16 w-16 rotate-12 bg-[repeating-linear-gradient(135deg,var(--lime)_0_3px,transparent_3px_7px)] opacity-80" />
         <span className="absolute inset-0 flex flex-col items-start justify-center px-[22%] text-[clamp(0.85rem,1vw,1rem)] font-medium leading-tight text-ink-foreground">
           More
@@ -53,7 +53,7 @@ function BrandTile({ tile }: { tile: Tile }) {
     );
   }
   return (
-    <a href="#brands" className={cn(tileBase, "group bg-ink")}>
+    <a href="/brands" className={cn(tileBase, "group bg-ink")}>
       <span className="absolute inset-0 flex flex-col items-center justify-center text-ink-foreground">
         {tile.plus === "above" && <ThinPlus className="mb-1.5 h-3 w-3" />}
         <span className="inline-flex items-start text-[clamp(0.95rem,4.6vw,1.35rem)] font-medium tracking-[0.02em] md:text-[clamp(0.95rem,1.25vw,1.3rem)]">
@@ -84,7 +84,7 @@ export function Brands() {
         <p className="mt-3 text-[13px] leading-snug text-muted-foreground md:text-[clamp(0.8rem,1vw,0.95rem)]">
           Discover a universe of curated fashion labels.
         </p>
-        <a href="#brands" className="mt-4 inline-flex items-center gap-1.5 text-[13px] font-medium md:mt-6 md:text-[15px]">
+        <a href="/brands" className="mt-4 inline-flex items-center gap-1.5 text-[13px] font-medium md:mt-6 md:text-[15px]">
           <span className="underline underline-offset-4 md:no-underline">Explore All</span>
           <ArrowRight className="h-4 w-4" />
         </a>
@@ -107,7 +107,7 @@ export function Brands() {
         ))}
       </div>
 
-      <a href="#brands" aria-label="All brands" className="hidden shrink-0 md:block">
+      <a href="/brands" aria-label="All brands" className="hidden shrink-0 md:block">
         <ChevronRight className="h-6 w-6" strokeWidth={1.6} />
       </a>
     </section>
