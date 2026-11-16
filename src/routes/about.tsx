@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowUpRight, Plus, Sparkle } from "lucide-react";
 import { Footer } from "@/components/home/Footer";
+import { CountingNumber } from "@/components/ui/counting-number";
 
 export const Route = createFileRoute("/about")({
   head: () => ({
@@ -78,12 +79,15 @@ function AboutPage() {
 
           <div className="absolute bottom-0 left-0 z-20 grid w-full grid-cols-3 overflow-hidden rounded-xl bg-[#171717] text-[#f4eddf] shadow-[0_16px_38px_rgba(0,0,0,0.2)] md:w-[min(650px,58%)]">
             {[
-              { value: "5+", label: "Brands" },
-              { value: "50K+", label: "Customers" },
-              { value: "12+", label: "Stores" },
+              { target: 5, suffix: "+", label: "Brands" },
+              { target: 50, suffix: "K+", label: "Customers" },
+              { target: 12, suffix: "+", label: "Stores" },
             ].map((stat, index) => (
               <div key={stat.label} className={`flex min-h-[76px] flex-col justify-center px-3 py-3 text-center md:min-h-[104px] md:px-6 ${index ? "border-l border-white/15" : ""}`}>
-                <strong className="font-display text-[1.55rem] font-bold leading-none tracking-[-0.04em] md:text-3xl">{stat.value}</strong>
+                <strong className="font-display text-[1.55rem] font-bold leading-none tracking-[-0.04em] md:text-3xl">
+                  <CountingNumber target={stat.target} />
+                  {stat.suffix}
+                </strong>
                 <span className="mt-2 text-[9px] tracking-wide text-[#d4cbbb] md:text-xs">{stat.label}</span>
               </div>
             ))}
