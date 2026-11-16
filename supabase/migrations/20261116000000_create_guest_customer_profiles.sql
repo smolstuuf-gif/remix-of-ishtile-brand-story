@@ -20,5 +20,6 @@ create policy "Admins can view customer profiles"
   on public.customer_profiles for select to authenticated
   using ((select private.is_admin()));
 
-grant insert on public.customer_profiles to anon, authenticated;
-grant select on public.customer_profiles to authenticated;
+revoke all on table public.customer_profiles from public, anon, authenticated;
+grant insert on table public.customer_profiles to anon, authenticated;
+grant select on table public.customer_profiles to authenticated;
