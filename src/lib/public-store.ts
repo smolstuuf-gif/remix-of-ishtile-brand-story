@@ -1,6 +1,6 @@
 const url = (import.meta.env.VITE_SUPABASE_URL as string | undefined)?.replace(/\/$/, "");
 const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined;
-import type { Product } from "@/lib/catalog";
+import { productById, type Product } from "@/lib/catalog";
 
 async function publicRows<T>(path: string): Promise<T[]> {
   if (!url || !key) return [];
@@ -41,14 +41,29 @@ type DatabaseProduct = {
   description: string | null; created_at: string; brands?: { name: string } | null;
 };
 function toCatalogProduct(row: DatabaseProduct): Product {
+  const fallback = productById(row.slug);
   const allowed = ["Men", "Women", "Accessories", "Traditional"] as const;
   return {
-    id: row.slug, name: row.name, price: Number(row.price), image: row.image_url || row.image_urls?.[0] || "",
-    alt: row.name, category: allowed.includes(row.category as (typeof allowed)[number]) ? row.category as Product["category"] : "Men",
-    brand: (row.brands?.name || "ISHTILE") as Product["brand"],
-    sizes: row.sizes || [], colors: row.colors || [], rating: 0, reviews: 0,
-    blurb: row.description || "", details: row.description ? [row.description] : [], care: "",
-    added: row.created_at,
+    ...(fallback ?? {
+      id: row.slug, name: row.name, price: Number(row.price), image: "", alt: row.name,
+      category: "Men" as const, brand: "ISHTILE" as const, sizes: [], colors: [],
+      rating: 0, reviews: 0, blurb: "", details: [], care: "", added: row.created_at,
+    }),
+    id: row.slug,
+    name: row.name,
+    price: Number(row.price),
+    image: row.image_url || row.image_urls?.[0] || fallback?.image || "",
+    alt: row.name,
+    category: allowed.includes(row.category as (typeof allowed)[number]) ? row.category as Product["category"] : fallback?.category ?? "Men",
+    brand: (row.brands?.name || fallback?.brand || "ISHTILE") as Product["brand"],
+    sizes: row.sizes?.length ? row.sizes : fallback?.sizes ?? [],
+    colors: row.colors?.length ? row.colors : fallback?.colors ?? [],
+    rating: fallback?.rating ?? 0,
+    reviews: fallback?.reviews ?? 0,
+    blurb: row.description || fallback?.blurb || "",
+    details: fallback?.details ?? (row.description ? [row.description] : []),
+    care: fallback?.care ?? "",
+    added: row.created_at || fallback?.added || "",
   };
 }
 export async function fetchPublicProducts(): Promise<Product[] | null> {
