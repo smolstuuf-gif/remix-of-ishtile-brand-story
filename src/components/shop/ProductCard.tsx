@@ -1,8 +1,9 @@
 import { Link } from "@tanstack/react-router";
-import { Heart, Plus, Star } from "lucide-react";
+import { Plus, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatTaka, type Product } from "@/lib/catalog";
 import { useCart } from "@/lib/store";
+import { FavoriteButton } from "@/components/ui/favorite-button";
 
 /** Product tile used on the catalog, the bag page and the product page's related row. */
 export function ProductCard({ product, className }: { product: Product; className?: string }) {
@@ -41,20 +42,16 @@ export function ProductCard({ product, className }: { product: Product; classNam
           </span>
         )}
 
-        <button
-          type="button"
-          onClick={() => toggleWish(product.id)}
-          aria-label={wished ? `Remove ${product.name} from wishlist` : `Add ${product.name} to wishlist`}
-          aria-pressed={wished}
-          className="absolute right-2.5 top-2.5 grid h-8 w-8 place-items-center rounded-full text-foreground transition-colors hover:bg-background/60"
-        >
-          <Heart className={cn("h-[22px] w-[22px]", wished && "fill-foreground")} strokeWidth={1.6} />
-        </button>
+        <FavoriteButton
+          active={wished}
+          onToggle={() => toggleWish(product.id)}
+          label={wished ? `Remove ${product.name} from wishlist` : `Add ${product.name} to wishlist`}
+        />
 
         <button
           type="button"
           onClick={add}
-          className="absolute bottom-2.5 right-2.5 inline-flex items-center gap-1.5 rounded-full bg-ink px-3.5 py-2 text-[13px] font-medium text-ink-foreground opacity-0 transition-opacity duration-200 group-hover:opacity-100 focus-visible:opacity-100"
+          className="absolute bottom-2.5 right-2.5 inline-flex items-center gap-1.5 rounded-full bg-ink px-3.5 py-2 text-[13px] font-medium text-ink-foreground opacity-0 transition-[opacity,transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:shadow-lg active:translate-y-px active:scale-[0.97] group-hover:opacity-100 focus-visible:opacity-100"
         >
           <Plus className="h-3.5 w-3.5" strokeWidth={2.4} />
           Add to Bag
