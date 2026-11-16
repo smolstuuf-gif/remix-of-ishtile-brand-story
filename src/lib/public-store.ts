@@ -54,6 +54,7 @@ function toCatalogProduct(row: DatabaseProduct): Product {
     name: row.name,
     price: Number(row.price),
     image: row.image_url || row.image_urls?.[0] || fallback?.image || "",
+    galleryImages: row.image_urls && row.image_urls.length > 1 ? row.image_urls : fallback?.galleryImages,
     alt: row.name,
     category: allowed.includes(row.category as (typeof allowed)[number]) ? row.category as Product["category"] : fallback?.category ?? "Men",
     brand: (row.brands?.name || fallback?.brand || "ISHTILE") as Product["brand"],
