@@ -1,5 +1,6 @@
 const url = (import.meta.env.VITE_SUPABASE_URL as string | undefined)?.replace(/\/$/, "");
 const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined;
+import type { Product } from "@/lib/catalog";
 
 async function publicRows<T>(path: string): Promise<T[]> {
   if (!url || !key) return [];
@@ -32,4 +33,39 @@ export async function fetchHomepageCollections() {
 export type PublicBrand = { id: string; name: string; logo_url: string | null; image_url: string | null };
 export async function fetchPublicBrands() {
   return publicRows<PublicBrand[]>("brands?select=id,name,logo_url,image_url&is_active=eq.true&order=sort_order.asc");
+}
+
+type DatabaseProduct = {
+  slug: string; name: string; price: number | string; image_url: string | null; image_urls: string[] | null;
+  category: string; sizes: string[] | null; colors: { name: string; hex: string }[] | null;
+  description: string | null; created_at: string; brands?: { name: string } | null;
+};
+function toCatalogProduct(row: DatabaseProduct): Product {
+  const allowed = ["Men", "Women", "Accessories", "Traditional"] as const;
+  return {
+    id: row.slug, name: row.name, price: Number(row.price), image: row.image_url || row.image_urls?.[0] || "",
+    alt: row.name, category: allowed.includes(row.category as (typeof allowed)[number]) ? row.category as Product["category"] : "Men",
+    brand: (row.brands?.name || "ISHTILE") as Product["brand"],
+    sizes: row.sizes || [], colors: row.colors || [], rating: 0, reviews: 0,
+    blurb: row.description || "", details: row.description ? [row.description] : [], care: "",
+    added: row.created_at,
+  };
+}
+export async function fetchPublicProducts(): Promise<Product[] | null> {
+  if (!url || !key) return null;
+  const response = await fetch(`${url}/rest/v1/products?select=slug,name,price,image_url,image_urls,category,sizes,colors,description,created_at,brands(name)&is_active=eq.true&order=created_at.desc`, {
+    headers: { apikey: key, Authorization: `Bearer ${key}` },
+  });
+  if (!response.ok) return null;
+  const rows = await response.json() as DatabaseProduct[];
+  return rows.map(toCatalogProduct);
+}
+export async function fetchPublicProduct(slug: string): Promise<Product | null | undefined> {
+  if (!url || !key) return undefined;
+  const response = await fetch(`${url}/rest/v1/products?select=slug,name,price,image_url,image_urls,category,sizes,colors,description,created_at,brands(name)&slug=eq.${encodeURIComponent(slug)}&is_active=eq.true&limit=1`, {
+    headers: { apikey: key, Authorization: `Bearer ${key}` },
+  });
+  if (!response.ok) return undefined;
+  const rows = await response.json() as DatabaseProduct[];
+  return rows[0] ? toCatalogProduct(rows[0]) : null;
 }
