@@ -38,7 +38,9 @@ export function AccountAccess({ defaultMode = "customer" }: { defaultMode?: Acce
       return;
     }
     try {
-      await createCustomerProfile({ full_name: name, mobile_number: phone, delivery_address: address });
+      const digits = phone.replace(/\D/g, "");
+      const normalizedPhone = digits.startsWith("880") ? `+${digits}` : `+88${digits}`;
+      await createCustomerProfile({ full_name: name, mobile_number: normalizedPhone, delivery_address: address });
       setSuccess("Your details have been saved. You can use this mobile number when placing an order.");
       setName("");
       setPhone("");
