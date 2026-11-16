@@ -297,3 +297,6 @@ on public.brands to anon;
 revoke select on public.products from anon;
 grant select (id, slug, name, brand_id, category, price, image_url, image_urls, description, sizes, colors, is_active, created_at, updated_at)
 on public.products to anon;
+
+-- Speed up reverse lookups when products are removed or collection assignments are queried.
+create index if not exists collection_products_product_id_idx on public.collection_products(product_id);
