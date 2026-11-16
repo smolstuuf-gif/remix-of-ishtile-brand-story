@@ -7,6 +7,7 @@ import { useCart } from "@/lib/store";
 const links = [
   { label: "Home", href: "/" },
   { label: "Shop", to: "/shop" as const },
+  { label: "Collections", to: "/collections" as const },
   { label: "Cart", to: "/cart" as const },
   { label: "Checkout", to: "/checkout" as const },
   { label: "Brands", href: "/#brands" },
