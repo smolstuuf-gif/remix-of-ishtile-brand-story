@@ -68,7 +68,7 @@ void main() {
   vec2 uv2 = coverUv(vUv, uToSize);
   vec2 pixel = vUv * uResolution;
   vec2 center = uResolution * 0.5;
-  float radius = uProgress * length(uResolution) * 0.82;
+  float radius = uProgress * length(uResolution) * 0.82 - edge * 1.2;
   float distanceFromCenter = length(pixel - center);
   float edge = 22.0 + 14.0 * sin(uTime * 1.2);
   float reveal = 1.0 - smoothstep(radius - edge, radius + edge, distanceFromCenter);
@@ -181,6 +181,9 @@ function BrandsPage() {
         if (disposed) { textures.forEach((texture) => gl.deleteTexture(texture)); return; }
         texturesRef.current = textures;
         setWebglReady(true);
+        gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, textures[0]);
+        gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, textures[1]);
+        gl.uniform1f(uniformsRef.current.uProgress, 0);
         const draw = (now: number) => {
           if (disposed) return;
           const width = canvas.clientWidth;
@@ -193,17 +196,12 @@ function BrandsPage() {
             gl.viewport(0, 0, pixelWidth, pixelHeight);
           }
           gl.useProgram(program);
-          gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, textures[activeRef.current]);
-          gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, textures[(activeRef.current + 1) % textures.length]);
-          const from = slides[activeRef.current];
-          const to = slides[(activeRef.current + 1) % slides.length];
           gl.uniform2f(uniformsRef.current.uResolution, pixelWidth, pixelHeight);
-          gl.uniform2f(uniformsRef.current.uFromSize, 1600, 2000);
-          gl.uniform2f(uniformsRef.current.uToSize, 1600, 2000);
-          gl.uniform1f(uniformsRef.current.uProgress, 0);
           gl.uniform1f(uniformsRef.current.uTime, (now - started) / 1000);
           gl.drawArrays(gl.TRIANGLES, 0, 6);
           frame = requestAnimationFrame(draw);
+        };
+        frame = requestAnimationFrame(draw);
         };
         frame = requestAnimationFrame(draw);
         void loaded;
