@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
-  ArrowLeft, Check, ChevronRight, ImagePlus, LoaderCircle, LogOut, Plus, RefreshCw,
+  ArrowLeft, Check, ChevronRight, ImagePlus, LoaderCircle, LogOut, Menu, Package, PanelsTopLeft, RefreshCw,
   Save, Trash2, Upload, X,
 } from "lucide-react";
 import { AccountAccess } from "@/components/account/AccountAccess";
@@ -37,6 +37,7 @@ function ManagementPage() {
   const [session, setSession] = useState<AdminSession | null>(null);
   const [checking, setChecking] = useState(true);
   const [tab, setTab] = useState<Tab>("products");
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [brandFilterRequest, setBrandFilterRequest] = useState("all");
   const [workspace, setWorkspace] = useState<Awaited<ReturnType<typeof loadAdminWorkspace>> | null>(null);
   const [loading, setLoading] = useState(false);
@@ -80,22 +81,32 @@ function ManagementPage() {
 
   return (
     <main className="min-h-screen bg-[#F0EAE0] text-[#171717]">
-      <div className="flex min-h-screen">
-        <aside className="hidden w-[250px] shrink-0 flex-col bg-[#171717] px-5 py-7 text-[#F0EAE0] lg:flex">
-          <Link to="/admin" className="flex items-center gap-2 text-xs font-semibold text-white/55 hover:text-[#D5FE00]"><ArrowLeft className="h-4 w-4" /> Dashboard</Link>
-          <div className="mt-8 font-display text-2xl font-black tracking-[-0.07em]">ISHTILE<span className="text-[#D5FE00]">+</span></div>
-          <p className="mt-1 text-[9px] font-bold uppercase tracking-[0.24em] text-white/40">Store controls</p>
-          <nav className="mt-10 space-y-1">
-            {tabs.map((item) => <button key={item.id} onClick={() => setTab(item.id)} className={`flex w-full items-center justify-between px-3 py-3 text-left text-xs font-bold transition ${tab === item.id ? "bg-[#D5FE00] text-[#171717]" : "text-white/65 hover:bg-white/10 hover:text-white"}`}><span>{item.label}</span>{tab === item.id && <ChevronRight className="h-4 w-4" />}</button>)}
+      <div className="min-h-screen">
+        {drawerOpen && <button type="button" aria-label="Close navigation drawer" onClick={() => setDrawerOpen(false)} className="fixed inset-0 z-40 cursor-default bg-[#171717]/55 backdrop-blur-[2px]" />}
+        <aside className={`fixed inset-y-0 left-0 z-50 flex w-[min(86vw,320px)] flex-col bg-[#171717] px-5 py-6 text-[#F0EAE0] shadow-[24px_0_70px_rgba(0,0,0,.24)] transition-transform duration-300 ease-[cubic-bezier(.22,1,.36,1)] ${drawerOpen ? "translate-x-0" : "-translate-x-full"}`} aria-hidden={!drawerOpen}>
+          <div className="flex items-center justify-between">
+            <div><div className="font-display text-2xl font-black tracking-[-0.07em]">ISHTILE<span className="text-[#D5FE00]">+</span></div><p className="mt-1 text-[9px] font-bold uppercase tracking-[0.24em] text-white/40">Store controls</p></div>
+            <button type="button" onClick={() => setDrawerOpen(false)} className="grid h-9 w-9 place-items-center border border-white/15 text-white/70 transition hover:border-[#D5FE00] hover:text-[#D5FE00]" aria-label="Close menu"><X className="h-4 w-4" /></button>
+          </div>
+          <Link to="/admin" onClick={() => setDrawerOpen(false)} className="mt-8 flex items-center gap-2 border border-white/15 px-3 py-3 text-xs font-semibold text-white/65 transition hover:border-[#D5FE00] hover:text-[#D5FE00]"><ArrowLeft className="h-4 w-4" /> Back to dashboard</Link>
+          <p className="mb-3 mt-9 text-[9px] font-bold uppercase tracking-[0.2em] text-white/35">Management sections</p>
+          <nav className="space-y-1.5" aria-label="Store management sections">
+            {tabs.map((item, index) => <button key={item.id} type="button" onClick={() => { setTab(item.id); setDrawerOpen(false); }} aria-current={tab === item.id ? "page" : undefined} className={`group flex w-full items-center gap-3 px-3 py-3.5 text-left transition-all duration-200 ${tab === item.id ? "bg-[#D5FE00] text-[#171717] shadow-[4px_4px_0_rgba(213,254,0,.18)]" : "text-white/65 hover:translate-x-1 hover:bg-white/10 hover:text-white"}`}>
+              <span className={`grid h-8 w-8 shrink-0 place-items-center text-[10px] font-black ${tab === item.id ? "bg-[#171717] text-[#D5FE00]" : "bg-white/10 text-white/55"}`}>0{index + 1}</span>
+              <span className="min-w-0 flex-1"><span className="block text-xs font-black uppercase tracking-[0.07em]">{item.label}</span><span className={`mt-1 block text-[10px] ${tab === item.id ? "text-black/60" : "text-white/35"}`}>{item.hint}</span></span>
+              <ChevronRight className={`h-4 w-4 transition-transform ${tab === item.id ? "translate-x-0 text-[#171717]" : "-translate-x-1 opacity-0 group-hover:translate-x-0 group-hover:opacity-70"}`} />
+            </button>)}
           </nav>
-          <div className="mt-auto border-t border-white/10 pt-5"><p className="truncate text-xs font-semibold">{session.user.email}</p><button onClick={handleSignOut} className="mt-4 flex items-center gap-2 text-xs text-white/55 hover:text-[#D5FE00]"><LogOut className="h-4 w-4" /> Sign out</button></div>
+          <div className="mt-auto border-t border-white/10 pt-5"><p className="text-[9px] font-bold uppercase tracking-[0.16em] text-white/35">Signed in as</p><p className="mt-2 truncate text-xs font-semibold">{session.user.email}</p><button onClick={handleSignOut} className="mt-4 flex w-full items-center gap-2 border border-white/15 px-3 py-3 text-xs font-bold text-white/60 transition hover:border-[#D5FE00] hover:text-[#D5FE00]"><LogOut className="h-4 w-4" /> Sign out</button></div>
         </aside>
-        <section className="min-w-0 flex-1">
-          <header className="sticky top-0 z-20 flex items-center justify-between border-b border-black/10 bg-[#F0EAE0]/95 px-4 py-4 backdrop-blur md:px-8">
-            <div><p className="text-[9px] font-bold uppercase tracking-[0.2em] text-black/45">ISHTILE / Operations</p><h1 className="mt-1 font-display text-2xl font-black tracking-[-0.055em] md:text-3xl">{tabs.find((item) => item.id === tab)?.label}<span className="text-black/25">.</span></h1></div>
-            <div className="flex items-center gap-2"><Link to="/admin" className={secondaryClass}><ArrowLeft className="h-4 w-4" /> Dashboard</Link><button onClick={() => void refresh()} className={secondaryClass} aria-label="Refresh"><RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} /></button><button onClick={handleSignOut} className={`${secondaryClass} lg:hidden`} aria-label="Sign out"><LogOut className="h-4 w-4" /></button></div>
+        <section className="min-w-0">
+          <header className="sticky top-0 z-30 flex items-center justify-between border-b border-black/10 bg-[#F0EAE0]/95 px-4 py-4 backdrop-blur md:px-8">
+            <div className="flex min-w-0 items-center gap-3">
+              <button type="button" onClick={() => setDrawerOpen(true)} className="grid h-10 w-10 shrink-0 place-items-center bg-[#171717] text-[#D5FE00] transition hover:bg-black" aria-label="Open management menu" aria-expanded={drawerOpen}><Menu className="h-5 w-5" /></button>
+              <div className="min-w-0"><p className="text-[9px] font-bold uppercase tracking-[0.2em] text-black/45">ISHTILE / Operations</p><h1 className="mt-1 truncate font-display text-2xl font-black tracking-[-0.055em] md:text-3xl">{tabs.find((item) => item.id === tab)?.label}<span className="text-black/25">.</span></h1></div>
+            </div>
+            <div className="flex shrink-0 items-center gap-2"><Link to="/admin" className={secondaryClass}><ArrowLeft className="h-4 w-4" /><span className="hidden sm:inline">Dashboard</span></Link><button onClick={() => void refresh()} className={secondaryClass} aria-label="Refresh"><RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} /></button></div>
           </header>
-          <div className="border-b border-black/10 bg-[#E8E1D6] px-4 py-2 lg:hidden"><div className="flex gap-2 overflow-x-auto">{tabs.map((item) => <button key={item.id} onClick={() => setTab(item.id)} className={`shrink-0 px-3 py-2 text-[10px] font-bold uppercase tracking-wide ${tab === item.id ? "bg-[#171717] text-white" : "bg-white/60"}`}>{item.label}</button>)}</div></div>
           <div className="space-y-5 px-4 py-6 md:px-8 md:py-8">
             {error && <div role="alert" className="flex items-start justify-between gap-3 border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800"><span>{error}</span><button onClick={() => setError("")} aria-label="Dismiss"><X className="h-4 w-4" /></button></div>}
             {notice && <div className="flex items-center gap-2 border border-[#171717]/15 bg-[#D5FE00]/35 px-4 py-3 text-sm"><Check className="h-4 w-4" />{notice}</div>}
