@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { AccountAccess } from "@/components/account/AccountAccess";
 import { PageShell, pageHead } from "@/components/layout/PageShell";
 import { formatTaka } from "@/lib/catalog";
 import { useCart } from "@/lib/store";
@@ -11,6 +12,8 @@ export const Route = createFileRoute("/account")({
 function AccountPage() {
   const { orders, wishlist } = useCart();
   return (
+    <>
+    <AccountAccess />
     <PageShell eyebrow="Account" title="My Account" intro="Orders placed on this device are listed here.">
       <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
         <section className="rounded-2xl border border-border bg-card p-6">
@@ -38,5 +41,6 @@ function AccountPage() {
         </aside>
       </div>
     </PageShell>
+    </>
   );
 }
