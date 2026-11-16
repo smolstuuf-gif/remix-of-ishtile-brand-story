@@ -1,7 +1,7 @@
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useMemo, useRef } from "react";
+import { useRef } from "react";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -69,6 +69,7 @@ export function ScrollGallery({
   const sectionRef = useRef<HTMLElement>(null);
   const imageStackRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLParagraphElement>(null);
+  const firstImageRef = useRef<HTMLImageElement>(null);
   const linkRef = useRef<HTMLAnchorElement>(null);
   const firstSlide = slides[0];
 
@@ -113,7 +114,7 @@ export function ScrollGallery({
       scrub: 1,
       invalidateOnRefresh: true,
       onUpdate: (self) => {
-        const progress = self.progress * (safeSlides.length - 1);
+        const progress = self.progress * (safeSlides.length - 1);\n        const firstScale = 1.2 - Math.min(1, Math.max(0, progress / 2)) * 0.2;\n        firstImage.style.transform = `translate3d(0,0,0) scale(${firstScale})`;
         const current = Math.min(safeSlides.length - 2, Math.floor(progress));
         const within = progress >= safeSlides.length - 1 ? 1 : progress - current;
 
@@ -160,7 +161,7 @@ export function ScrollGallery({
   return (
     <section ref={sectionRef} className={`${STUDIO_CLASSES.root} ${className ?? ""}`} aria-label="Seasonal collections" data-header-theme="dark">
       <div ref={imageStackRef} className={STUDIO_CLASSES.images}>
-        <img src={firstSlide.image} alt={firstSlide.title} className={STUDIO_CLASSES.image} fetchPriority="high" />
+        <img ref={firstImageRef} src={firstSlide.image} alt={firstSlide.title} className={STUDIO_CLASSES.image} style={{ transform: "translate3d(0,0,0) scale(1.2)" }} fetchPriority="high" />
       </div>
       <div className={STUDIO_CLASSES.info}>
         <div className={STUDIO_CLASSES.infoInner}>
