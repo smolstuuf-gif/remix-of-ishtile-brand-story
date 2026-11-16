@@ -84,3 +84,17 @@ export async function fetchPublicProduct(slug: string): Promise<Product | null |
   const rows = await response.json() as DatabaseProduct[];
   return rows[0] ? toCatalogProduct(rows[0]) : null;
 }
+
+export type PublicBrandInfo = {
+  social_links: Record<string, string>;
+  contact_numbers: string[];
+  address: string | null;
+  motto: string | null;
+  about_text: string | null;
+  logo_url: string | null;
+  symbol_url: string | null;
+};
+export async function fetchPublicBrandInfo() {
+  const rows = await publicRows<PublicBrandInfo[]>("site_brand_info?select=social_links,contact_numbers,address,motto,about_text,logo_url,symbol_url&id=eq.1&limit=1");
+  return rows[0] ?? null;
+}
