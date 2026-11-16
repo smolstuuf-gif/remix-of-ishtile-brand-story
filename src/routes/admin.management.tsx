@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
-  ArrowLeft, Check, ChevronRight, ImagePlus, LoaderCircle, LogOut, Menu, Package, PanelsTopLeft, RefreshCw,
+  ArrowLeft, Check, ChevronRight, ImagePlus, LoaderCircle, LogOut, Menu, RefreshCw,
   Save, Trash2, Upload, X,
 } from "lucide-react";
 import { AccountAccess } from "@/components/account/AccountAccess";
