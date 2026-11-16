@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
-  ArrowLeft, Check, ChevronRight, ImagePlus, LoaderCircle, LogOut, Menu, RefreshCw,
+  ArrowLeft, Check, ChevronRight, ImagePlus, LoaderCircle, LogOut, RefreshCw,
   Save, Trash2, Upload, X,
 } from "lucide-react";
 import { MenuToggleIcon } from "@/components/ui/menu-toggle-icon";
@@ -87,7 +87,7 @@ function ManagementPage() {
         <aside className={`fixed inset-y-0 left-0 z-50 flex w-[min(86vw,320px)] flex-col bg-[#171717] px-5 py-6 text-[#F0EAE0] shadow-[24px_0_70px_rgba(0,0,0,.24)] transition-transform duration-300 ease-[cubic-bezier(.22,1,.36,1)] ${drawerOpen ? "translate-x-0" : "-translate-x-full"}`} aria-hidden={!drawerOpen}>
           <div className="flex items-center justify-between">
             <div><div className="font-display text-2xl font-black tracking-[-0.07em]">ISHTILE<span className="text-[#D5FE00]">+</span></div><p className="mt-1 text-[9px] font-bold uppercase tracking-[0.24em] text-white/40">Store controls</p></div>
-            <button type="button" onClick={() => setDrawerOpen(false)} className="grid h-9 w-9 place-items-center border border-white/15 text-white/70 transition hover:border-[#D5FE00] hover:text-[#D5FE00]" aria-label="Close menu"><X className="h-4 w-4" /></button>
+            <button type="button" onClick={() => setDrawerOpen(false)} className="grid h-9 w-9 place-items-center border border-white/15 text-white/70 transition hover:border-[#D5FE00] hover:text-[#D5FE00]" aria-label="Close menu"><MenuToggleIcon open className="h-5 w-5" strokeWidth={2.2} duration={500} /></button>
           </div>
           <Link to="/admin" onClick={() => setDrawerOpen(false)} className="mt-8 flex items-center gap-2 border border-white/15 px-3 py-3 text-xs font-semibold text-white/65 transition hover:border-[#D5FE00] hover:text-[#D5FE00]"><ArrowLeft className="h-4 w-4" /> Back to dashboard</Link>
           <p className="mb-3 mt-9 text-[9px] font-bold uppercase tracking-[0.2em] text-white/35">Management sections</p>
