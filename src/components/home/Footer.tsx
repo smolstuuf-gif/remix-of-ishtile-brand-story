@@ -154,13 +154,10 @@ export function Footer() {
         {/* desktop */}
         <div className="hidden md:grid md:grid-cols-[1.25fr_0.6fr_0.55fr_0.7fr_1.35fr] md:gap-6">
           <div>
-            <Logo className="text-[clamp(2rem,3vw,2.9rem)]" />
-            <p className="mt-5 text-[17px] leading-snug text-ink-foreground">
-              Fashion, culture and beyond.
-              <br />
-              Explore. Discover. Belong.
-            </p>
-            <Socials className="mt-14" />
+            {brandInfo?.logo_url ? <img src={brandInfo.logo_url} alt="ISHTILE" className="max-h-12 max-w-[220px] object-contain object-left" /> : <Logo className="text-[clamp(2rem,3vw,2.9rem)]" />}
+            <p className="mt-5 max-w-sm whitespace-pre-line text-[17px] leading-snug text-ink-foreground">{motto}</p>
+            {brandInfo?.about_text && <p className="mt-3 max-w-sm text-sm leading-relaxed text-ink-muted">{brandInfo.about_text}</p>}
+            <Socials className="mt-14" items={socialItems} />
           </div>
           {columns.map(([title, items]) => (
             <div key={title}>
@@ -190,14 +187,9 @@ export function Footer() {
 
         {/* mobile */}
         <div className="md:hidden">
-          <Logo className="text-[2.6rem]" />
-          <p className="mt-5 text-xl leading-snug">
-            Fashion, culture and
-            <br />
-            beyond.
-            <br />
-            Explore. Discover. Belong.
-          </p>
+          {brandInfo?.logo_url ? <img src={brandInfo.logo_url} alt="ISHTILE" className="max-h-12 max-w-[220px] object-contain object-left" /> : <Logo className="text-[2.6rem]" />}
+          <p className="mt-5 whitespace-pre-line text-xl leading-snug">{motto}</p>
+          {brandInfo?.about_text && <p className="mt-3 text-sm leading-relaxed text-ink-muted">{brandInfo.about_text}</p>}
           <svg viewBox="0 0 220 16" className="mt-1 h-4 w-56 text-lime" aria-hidden="true">
             <path d="M2 14C60 6 120 3 218 2" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
           </svg>
@@ -216,10 +208,11 @@ export function Footer() {
             </div>
           </div>
           <Newsletter />
-          <Socials className="mt-6" />
+          <Socials className="mt-6" items={socialItems} />
         </div>
 
         <div className="mt-10 border-t border-ink-foreground/40 md:mt-12" />
+        {(brandInfo?.contact_numbers?.length || brandInfo?.address) ? <p className="mt-4 text-xs text-ink-muted">{brandInfo.contact_numbers?.join(" · ")}{brandInfo.address ? " · " + brandInfo.address : ""}</p> : null}
         <div className="flex flex-wrap items-center justify-between gap-y-5 py-5 text-base md:text-[15px]">
           <p className="order-3 w-full md:order-1 md:w-auto">© 2025 ISHTILE+. All rights reserved.</p>
           <ul className="order-1 flex gap-7 md:order-2 md:gap-8">
