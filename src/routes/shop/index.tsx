@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { SlidersHorizontal } from "lucide-react";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
@@ -23,7 +23,9 @@ import {
   sortProducts,
   type Filters,
   type SortKey,
+  type Product,
 } from "@/lib/catalog";
+import { fetchPublicProducts } from "@/lib/public-store";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/shop/")({
@@ -48,6 +50,9 @@ export const Route = createFileRoute("/shop/")({
 });
 
 function ShopPage() {
+  const [liveProducts, setLiveProducts] = useState<Product[] | null>(null);
+  useEffect(() => { let live = true; fetchPublicProducts().then((items) => { if (live && items !== null) setLiveProducts(items); }).catch(() => undefined); return () => { live = false; }; }, []);
+  const catalogue = liveProducts ?? products;
   const [filters, setFilters] = useState<Filters>(defaultFilters);
   const [sort, setSort] = useState<SortKey>("newest");
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -55,7 +60,7 @@ function ShopPage() {
   const patch = (next: Partial<Filters>) => setFilters((f) => ({ ...f, ...next }));
   const clear = () => setFilters({ ...defaultFilters, maxPrice: priceCeiling });
 
-  const visible = useMemo(() => sortProducts(filterProducts(products, filters), sort), [filters, sort]);
+  const visible = useMemo(() => sortProducts(filterProducts(catalogue, filters), sort), [catalogue, filters, sort]);
 
   return (
     <div className="min-h-screen">
