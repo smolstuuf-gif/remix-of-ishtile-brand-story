@@ -4,6 +4,7 @@ import {
   ArrowLeft, Check, ChevronRight, ImagePlus, LoaderCircle, LogOut, Menu, RefreshCw,
   Save, Trash2, Upload, X,
 } from "lucide-react";
+import { MenuToggleIcon } from "@/components/ui/menu-toggle-icon";
 import { AccountAccess } from "@/components/account/AccountAccess";
 import { restoreAdminSession, signOutAdmin, type AdminSession } from "@/lib/supabase-admin";
 import {
@@ -102,7 +103,7 @@ function ManagementPage() {
         <section className="min-w-0">
           <header className="sticky top-0 z-30 flex items-center justify-between border-b border-black/10 bg-[#F0EAE0]/95 px-4 py-4 backdrop-blur md:px-8">
             <div className="flex min-w-0 items-center gap-3">
-              <button type="button" onClick={() => setDrawerOpen(true)} className="grid h-10 w-10 shrink-0 place-items-center bg-[#171717] text-[#D5FE00] transition hover:bg-black" aria-label="Open management menu" aria-expanded={drawerOpen}><Menu className="h-5 w-5" /></button>
+              <button type="button" onClick={() => setDrawerOpen(true)} className="grid h-10 w-10 shrink-0 place-items-center bg-[#171717] text-[#D5FE00] transition hover:bg-black" aria-label="Open management menu" aria-expanded={drawerOpen}><MenuToggleIcon open={drawerOpen} className="h-6 w-6" strokeWidth={2.2} duration={500} /></button>
               <div className="min-w-0"><p className="text-[9px] font-bold uppercase tracking-[0.2em] text-black/45">ISHTILE / Operations</p><h1 className="mt-1 truncate font-display text-2xl font-black tracking-[-0.055em] md:text-3xl">{tabs.find((item) => item.id === tab)?.label}<span className="text-black/25">.</span></h1></div>
             </div>
             <div className="flex shrink-0 items-center gap-2"><Link to="/admin" className={secondaryClass}><ArrowLeft className="h-4 w-4" /><span className="hidden sm:inline">Dashboard</span></Link><button onClick={() => void refresh()} className={secondaryClass} aria-label="Refresh"><RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} /></button></div>
