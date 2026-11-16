@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { createFileRoute, Link, notFound, useRouter, type ErrorComponentProps } from "@tanstack/react-router";
-import { Check, ChevronRight, Heart, Minus, Plus, RotateCcw, ShieldCheck, Star, Truck } from "lucide-react";
+import { Check, ChevronRight, Heart, RotateCcw, ShieldCheck, Star, Truck } from "lucide-react";
 import { toast } from "sonner";
 import {
   Accordion,
@@ -17,6 +17,7 @@ import { MAX_QTY } from "@/lib/commerce";
 import { useCart } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { fetchPublicProduct } from "@/lib/public-store";
+import { Stepper } from "@/components/ui/stepper";
 
 export const Route = createFileRoute("/shop/$productId")({
   loader: async ({ params }) => {
@@ -329,27 +330,13 @@ function ProductPage() {
 
             {/* qty + add */}
             <div className="mt-7 flex flex-wrap items-center gap-3">
-              <div className="inline-flex items-center rounded-full border border-border">
-                <button
-                  type="button"
-                  onClick={() => setQty((q) => Math.max(1, q - 1))}
-                  disabled={qty <= 1}
-                  aria-label="Decrease quantity"
-                  className="grid h-11 w-11 place-items-center rounded-l-full transition-colors hover:bg-accent disabled:opacity-40"
-                >
-                  <Minus className="h-4 w-4" strokeWidth={2} />
-                </button>
-                <span className="w-8 text-center tabular-nums">{qty}</span>
-                <button
-                  type="button"
-                  onClick={() => setQty((q) => Math.min(MAX_QTY, q + 1))}
-                  disabled={qty >= MAX_QTY}
-                  aria-label="Increase quantity"
-                  className="grid h-11 w-11 place-items-center rounded-r-full transition-colors hover:bg-accent disabled:opacity-40"
-                >
-                  <Plus className="h-4 w-4" strokeWidth={2} />
-                </button>
-              </div>
+              <Stepper
+                value={qty}
+                min={1}
+                max={MAX_QTY}
+                onChange={setQty}
+                label="quantity"
+              />
 
               <button
                 type="button"
