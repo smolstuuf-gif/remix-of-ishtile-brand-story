@@ -22,6 +22,7 @@ export type Product = {
   name: string;
   price: number;
   image: string;
+  galleryImages?: string[];
   alt: string;
   category: "Men" | "Women" | "Accessories" | "Traditional";
   brand: "ISHTILE" | "ONEN+" | "FARAK" | "MOCHA+" | "PILGRIM";
@@ -410,6 +411,13 @@ export function formatTaka(amount: number) {
  * three crops of it. Swap for real photography when the owner sends it.
  */
 export function galleryViews(p: Product) {
+  if (p.galleryImages && p.galleryImages.length > 1) {
+    return p.galleryImages.map((src, index) => ({
+      label: index === 0 ? "Full" : `View ${index + 1}`,
+      position: "50% 50%",
+      src,
+    }));
+  }
   return [
     { label: "Full", position: "50% 50%" },
     { label: "Top", position: "50% 12%" },
