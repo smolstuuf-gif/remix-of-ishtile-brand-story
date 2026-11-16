@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import {
   Activity,
-  ArrowDownRight,
   ArrowUpRight,
   Boxes,
   ChartNoAxesCombined,
@@ -15,7 +14,6 @@ import {
   ShieldCheck,
   ShoppingBag,
   TrendingUp,
-  Truck,
 } from "lucide-react";
 import {
   Area,
@@ -327,7 +325,7 @@ function Dashboard({
                             <defs><linearGradient id="salesFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#D5FE00" stopOpacity={0.65} /><stop offset="95%" stopColor="#D5FE00" stopOpacity={0.02} /></linearGradient></defs>
                             <CartesianGrid stroke="#171717" strokeOpacity={0.1} vertical={false} />
                             <XAxis dataKey="day" tick={{ fill: "#171717", fontSize: 10 }} axisLine={false} tickLine={false} minTickGap={22} />
-                            <YAxis tick={{ fill: "#171717", fontSize: 10 }} axisLine={false} tickLine={false} tickFormatter={(value: number) => value >= 1000 ? `${Math.round(value / 1000)}k` : String(value)} />
+                            <YAxis tick={{ fill: "#171717", fontSize: 10 }} axisLine={false} tickLine={false} tickFormatter={(value: number | string) => Number(value) >= 1000 ? `${Math.round(Number(value) / 1000)}k` : String(value)} />
                             <Tooltip formatter={(value) => [money(Number(value)), "Paid revenue"]} contentStyle={{ border: "1px solid #171717", borderRadius: 0, background: "#F0EAE0", fontSize: 12 }} />
                             <Area type="monotone" dataKey="revenue" stroke="#171717" strokeWidth={2} fill="url(#salesFill)" />
                           </AreaChart>
