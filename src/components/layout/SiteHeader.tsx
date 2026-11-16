@@ -22,7 +22,7 @@ function CountBadge({ n }: { n: number }) {
 export function SiteHeader() {
   const isHome = useRouterState({ select: (s) => s.location.pathname === "/" });
   const isBrands = useRouterState({ select: (s) => s.location.pathname === "/brands" });
-  const [theme, setTheme] = useState<"dark" | "light">(isHome ? "dark" : "light");
+  const [theme, setTheme] = useState<"dark" | "light">("dark");
   const { count, openCart, openSearch, openMenu } = useCart();
 
   useEffect(() => {
@@ -91,7 +91,7 @@ export function SiteHeader() {
           <Link to="/account" aria-label="Your account" title="Your account" className="hidden transition-colors hover:text-lime sm:block"><UserRound className="h-5 w-5" strokeWidth={1.7} /></Link>
           <button type="button" aria-label="Search" onClick={openSearch} className="transition-colors hover:text-lime"><Search className="h-6 w-6" strokeWidth={1.7} /></button>
           <button type="button" aria-label={`Bag, ${count} item${count === 1 ? "" : "s"}`} onClick={openCart} className="relative transition-colors hover:text-lime"><ShoppingBag className="h-6 w-6" strokeWidth={1.7} /><CountBadge n={count} /></button>
-          <button type="button" aria-label="Menu" onClick={openMenu} className="text-ink transition-colors hover:text-lime md:hidden"><Menu className="h-6 w-6" strokeWidth={1.7} /></button>
+          <button type="button" aria-label="Menu" onClick={openMenu} className="transition-colors hover:text-lime md:hidden"><Menu className="h-6 w-6" strokeWidth={1.7} /></button>
         </div>
       </div>
     </header>
