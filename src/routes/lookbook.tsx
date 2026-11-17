@@ -80,7 +80,7 @@ function LookbookPage() {
   const [season] = useState<Season | null>(() => {
     if (typeof window === "undefined") return null;
     const value = new URLSearchParams(window.location.search).get("season");
-    return value && value in seasonNames ? value as Season : null;
+    return value && Object.keys(seasonNames).includes(value) ? value as Season : null;
   });
   useEffect(() => {
     let live = true;
