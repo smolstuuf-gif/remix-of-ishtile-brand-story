@@ -256,17 +256,17 @@ function LookbookPanel({ looks, products, session, busy, perform }: {
   perform: (action: () => Promise<unknown>, message: string) => Promise<void>;
 }) {
   const [selected, setSelected] = useState<AdminLook | null>(null);
-  const [draft, setDraft] = useState({ title: "", slug: "", description: "", image_url: "", alt_text: "", sort_order: "0", is_active: true, starts_at: "", ends_at: "" });
+  const [draft, setDraft] = useState({ title: "", slug: "", description: "", image_url: "", alt_text: "", season: "", sort_order: "0", is_active: true, starts_at: "", ends_at: "" });
   const [linked, setLinked] = useState<{ product_id: string; default_size: string; default_color: string; default_quantity: string }[]>([]);
   const [query, setQuery] = useState("");
   useEffect(() => {
     if (!selected) return;
-    setDraft({ title: selected.title, slug: selected.slug, description: selected.description ?? "", image_url: selected.image_url, alt_text: selected.alt_text ?? "", sort_order: String(selected.sort_order), is_active: selected.is_active, starts_at: dateInputValue(selected.starts_at), ends_at: dateInputValue(selected.ends_at) });
+    setDraft({ title: selected.title, slug: selected.slug, description: selected.description ?? "", image_url: selected.image_url, alt_text: selected.alt_text ?? "", season: selected.season ?? "", sort_order: String(selected.sort_order), is_active: selected.is_active, starts_at: dateInputValue(selected.starts_at), ends_at: dateInputValue(selected.ends_at) });
     setLinked((selected.lookbook_look_products ?? []).sort((a,b) => a.sort_order-b.sort_order).map((item) => ({ product_id: item.product_id, default_size: item.default_size ?? "", default_color: item.default_color ?? "", default_quantity: String(item.default_quantity ?? 1) })));
   }, [selected]);
   function reset() {
     setSelected(null);
-    setDraft({ title: "", slug: "", description: "", image_url: "", alt_text: "", sort_order: String(looks.length), is_active: true, starts_at: "", ends_at: "" });
+    setDraft({ title: "", slug: "", description: "", image_url: "", alt_text: "", season: "", sort_order: String(looks.length), is_active: true, starts_at: "", ends_at: "" });
     setLinked([]);
   }
   function toggleProduct(product: AdminProduct) {
@@ -291,7 +291,7 @@ function LookbookPanel({ looks, products, session, busy, perform }: {
         <div className="max-h-[760px] divide-y divide-black/10 overflow-y-auto">
           {looks.map((look) => <button type="button" key={look.id} onClick={() => setSelected(look)} className={`flex w-full items-center gap-3 p-3 text-left transition hover:bg-black/[.035] ${selected?.id === look.id ? "bg-[#D5FE00]/20" : ""}`}>
             <img src={look.image_url} alt={look.alt_text || look.title} className="h-20 w-16 shrink-0 bg-[#E8E1D6] object-cover" />
-            <span className="min-w-0 flex-1"><span className="block truncate text-xs font-bold">{look.title}</span><span className="mt-1 block text-[10px] text-black/45">{look.lookbook_look_products?.length ?? 0} products · {look.is_active ? "Published" : "Hidden"}</span></span>
+            <span className="min-w-0 flex-1"><span className="block truncate text-xs font-bold">{look.title}</span><span className="mt-1 block text-[10px] text-black/45">{look.season ? look.season.charAt(0).toUpperCase() + look.season.slice(1) : "Unassigned"} · {look.lookbook_look_products?.length ?? 0} products · {look.is_active ? "Published" : "Hidden"}</span></span>
             <ChevronRight className="h-4 w-4 shrink-0" />
           </button>)}
           {!looks.length && <Empty title="No looks yet" detail="Create your first model-shoot look and connect products from the catalogue." />}
@@ -301,6 +301,7 @@ function LookbookPanel({ looks, products, session, busy, perform }: {
         <div className="flex items-center justify-between"><div><p className="text-[9px] font-bold uppercase tracking-[.18em] text-black/45">Look editor</p><h3 className="mt-1 text-sm font-black">{selected ? "Edit selected look" : "Create a look"}</h3></div>{selected && <button type="button" className={secondaryClass} onClick={reset}>New look</button>}</div>
         <Field label="Look title" name="title" value={draft.title} required onChange={(value) => setDraft((d) => ({ ...d, title: value, slug: selected ? d.slug : slugify(value) }))} />
         <Field label="URL slug" name="slug" value={draft.slug} onChange={(value) => setDraft((d) => ({ ...d, slug: value }))} />
+        <label className={labelClass}>Season<select className={inputClass} value={draft.season} onChange={(event) => setDraft((d) => ({ ...d, season: event.target.value }))}><option value="">Unassigned — hidden from seasonal pages</option><option value="spring">Spring</option><option value="summer">Summer</option><option value="festive">Festive</option><option value="monsoon">Monsoon</option><option value="winter">Winter</option></select></label>
         <TextField label="Description" name="description" value={draft.description} onChange={(value) => setDraft((d) => ({ ...d, description: value }))} />
         <div className="space-y-2"><Field label="Model-shoot image URL" name="image_url" value={draft.image_url} onChange={(value) => setDraft((d) => ({ ...d, image_url: value }))} /><UploadField label="Upload model-shoot image" session={session} folder="lookbook" busy={busy} onUploaded={(url) => setDraft((d) => ({ ...d, image_url: url }))} /></div>
         {draft.image_url && <img src={draft.image_url} alt={draft.alt_text || draft.title} className="h-52 w-full bg-[#E8E1D6] object-cover" />}
