@@ -168,6 +168,7 @@ export interface FileRouteTypes {
     | '/editorial'
     | '/stores'
     | '/wishlist'
+    | '/lookbook'
     | '/admin/management'
     | '/shop/$productId'
     | '/shop/'
