@@ -343,7 +343,7 @@ function ProductPage() {
               <button
                 type="button"
                 onClick={addToBag}
-                className="min-w-[200px] flex-1 rounded-full bg-lime px-6 py-3.5 text-sm font-semibold text-primary-foreground transition-transform hover:scale-[1.01] active:scale-[0.99]"
+                className="min-w-[200px] flex-1 rounded-full bg-lime px-6 py-3.5 text-sm font-semibold text-primary-foreground transition-transform hover:scale-[1.01] active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-foreground"
               >
                 {product.isOutOfStock ? "Currently Out of Stock" : `Add to Bag · ${formatTaka(product.price * qty)}`}
               </button>
