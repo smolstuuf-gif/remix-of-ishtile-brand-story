@@ -67,6 +67,7 @@ export const SCROLL_GALLERY_STUDIO_CLASSES = {
 
 export interface ScrollGallerySlide {
   image: string;
+  video?: string;
   /** Per-slide CTA label. Falls back to `linkLabel`. */
   linkLabel?: string;
   title: string;
@@ -463,7 +464,7 @@ export function ScrollGallery({
 
   const trackRef = useRef<HTMLDivElement>(null);
   const sectionRef = useRef<HTMLElement>(null);
-  const firstImgRef = useRef<HTMLImageElement>(null);
+  const firstImgRef = useRef<HTMLImageElement | HTMLVideoElement>(null);
   const titleRef = useRef<HTMLParagraphElement>(null);
   const exploreLinkRef = useRef<HTMLAnchorElement>(null);
   const slideImagesRef = useRef<HTMLDivElement>(null);
@@ -548,11 +549,13 @@ export function ScrollGallery({
         const totalSlides = slides.length;
         const setFirstImgScale = createScaleSetter(firstSlideImg, scaleFrom);
         const updateContrast = (image: HTMLImageElement) => applyBrandTextContrast(image, section);
-        if (firstSlideImg.complete) updateContrast(firstSlideImg);
-        else firstSlideImg.addEventListener("load", () => updateContrast(firstSlideImg), { once: true });
+        if (firstSlideImg instanceof HTMLImageElement) {
+          if (firstSlideImg.complete) updateContrast(firstSlideImg);
+          else firstSlideImg.addEventListener("load", () => updateContrast(firstSlideImg), { once: true });
+        }
 
         interface SlideLayer {
-          img: HTMLImageElement;
+          img: HTMLElement;
           revealState: "hidden" | "animating" | "revealed";
           setScale: (v: number) => void;
           transitionIndex: number;
@@ -564,21 +567,32 @@ export function ScrollGallery({
           const imgContainer = document.createElement("div");
           imgContainer.style.cssText = IMAGE_CONTAINER_STYLE;
 
-          const img = document.createElement("img");
-          img.style.cssText = MASKED_IMAGE_STYLE;
-          img.src = slides[i].image;
-          img.alt = slides[i].title;
-          img.decoding = "async";
-          setMaskImage(img, MASK_HIDDEN);
+          const media: HTMLImageElement | HTMLVideoElement = slides[i].video
+            ? document.createElement("video")
+            : document.createElement("img");
+          media.style.cssText = MASKED_IMAGE_STYLE;
+          if (media instanceof HTMLVideoElement) {
+            media.src = slides[i].video!;
+            media.muted = true;
+            media.loop = true;
+            media.autoplay = true;
+            media.playsInline = true;
+            media.preload = "metadata";
+          } else {
+            media.src = slides[i].image;
+            media.alt = slides[i].title;
+            media.decoding = "async";
+          }
+          setMaskImage(media, MASK_HIDDEN);
 
-          imgContainer.appendChild(img);
+          imgContainer.appendChild(media);
           slideImages.appendChild(imgContainer);
           createdContainers.push(imgContainer);
 
           slideLayers.push({
             transitionIndex: i - 1,
-            img,
-            setScale: createScaleSetter(img, scaleFrom),
+            img: media,
+            setScale: createScaleSetter(media, scaleFrom),
             revealState: "hidden",
           });
         }
@@ -896,13 +910,7 @@ export function ScrollGallery({
       <div className={classes.images} ref={slideImagesRef}>
         <div className={classes.imageFrame}>
           {firstSlide ? (
-            <img
-              alt={firstSlide.title}
-              className={classes.image}
-              ref={firstImgRef}
-              src={firstSlide.image}
-              style={imageScaleStyle(initialImageScale)}
-            />
+            {firstSlide.video ? <video src={firstSlide.video} poster={firstSlide.image} autoPlay muted loop playsInline preload="auto" className={classes.image} ref={firstImgRef} style={imageScaleStyle(initialImageScale)} /> : <img alt={firstSlide.title} className={classes.image} ref={firstImgRef} src={firstSlide.image} style={imageScaleStyle(initialImageScale)} />}
           ) : null}
         </div>
       </div>
