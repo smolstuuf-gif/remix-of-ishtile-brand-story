@@ -126,6 +126,7 @@ function ProductPage() {
     .slice(0, 4);
 
   const addToBag = () => {
+    if (product.isOutOfStock) return;
     if (!size) {
       setSizeError(true);
       toast.error("Choose a size first");
