@@ -130,13 +130,14 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const isAdminRoute = useRouterState({ select: (state) => state.location.pathname.startsWith("/admin") });
+  const isLookbookRoute = useRouterState({ select: (state) => state.location.pathname === "/lookbook" });
   const pathname = useRouterState({ select: (state) => state.location.pathname });
 
   return (
     <QueryClientProvider client={queryClient}>
       <CartProvider>
         {/* Site-wide bar + bag / search / menu overlays. */}
-        {!isAdminRoute && <SiteChrome />}
+        {!isAdminRoute && !isLookbookRoute && <SiteChrome />}
         {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
         <div key={pathname} className="route-transition" data-route={pathname}>
           <Outlet />
