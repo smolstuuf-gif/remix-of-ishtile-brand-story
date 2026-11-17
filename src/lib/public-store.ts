@@ -114,12 +114,12 @@ export async function fetchPublicBrandInfo() {
 
 export type PublicLook = {
   id: string; slug: string; title: string; description: string | null; image_url: string;
-  alt_text: string | null; sort_order: number;
+  alt_text: string | null; season: "spring" | "summer" | "festive" | "monsoon" | "winter" | null; sort_order: number;
   products: { product: Product; defaultSize: string | null; defaultColor: string | null; defaultQuantity: number; sortOrder: number }[];
 };
 type PublicLookRow = {
   id: string; slug: string; title: string; description: string | null; image_url: string;
-  alt_text: string | null; sort_order: number;
+  alt_text: string | null; season: "spring" | "summer" | "festive" | "monsoon" | "winter" | null; sort_order: number;
   lookbook_look_products?: {
     sort_order: number; default_size: string | null; default_color: string | null; default_quantity: number;
     products: DatabaseProduct | null;
@@ -128,11 +128,11 @@ type PublicLookRow = {
 export async function fetchPublicLooks(): Promise<PublicLook[] | null> {
   if (!url || !key) return null;
   const rows = await publicRows<PublicLookRow>(
-    "lookbook_looks?select=id,slug,title,description,image_url,alt_text,sort_order,lookbook_look_products(sort_order,default_size,default_color,default_quantity,products(slug,name,price,image_url,image_urls,category,sizes,colors,description,created_at,is_featured,is_out_of_stock,stock_quantity,tags,brands(name)))&is_active=eq.true&order=sort_order.asc"
+    "lookbook_looks?select=id,slug,title,description,image_url,alt_text,season,sort_order,lookbook_look_products(sort_order,default_size,default_color,default_quantity,products(slug,name,price,image_url,image_urls,category,sizes,colors,description,created_at,is_featured,is_out_of_stock,stock_quantity,tags,brands(name)))&is_active=eq.true&order=sort_order.asc"
   );
   return rows.map((look) => ({
     id: look.id, slug: look.slug, title: look.title, description: look.description,
-    image_url: look.image_url, alt_text: look.alt_text, sort_order: look.sort_order,
+    image_url: look.image_url, alt_text: look.alt_text, season: look.season, sort_order: look.sort_order,
     products: (look.lookbook_look_products ?? [])
       .filter((item) => item.products)
       .sort((a, b) => a.sort_order - b.sort_order)
