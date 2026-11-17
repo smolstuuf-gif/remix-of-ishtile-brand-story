@@ -66,7 +66,7 @@ export function DesktopHero() {
       if (!live) return;
       setIntervalMs(interval);
       if (remote.length) setSlides(remote.map((item) => ({
-        image: item.image_url, alt: item.title || "ISHTILE featured story",
+        image: item.image_url, video: item.video_url || undefined, alt: item.title || "ISHTILE featured story",
         lines: [item.title || "Discover Beyond Labels"], accent: item.subtitle || "",
         tagline: "", link: "Explore",
         href: item.link_url || "#shop",
@@ -99,12 +99,7 @@ export function DesktopHero() {
           )}
           aria-hidden={i !== index}
         >
-          <img
-            src={item.image}
-            alt={item.alt}
-            className="h-full w-full object-cover object-center"
-            loading={i === 0 ? "eager" : "lazy"}
-          />
+          {item.video ? <video src={item.video} autoPlay muted loop playsInline preload={i === 0 ? "auto" : "metadata"} poster={item.image} className="h-full w-full object-cover object-center" /> : <img src={item.image} alt={item.alt} className="h-full w-full object-cover object-center" loading={i === 0 ? "eager" : "lazy"} />}
           <div className="absolute inset-0 bg-gradient-to-r from-black/65 via-black/15 to-transparent" />
         </div>
       ))}
@@ -175,7 +170,7 @@ export function MobileHero() {
       if (!live) return;
       setIntervalMs(interval);
       if (remote.length) setActiveSlides(remote.map((item) => ({
-        image: item.mobile_image_url || item.image_url,
+        image: item.mobile_image_url || item.image_url, video: item.mobile_video_url || item.video_url || undefined,
         alt: item.title || "ISHTILE featured story",
         lines: [item.title || "Discover"], accent: item.subtitle || "",
         href: item.link_url || "#shop",
@@ -202,12 +197,7 @@ export function MobileHero() {
             )}
             aria-hidden={i !== index}
           >
-            <img
-              src={s.image}
-              alt={s.alt}
-              className="h-full w-full object-cover grayscale"
-              loading={i === 0 ? "eager" : "lazy"}
-            />
+            {s.video ? <video src={s.video} autoPlay muted loop playsInline preload={i === 0 ? "auto" : "metadata"} poster={s.image} className="h-full w-full object-cover grayscale" /> : <img src={s.image} alt={s.alt} className="h-full w-full object-cover grayscale" loading={i === 0 ? "eager" : "lazy"} />}
             <div className="absolute inset-0 bg-gradient-to-b from-ink/30 via-transparent to-ink/80" />
             <div className="absolute bottom-[12%] left-[7%] right-[6%] origin-bottom-left -rotate-[7deg]">
               <h2 className="font-headline text-[12.6vw] font-extrabold italic uppercase tracking-[-0.035em] [&>span]:leading-[0.88]">
