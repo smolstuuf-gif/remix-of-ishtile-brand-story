@@ -276,6 +276,7 @@ function LookbookPanel({ looks, products, session, busy, perform }: {
   }
   async function save(event: FormEvent) {
     event.preventDefault();
+    if (!draft.season) throw new Error("Choose a season before saving this look.");
     if (!draft.image_url.trim()) throw new Error("Upload a model-shoot image before saving this look.");
     if (!linked.length) throw new Error("Add at least one product to this look.");
     const look = { ...(selected ? { id: selected.id } : {}), ...draft, slug: slugify(draft.slug || draft.title), sort_order: Number(draft.sort_order), starts_at: draft.starts_at ? new Date(draft.starts_at).toISOString() : null, ends_at: draft.ends_at ? new Date(draft.ends_at).toISOString() : null };
@@ -284,7 +285,7 @@ function LookbookPanel({ looks, products, session, busy, perform }: {
   }
   const visibleProducts = products.filter((product) => product.is_active && `${product.name} ${product.slug} ${product.sku ?? ""}`.toLowerCase().includes(query.toLowerCase()));
   return <>
-    <PanelHeading eyebrow="Editorial commerce" title="Buy the Look" detail="Build model-shoot looks from existing catalogue products. Product prices, sizes and availability always come from the live product records." action={<button type="button" className={buttonClass} onClick={reset}><Plus className="h-4 w-4" /> New look</button>} />
+    <PanelHeading eyebrow="Editorial commerce" title="Buy the Look" detail="Build seasonal model-shoot looks from catalogue products. Every look belongs to one season; product prices, sizes and availability always come from live product records." action={<button type="button" className={buttonClass} onClick={reset}><Plus className="h-4 w-4" /> New look</button>} />
     <div className="grid gap-5 xl:grid-cols-[minmax(260px,.8fr)_minmax(0,1.2fr)]">
       <section className="border border-black/10 bg-[#F7F3EC]">
         <div className="flex items-center justify-between border-b border-black/10 px-4 py-3"><p className="text-xs font-black uppercase tracking-wider">Lookbook gallery</p><span className="text-[10px] text-black/45">{looks.length} looks</span></div>
@@ -301,7 +302,7 @@ function LookbookPanel({ looks, products, session, busy, perform }: {
         <div className="flex items-center justify-between"><div><p className="text-[9px] font-bold uppercase tracking-[.18em] text-black/45">Look editor</p><h3 className="mt-1 text-sm font-black">{selected ? "Edit selected look" : "Create a look"}</h3></div>{selected && <button type="button" className={secondaryClass} onClick={reset}>New look</button>}</div>
         <Field label="Look title" name="title" value={draft.title} required onChange={(value) => setDraft((d) => ({ ...d, title: value, slug: selected ? d.slug : slugify(value) }))} />
         <Field label="URL slug" name="slug" value={draft.slug} onChange={(value) => setDraft((d) => ({ ...d, slug: value }))} />
-        <label className={labelClass}>Season<select className={inputClass} value={draft.season} onChange={(event) => setDraft((d) => ({ ...d, season: event.target.value }))}><option value="">Unassigned — hidden from seasonal pages</option><option value="spring">Spring</option><option value="summer">Summer</option><option value="festive">Festive</option><option value="monsoon">Monsoon</option><option value="winter">Winter</option></select></label>
+        <label className={labelClass}>Season<select required className={inputClass} value={draft.season} onChange={(event) => setDraft((d) => ({ ...d, season: event.target.value }))}><option value="">Unassigned — hidden from seasonal pages</option><option value="spring">Spring</option><option value="summer">Summer</option><option value="festive">Festive</option><option value="monsoon">Monsoon</option><option value="winter">Winter</option></select></label>
         <TextField label="Description" name="description" value={draft.description} onChange={(value) => setDraft((d) => ({ ...d, description: value }))} />
         <div className="space-y-2"><Field label="Model-shoot image URL" name="image_url" value={draft.image_url} onChange={(value) => setDraft((d) => ({ ...d, image_url: value }))} /><UploadField label="Upload model-shoot image" session={session} folder="lookbook" busy={busy} onUploaded={(url) => setDraft((d) => ({ ...d, image_url: url }))} /></div>
         {draft.image_url && <img src={draft.image_url} alt={draft.alt_text || draft.title} className="h-52 w-full bg-[#E8E1D6] object-cover" />}
@@ -326,7 +327,7 @@ function LookbookPanel({ looks, products, session, busy, perform }: {
             })}
           </div>
         </div>
-        <div className="flex flex-wrap gap-2 border-t border-black/10 pt-4"><button className={buttonClass} disabled={busy || !draft.title.trim() || !linked.length}><Save className="h-4 w-4" /> Save look</button>{selected && <button type="button" className={secondaryClass} disabled={busy} onClick={() => { setDraft((d) => ({ ...d, title: `${d.title} Copy`, slug: slugify(`${d.title} Copy`), sort_order: String(looks.length) })); setSelected(null); }}><Plus className="h-4 w-4" /> Duplicate</button>}{selected && <button type="button" className={secondaryClass} disabled={busy} onClick={() => { if (confirm(`Delete “${selected.title}” and its product links?`)) void perform(() => adminWrite(`lookbook_looks?id=eq.${selected.id}`, session, "DELETE"), "Look deleted."); }}><Trash2 className="h-4 w-4" /> Delete look</button>}</div>
+        <div className="flex flex-wrap gap-2 border-t border-black/10 pt-4"><button className={buttonClass} disabled={busy || !draft.title.trim() || !draft.season || !linked.length}><Save className="h-4 w-4" /> Save look</button>{selected && <button type="button" className={secondaryClass} disabled={busy} onClick={() => { setDraft((d) => ({ ...d, title: `${d.title} Copy`, slug: slugify(`${d.title} Copy`), sort_order: String(looks.length) })); setSelected(null); }}><Plus className="h-4 w-4" /> Duplicate</button>}{selected && <button type="button" className={secondaryClass} disabled={busy} onClick={() => { if (confirm(`Delete “${selected.title}” and its product links?`)) void perform(() => adminWrite(`lookbook_looks?id=eq.${selected.id}`, session, "DELETE"), "Look deleted."); }}><Trash2 className="h-4 w-4" /> Delete look</button>}</div>
       </form>
     </div>
   </>;
