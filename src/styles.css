@@ -158,17 +158,21 @@
 }
 
 
-/* Transparent global navigation. Difference blending inverts the live pixels
-   beneath the header, keeping the logo, links and controls legible over any surface. */
+/* Global navigation switches between ink on light surfaces and warm cream on dark ones. */
 .site-header {
-  color: white;
+  --header-foreground: #F0EAE0;
+  color: var(--header-foreground);
   background: transparent;
   border-color: transparent;
+  transition: color 180ms ease;
+}
+
+.site-header[data-theme="light"] {
+  --header-foreground: #171717;
 }
 
 .site-header__content {
-  color: white;
-  mix-blend-mode: difference;
+  color: var(--header-foreground);
 }
 
 .site-header a,
