@@ -26,11 +26,11 @@ export const Route = createFileRoute("/collections")({
 });
 
 const slides = [
-  { title: "Spring '25", image: colSpring, url: "/lookbook", linkLabel: "Explore Spring" },
-  { title: "Summer Essentials '25", image: colSummer, url: "/lookbook", linkLabel: "Explore Summer" },
-  { title: "Festive Collection '25", image: colFestive, url: "/lookbook", linkLabel: "Explore Festive" },
-  { title: "Monsoon '25", image: colMonsoon, url: "/lookbook", linkLabel: "Explore Monsoon" },
-  { title: "Winter Collection", image: cardWinter, url: "/lookbook", linkLabel: "Explore Winter" },
+  { title: "Spring '25", image: colSpring, url: "#collection-products", linkLabel: "Explore Spring" },
+  { title: "Summer Essentials '25", image: colSummer, url: "#collection-products", linkLabel: "Explore Summer" },
+  { title: "Festive Collection '25", image: colFestive, url: "#collection-products", linkLabel: "Explore Festive" },
+  { title: "Monsoon '25", image: colMonsoon, url: "#collection-products", linkLabel: "Explore Monsoon" },
+  { title: "Winter Collection", image: cardWinter, url: "#collection-products", linkLabel: "Explore Winter" },
 ];
 
 function CollectionsPage() {
@@ -59,7 +59,7 @@ function CollectionsPage() {
       <main>
         <ScrollGallery slides={slides} variant="studio" prefixLabel="ISHTILE+ / COLLECTIONS" linkLabel="Explore" />
 
-        <section className="px-5 pb-20 pt-16 md:px-10 md:pb-28 md:pt-24">
+        <section id="collection-products" className="scroll-mt-20 px-5 pb-20 pt-16 md:px-10 md:pb-28 md:pt-24">
           <div className="mx-auto max-w-[1600px]">
             <div className="mb-8 flex items-end justify-between gap-5 border-b border-[#171717]/20 pb-5 md:mb-12 md:pb-7">
               <div>
@@ -82,7 +82,7 @@ function CollectionsPage() {
                   <span>Current selection</span>
                   <span>{String(currentProducts.length).padStart(2, "0")} pieces</span>
                 </div>
-                <div id="collection-products" className="grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-2 sm:gap-x-5 md:grid-cols-3 md:gap-y-9 lg:grid-cols-4">
+                <div className="grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-2 sm:gap-x-5 md:grid-cols-3 md:gap-y-9 lg:grid-cols-4">
                   {currentProducts.map((product) => (
                     <ProductCard key={product.id} product={product} className="rounded-none shadow-none" />
                   ))}
