@@ -39,7 +39,7 @@ export async function fetchPublicBrands() {
 type DatabaseProduct = {
   slug: string; name: string; price: number | string; image_url: string | null; image_urls: string[] | null;
   category: string; sizes: string[] | null; colors: { name: string; hex: string }[] | null;
-  description: string | null; created_at: string; is_featured: boolean; is_out_of_stock: boolean; tags: string[]; brands?: { name: string } | null;
+  description: string | null; created_at: string; is_featured: boolean; is_out_of_stock: boolean; stock_quantity?: number | null; tags: string[]; brands?: { name: string } | null;
 };
 function toCatalogProduct(row: DatabaseProduct): Product {
   const fallback = productById(row.slug);
@@ -49,7 +49,7 @@ function toCatalogProduct(row: DatabaseProduct): Product {
       id: row.slug, name: row.name, price: Number(row.price), image: "", alt: row.name,
       category: "Men" as const, brand: "ISHTILE" as const, sizes: [], colors: [],
       rating: 0, reviews: 0, blurb: "", details: [], care: "", added: row.created_at,
-      isFeatured: row.is_featured, isOutOfStock: row.is_out_of_stock, tags: row.tags ?? [],
+      isFeatured: row.is_featured, isOutOfStock: row.is_out_of_stock, stockQuantity: row.stock_quantity ?? null, tags: row.tags ?? [],
     }),
     id: row.slug,
     name: row.name,
@@ -67,7 +67,7 @@ function toCatalogProduct(row: DatabaseProduct): Product {
     details: fallback?.details ?? (row.description ? [row.description] : []),
     care: fallback?.care ?? "",
     added: row.created_at || fallback?.added || "",
-    isFeatured: row.is_featured, isOutOfStock: row.is_out_of_stock, tags: row.tags ?? [],
+    isFeatured: row.is_featured, isOutOfStock: row.is_out_of_stock, stockQuantity: row.stock_quantity ?? null, tags: row.tags ?? [],
     badge: (row.tags ?? []).find((tag) => ["Best Seller", "Customer Favorite", "New Arrival", "Limited Edition", "Trending", "Staff Pick", "Exclusive"].includes(tag)) || undefined,
   };
 }
@@ -120,7 +120,7 @@ type PublicLookRow = {
 export async function fetchPublicLooks(): Promise<PublicLook[] | null> {
   if (!url || !key) return null;
   const rows = await publicRows<PublicLookRow>(
-    "lookbook_looks?select=id,slug,title,description,image_url,alt_text,sort_order,lookbook_look_products(sort_order,default_size,default_color,default_quantity,products(slug,name,price,image_url,image_urls,category,sizes,colors,description,created_at,is_featured,is_out_of_stock,tags,brands(name)))&is_active=eq.true&order=sort_order.asc"
+    "lookbook_looks?select=id,slug,title,description,image_url,alt_text,sort_order,lookbook_look_products(sort_order,default_size,default_color,default_quantity,products(slug,name,price,image_url,image_urls,category,sizes,colors,description,created_at,is_featured,is_out_of_stock,stock_quantity,tags,brands(name)))&is_active=eq.true&order=sort_order.asc"
   );
   return rows.map((look) => ({
     id: look.id, slug: look.slug, title: look.title, description: look.description,
