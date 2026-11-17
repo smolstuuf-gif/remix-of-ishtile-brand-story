@@ -291,12 +291,6 @@ function CollectionsPanel({ collections, looks, products, session, busy, perform
             <span className="flex items-center gap-2 text-[10px] font-bold uppercase text-black/45"><span className="hidden sm:inline">Manage collection</span><ChevronRight className="h-4 w-4 transition-transform group-open:rotate-90" /></span>
           </summary>
           <div className="space-y-5 border-t border-black/10 p-4 md:p-5">
-            <form onSubmit={(event) => {
-              event.preventDefault();
-              void perform(() => adminWrite(\`collections?id=eq.\${collection.id}\`, session, "PATCH", {
-                title: collection.title, slug: collection.slug,
-              }), "Collection identity updated.");
-            }} className="hidden" />
             <CollectionDetailsEditor collection={collection} session={session} busy={busy} perform={perform} />
             <div className="flex flex-wrap items-center justify-between gap-2 border-t border-black/10 pt-4">
               <div><h3 className="text-sm font-black">Lookbook images</h3><p className="mt-1 text-[10px] text-black/45">Each image has its own linked products, default size, colour and quantity.</p></div>
@@ -304,12 +298,12 @@ function CollectionsPanel({ collections, looks, products, session, busy, perform
             </div>
             <div className="space-y-3">
               {collectionLooks.map((look) => <CollectionLookEditor key={look.id} collection={collection} look={look} looksCount={collectionLooks.length} products={products} session={session} busy={busy} perform={perform} />)}
-              <CollectionLookEditor key={\`new-\${collection.id}\`} collection={collection} looksCount={collectionLooks.length} products={products} session={session} busy={busy} perform={perform} />
+              <CollectionLookEditor key={`new-${collection.id}`} collection={collection} looksCount={collectionLooks.length} products={products} session={session} busy={busy} perform={perform} />
             </div>
             <div className="flex flex-wrap gap-2 border-t border-black/10 pt-4">
-              <button type="button" className={secondaryClass} disabled={busy} onClick={() => void perform(() => adminWrite(\`collections?id=eq.\${collection.id}\`, session, "PATCH", { show_homepage: !collection.show_homepage }), collection.show_homepage ? "Collection hidden from homepage." : "Collection shown on homepage.")}>{collection.show_homepage ? "Hide from homepage" : "Show on homepage"}</button>
-              <button type="button" className={secondaryClass} disabled={busy} onClick={() => void perform(() => adminWrite(\`collections?id=eq.\${collection.id}\`, session, "PATCH", { is_active: !collection.is_active }), collection.is_active ? "Collection paused." : "Collection activated.")}>{collection.is_active ? "Pause collection" : "Activate collection"}</button>
-              <button type="button" className={secondaryClass} disabled={busy} onClick={() => { if (confirm(\`Delete collection “\${collection.title}” and all its nested lookbook images?\`)) void perform(() => adminWrite(\`collections?id=eq.\${collection.id}\`, session, "DELETE"), "Collection and its lookbook images deleted."); }}><Trash2 className="h-4 w-4" /> Delete collection</button>
+              <button type="button" className={secondaryClass} disabled={busy} onClick={() => void perform(() => adminWrite(`collections?id=eq.${collection.id}`, session, "PATCH", { show_homepage: !collection.show_homepage }), collection.show_homepage ? "Collection hidden from homepage." : "Collection shown on homepage.")}>{collection.show_homepage ? "Hide from homepage" : "Show on homepage"}</button>
+              <button type="button" className={secondaryClass} disabled={busy} onClick={() => void perform(() => adminWrite(`collections?id=eq.${collection.id}`, session, "PATCH", { is_active: !collection.is_active }), collection.is_active ? "Collection paused." : "Collection activated.")}>{collection.is_active ? "Pause collection" : "Activate collection"}</button>
+              <button type="button" className={secondaryClass} disabled={busy} onClick={() => { if (confirm(`Delete collection “${collection.title}” and all its nested lookbook images?`)) void perform(() => adminWrite(`collections?id=eq.${collection.id}`, session, "DELETE"), "Collection and its lookbook images deleted."); }}><Trash2 className="h-4 w-4" /> Delete collection</button>
             </div>
           </div>
         </details>;
@@ -347,7 +341,7 @@ function CollectionDetailsEditor({ collection, session, busy, perform }: {
   }), [collection]);
   async function save(event: FormEvent) {
     event.preventDefault();
-    await perform(() => adminWrite(\`collections?id=eq.\${collection.id}\`, session, "PATCH", {
+    await perform(() => adminWrite(`collections?id=eq.${collection.id}`, session, "PATCH", {
       ...draft, slug: slugify(draft.slug || draft.title), sort_order: Number(draft.sort_order),
       starts_at: draft.starts_at ? new Date(draft.starts_at).toISOString() : null,
       ends_at: draft.ends_at ? new Date(draft.ends_at).toISOString() : null,
@@ -417,11 +411,11 @@ function CollectionLookEditor({ collection, look, looksCount, products, session,
     }));
     await perform(() => adminRpc<string>("save_lookbook_look", session, { p_look: payload, p_products: associations }), look ? "Lookbook image and product set saved." : "Lookbook image created with its product set.");
   }
-  const visibleProducts = products.filter((product) => product.is_active && \`\${product.name} \${product.slug} \${product.sku ?? ""}\`.toLowerCase().includes(query.toLowerCase()));
+  const visibleProducts = products.filter((product) => product.is_active && `${product.name} ${product.slug} ${product.sku ?? ""}`.toLowerCase().includes(query.toLowerCase()));
   return <details className="group border border-black/10 bg-white/55" defaultOpen={!look}>
     <summary className="flex cursor-pointer list-none items-center gap-3 p-3 [&::-webkit-details-marker]:hidden">
       {look?.image_url ? <img src={look.image_url} alt="" className="h-16 w-12 shrink-0 object-cover" /> : <div className="grid h-16 w-12 shrink-0 place-items-center bg-[#E8E1D6]"><ImagePlus className="h-4 w-4 text-black/35" /></div>}
-      <span className="min-w-0 flex-1"><span className="block truncate text-xs font-black">{look?.title || "Add a lookbook image"}</span><span className="mt-1 block text-[10px] text-black/45">{look ? \`\${look.slug} · \${linked.length} products · \${look.is_active ? "Published" : "Hidden"}\` : "New editorial image · add its own products"}</span></span>
+      <span className="min-w-0 flex-1"><span className="block truncate text-xs font-black">{look?.title || "Add a lookbook image"}</span><span className="mt-1 block text-[10px] text-black/45">{look ? `${look.slug} · ${linked.length} products · ${look.is_active ? "Published" : "Hidden"}` : "New editorial image · add its own products"}</span></span>
       <ChevronRight className="h-4 w-4 shrink-0 text-black/45 transition-transform group-open:rotate-90" />
     </summary>
     <form onSubmit={(event) => { void save(event).catch((error: unknown) => window.alert(error instanceof Error ? error.message : "Could not save this lookbook image.")); }} className="grid gap-3 border-t border-black/10 p-4 md:grid-cols-2">
@@ -455,7 +449,7 @@ function CollectionLookEditor({ collection, look, looksCount, products, session,
       </section>
       <div className="flex flex-wrap gap-2 border-t border-black/10 pt-4 md:col-span-2">
         <button className={buttonClass} disabled={busy || !draft.title.trim() || !draft.season || !draft.image_url.trim() || !linked.length}><Save className="h-4 w-4" /> Save image & products</button>
-        {look && <button type="button" className={secondaryClass} disabled={busy} onClick={() => { if (confirm(\`Delete lookbook image “\${look.title}” and its product links?\`)) void perform(() => adminWrite(\`lookbook_looks?id=eq.\${look.id}\`, session, "DELETE"), "Lookbook image deleted."); }}><Trash2 className="h-4 w-4" /> Delete image</button>}
+        {look && <button type="button" className={secondaryClass} disabled={busy} onClick={() => { if (confirm(`Delete lookbook image “${look.title}” and its product links?`)) void perform(() => adminWrite(`lookbook_looks?id=eq.${look.id}`, session, "DELETE"), "Lookbook image deleted."); }}><Trash2 className="h-4 w-4" /> Delete image</button>}
       </div>
     </form>
   </details>;
