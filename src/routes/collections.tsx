@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ScrollGallery } from "@/components/ui/scroll-gallery";
+import { ScrollGallery, type ScrollGallerySlide } from "@/components/ui/scroll-gallery";
 import { fetchHomepageCollections } from "@/lib/public-store";
 import colSpring from "@/assets/col-spring.jpg";
 import colSummer from "@/assets/col-summer.jpg";
@@ -30,12 +30,12 @@ const slides = [
 ];
 
 function CollectionsPage() {
-  const [liveSlides, setLiveSlides] = useState<typeof slides | null>(null);
+  const [liveSlides, setLiveSlides] = useState<ScrollGallerySlide[] | null>(null);
   useEffect(() => {
     let live = true;
     fetchHomepageCollections().then((items) => {
       if (!live || !items.length) return;
-      const mapped = items.filter((item) => item.is_active !== false && (item.video_url || item.image_url)).map((item) => {
+      const mapped = items.filter((item) => item.video_url || item.image_url).map((item) => {
         const slug = item.slug.toLowerCase();
         const season = ["spring", "summer", "festive", "monsoon", "winter"].find((value) => slug.includes(value));
         return { title: item.title, image: item.image_url || "", video: item.video_url || undefined, url: season ? `/lookbook?season=${season}` : `/lookbook`, linkLabel: `Explore ${item.title}` };
