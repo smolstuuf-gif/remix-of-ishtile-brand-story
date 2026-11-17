@@ -181,6 +181,7 @@ export interface FileRouteTypes {
     | '/cart'
     | '/checkout'
     | '/collections'
+    | '/lookbook'
     | '/editorial'
     | '/stores'
     | '/wishlist'
