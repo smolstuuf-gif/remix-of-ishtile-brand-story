@@ -1,19 +1,22 @@
 import { useEffect, useState } from "react";
+import { fetchPublicBrands } from "@/lib/public-store";
 import gsap from "gsap";
 import brandOnen from "@/assets/brand-onen.jpg";
 import brandFarak from "@/assets/brand-farak.jpg";
 import brandMocha from "@/assets/brand-mocha.jpg";
 import "./lumina-interactive-list.css";
 
-const slides = [
+const fallbackSlides = [
   { name: "ONEN+", title: "A quieter kind of confidence.", description: "Clean lines, considered details and everyday pieces made to move with you.", image: brandOnen },
   { name: "FARAK", title: "Made to stand apart.", description: "Expressive silhouettes, confident choices and a point of view entirely your own.", image: brandFarak },
   { name: "MOCHA+", title: "Tradition, with a new rhythm.", description: "Thoughtful everyday dressing with a respect for heritage and an eye on what comes next.", image: brandMocha },
 ];
 
 export function Component() {
+  const [slides, setSlides] = useState(fallbackSlides);
   const [active, setActive] = useState(0);
-  const slide = slides[active];
+  const slide = slides[active] ?? slides[0]!;
+  useEffect(() => { let live = true; fetchPublicBrands().then((items) => { if (live && items.length) setSlides(items.map((item) => ({ name: item.name, title: item.motto || "Discover the label.", description: item.description || "", image: item.image_url || item.logo_url || "", video: item.video_url || undefined }))); }).catch(() => undefined); return () => { live = false; }; }, []);
 
   useEffect(() => {
     const timer = window.setInterval(() => setActive((current) => (current + 1) % slides.length), 6500);
@@ -30,7 +33,7 @@ export function Component() {
     <main className="lumina-brands" data-header-theme="dark">
       <div className="lumina-brands__media" aria-hidden="true">
         {slides.map((item, index) => (
-          <img key={`${item.name}-${active}`} src={item.image} alt="" className={index === active ? "is-active" : ""} />
+          {item.video ? <video key={`${item.name}-${active}`} src={item.video} autoPlay muted loop playsInline poster={item.image || undefined} className={index === active ? "is-active" : ""} /> : <img key={`${item.name}-${active}`} src={item.image} alt="" className={index === active ? "is-active" : ""} />}
         ))}
       </div>
       <svg className="lumina-brands__filters" aria-hidden="true" focusable="false">
