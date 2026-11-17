@@ -30,9 +30,9 @@ export function SiteHeader() {
     let frame = 0;
 
     const readLuminance = (color: string): number | null => {
-      const rgb = color.match(/rgba?\\(([^)]+)\\)/i);
+      const rgb = color.match(/rgba?\(([^)]+)\)/i);
       if (rgb) {
-        const channels = (rgb[1] ?? "").split(/[\\s,/]+/).filter(Boolean).map(Number);
+        const channels = (rgb[1] ?? "").split(/[\s,/]+/).filter(Boolean).map(Number);
         const alpha = channels[3] ?? 1;
         if (channels.length >= 3 && alpha > 0.12 && channels.slice(0, 3).every(Number.isFinite)) {
           const [red = 255, green = red, blue = red] = channels;
@@ -41,7 +41,7 @@ export function SiteHeader() {
       }
 
       // The site's theme tokens compute to OKLCH in modern browsers.
-      const oklch = color.match(/oklch\\(\\s*([\\d.]+%?)/i);
+      const oklch = color.match(/oklch\(\s*([\d.]+%?)/i);
       if (oklch) {
         const lightness = Number((oklch[1] ?? "").replace("%", ""));
         if (Number.isFinite(lightness)) return lightness > 1 ? lightness / 100 : lightness;
