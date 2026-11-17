@@ -22,10 +22,10 @@ export function LookProductsDrawer({ look, open, onOpenChange }: { look: PublicL
     });
     setSelection(next);
   }, [look?.id, open]);
-  const available = useMemo(() => (look?.products ?? []).filter(({ product }) => !product.isOutOfStock && product.stock_quantity !== 0), [look]);
+  const available = useMemo(() => (look?.products ?? []).filter(({ product }) => !product.isOutOfStock && product.stockQuantity !== 0), [look]);
   const total = (look?.products ?? []).reduce((sum, { product }) => {
     const state = selection[product.id];
-    return sum + (state?.selected && !product.isOutOfStock && product.stock_quantity !== 0 ? product.price * state.qty : 0);
+    return sum + (state?.selected && !product.isOutOfStock && product.stockQuantity !== 0 ? product.price * state.qty : 0);
   }, 0);
   const selectedCount = available.filter(({ product }) => selection[product.id]?.selected).length;
   function patch(product: Product, value: Partial<Selection>) {
@@ -35,7 +35,7 @@ export function LookProductsDrawer({ look, open, onOpenChange }: { look: PublicL
     if (!look) return;
     look.products.forEach(({ product }) => {
       const item = selection[product.id];
-      if (!item?.selected || product.isOutOfStock || product.stock_quantity === 0) return;
+      if (!item?.selected || product.isOutOfStock || product.stockQuantity === 0) return;
       addItem(product, { size: item.size || product.sizes[0] || "One Size", color: item.color || product.colors[0]?.name || "Default", qty: item.qty });
     });
     onOpenChange(false);
@@ -50,7 +50,7 @@ export function LookProductsDrawer({ look, open, onOpenChange }: { look: PublicL
         {look?.description && <p className="text-sm leading-6 text-[#171717]/65">{look.description}</p>}
         {(look?.products ?? []).map(({ product }) => {
           const item = selection[product.id] ?? { selected: true, size: product.sizes[0] ?? "One Size", color: product.colors[0]?.name ?? "Default", qty: 1 };
-          const soldOut = !!product.isOutOfStock || product.stock_quantity === 0;
+          const soldOut = !!product.isOutOfStock || product.stockQuantity === 0;
           return <article key={product.id} className={`border border-[#171717]/12 bg-white/45 p-3 ${soldOut ? "opacity-60" : ""}`}>
             <div className="flex gap-3">
               <label className="mt-1"><input type="checkbox" checked={item.selected && !soldOut} disabled={soldOut} onChange={(event) => patch(product, { selected: event.target.checked })} aria-label={`Include ${product.name}`} /></label>
@@ -62,7 +62,7 @@ export function LookProductsDrawer({ look, open, onOpenChange }: { look: PublicL
                 </div>}
               </div>
             </div>
-            {!soldOut && <div className="mt-3 flex items-center justify-between border-t border-[#171717]/10 pt-2"><span className="text-[10px] text-[#171717]/50">Quantity</span><div className="flex items-center gap-3"><button type="button" onClick={() => patch(product, { qty: Math.max(1, item.qty - 1) })} className="grid h-7 w-7 place-items-center border border-[#171717]/20" aria-label="Decrease quantity">−</button><span className="w-4 text-center text-xs tabular-nums">{item.qty}</span><button type="button" onClick={() => patch(product, { qty: Math.min(10, item.qty + 1, product.stock_quantity ?? 10) })} className="grid h-7 w-7 place-items-center border border-[#171717]/20" aria-label="Increase quantity">+</button></div></div>}
+            {!soldOut && <div className="mt-3 flex items-center justify-between border-t border-[#171717]/10 pt-2"><span className="text-[10px] text-[#171717]/50">Quantity</span><div className="flex items-center gap-3"><button type="button" onClick={() => patch(product, { qty: Math.max(1, item.qty - 1) })} className="grid h-7 w-7 place-items-center border border-[#171717]/20" aria-label="Decrease quantity">−</button><span className="w-4 text-center text-xs tabular-nums">{item.qty}</span><button type="button" onClick={() => patch(product, { qty: Math.min(10, item.qty + 1, product.stockQuantity ?? 10) })} className="grid h-7 w-7 place-items-center border border-[#171717]/20" aria-label="Increase quantity">+</button></div></div>}
           </article>;
         })}
         {!look?.products.length && <p className="py-12 text-center text-sm text-[#171717]/50">No products have been assigned to this look yet.</p>}
