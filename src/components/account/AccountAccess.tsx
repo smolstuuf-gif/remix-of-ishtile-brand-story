@@ -52,9 +52,14 @@ export function AccountAccess({ defaultMode = "customer" }: { defaultMode?: Acce
           setPassword("");
           await navigate({ to: "/admin" });
           return;
-        } catch {
-          // Not an authorised admin (or not an admin account): continue with
-          // the customer identifier flow below.
+        } catch (adminError) {
+          const message = adminError instanceof Error ? adminError.message : "";
+          // Invalid credentials or a valid non-admin account should continue
+          // through customer sign-in. Configuration, network and permission
+          // failures must remain visible instead of being hidden as login errors.
+          if (!/invalid login credentials|invalid email or password|does not have ISHTILE administrator access/i.test(message)) {
+            throw adminError;
+          }
         }
       }
 
