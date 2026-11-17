@@ -36,7 +36,7 @@ function LookbookPage() {
       <div className="absolute left-6 top-7 text-[9px] font-bold uppercase tracking-[.24em] text-white/75 md:left-10 md:top-9">ISHTILE+ <span className="text-[#D5FE00]">/</span> THE LOOKBOOK</div>
       <Link to="/collections" className="pointer-events-auto absolute right-6 top-7 inline-flex items-center gap-2 text-[9px] font-bold uppercase tracking-[.16em] text-white/80 transition hover:text-[#D5FE00] md:right-10 md:top-9"><ArrowLeft className="h-3.5 w-3.5" /> Collections</Link>
     </PortalCarousel>
-    <BuyTheLookButton onClick={() => setDrawerOpen(true)} />
+    {!drawerOpen && <BuyTheLookButton onClick={() => setDrawerOpen(true)} />}
     <LookProductsDrawer look={activeLook} open={drawerOpen} onOpenChange={setDrawerOpen} />
   </main>;
 }
