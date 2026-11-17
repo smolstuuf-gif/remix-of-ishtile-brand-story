@@ -57,7 +57,7 @@ export function SiteHeader() {
             const color = window.getComputedStyle(current).backgroundColor;
             const match = color.match(/rgba?\(([^)]+)\)/);
             if (match) {
-              const channels = (match[1] ?? "").split(/[\\s,/]+/).filter(Boolean).map(Number);
+              const channels = (match[1] ?? "").split(/[\s,/]+/).filter(Boolean).map(Number);
               const alpha = channels[3] ?? 1;
               if (channels.length >= 3 && alpha > 0.12 && channels.slice(0, 3).every(Number.isFinite)) {
                 const [red = 255, green = red, blue = red] = channels;
