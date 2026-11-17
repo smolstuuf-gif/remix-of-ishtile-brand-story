@@ -66,7 +66,7 @@ export function DesktopHero() {
       if (!live) return;
       setIntervalMs(interval);
       if (remote.length) setSlides(remote.map((item) => ({
-        image: item.image_url, video: item.video_url || undefined, alt: item.title || "ISHTILE featured story",
+        image: item.image_url || undefined, video: item.video_url || undefined, alt: item.title || "ISHTILE featured story",
         lines: [item.title || "Discover Beyond Labels"], accent: item.subtitle || "",
         tagline: "", link: "Explore",
         href: item.link_url || "#shop",
@@ -170,7 +170,7 @@ export function MobileHero() {
       if (!live) return;
       setIntervalMs(interval);
       if (remote.length) setActiveSlides(remote.map((item) => ({
-        image: item.mobile_image_url || item.image_url, video: item.mobile_video_url || item.video_url || undefined,
+        image: item.mobile_image_url || item.image_url || undefined, video: item.mobile_video_url || item.video_url || undefined,
         alt: item.title || "ISHTILE featured story",
         lines: [item.title || "Discover"], accent: item.subtitle || "",
         href: item.link_url || "#shop",
