@@ -20,7 +20,7 @@ const desktopCollections = [
 
 export function DesktopCollections() {
   const [liveCollections, setLiveCollections] = useState<typeof desktopCollections | null>(null);
-  useEffect(() => { let live = true; fetchHomepageCollections().then((items) => { if (live && items.length) setLiveCollections(items.filter((item) => item.show_homepage && item.image_url).map((item) => ({ image: item.image_url || "", video: item.video_url || undefined, alt: item.title, w: 751, h: 370 }))); }).catch(() => undefined); return () => { live = false; }; }, []);
+  useEffect(() => { let live = true; fetchHomepageCollections().then((items) => { if (live && items.length) setLiveCollections(items.filter((item) => item.show_homepage && (item.video_url || item.image_url)).map((item) => ({ image: item.image_url || "", video: item.video_url || undefined, alt: item.title, w: 751, h: 370 }))); }).catch(() => undefined); return () => { live = false; }; }, []);
   const visibleCollections = liveCollections ?? desktopCollections;
   if (liveCollections && !liveCollections.length) return null;
   return (
