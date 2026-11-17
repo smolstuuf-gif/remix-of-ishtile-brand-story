@@ -132,17 +132,17 @@ export default function PortalCarousel({ images, label = "NEXT", thumbWidth = 19
   const currentImage = images[wrap(current)];
   const thumbImage = images[thumbIndex];
   const headTitle = images[wrap(head)].title;
-  return <div ref={rootRef} role="region" aria-roledescription="carousel" aria-label="ISHTILE lookbook" tabIndex={0} onKeyDown={onKeyDown} onClick={onRootClick} onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} className={`relative h-svh min-h-[560px] w-full cursor-pointer select-none overflow-hidden bg-[#171717] touch-pan-y outline-none ${className}`}>
+  return <div ref={rootRef} role="region" aria-roledescription="carousel" aria-label="ISHTILE lookbook" tabIndex={0} onKeyDown={onKeyDown} onClick={onRootClick} onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} className={`relative isolate h-svh min-h-[560px] w-full cursor-pointer select-none overflow-hidden bg-[#171717] touch-pan-y outline-none ${className}`}>
     <img src={currentImage.src} alt={currentImage.alt ?? currentImage.title ?? ""} draggable={false} className="absolute inset-0 h-full w-full object-cover" />
     <div className="absolute inset-0 z-[1]">{layers.map((layer) => <ExpandingLayer key={layer.id} layer={layer} image={images[layer.index]} duration={duration} onDone={onLayerDone} />)}</div>
-    {children && <div className="pointer-events-none absolute inset-0 z-[1000]">{children}</div>}
+    {children && <div className="pointer-events-none absolute inset-0 z-40">{children}</div>}
     {count > 1 && <>
-      <div ref={followerRef} className="pointer-events-none absolute left-0 top-0 z-[1001] aspect-square will-change-transform" style={{ width: `min(${thumbWidth}px, 38vw)` }}>
+      <div ref={followerRef} className="pointer-events-none absolute left-0 top-0 z-30 aspect-square will-change-transform" style={{ width: `min(${thumbWidth}px, 38vw)` }}>
         <button ref={thumbRef} type="button" data-portal-next aria-label={`Show next look: ${thumbImage.alt ?? thumbImage.title ?? "Next"}`} className="pointer-events-auto block h-full w-full overflow-hidden border border-white/70 shadow-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"><img src={thumbImage.src} alt="" draggable={false} className="h-full w-full object-cover" /></button>
       </div>
-      <span ref={tagRef} aria-hidden="true" className="pointer-events-none absolute left-0 top-0 z-[1002] bg-[#171717] px-2 py-1 text-[9px] font-semibold uppercase tracking-[.2em] text-[#F0EAE0] will-change-transform">{label}</span>
+      <span ref={tagRef} aria-hidden="true" className="pointer-events-none absolute left-0 top-0 z-30 bg-[#171717] px-2 py-1 text-[9px] font-semibold uppercase tracking-[.2em] text-[#F0EAE0] will-change-transform">{label}</span>
     </>}
-    <div className="pointer-events-none absolute bottom-10 left-[7%] z-[999] flex flex-col gap-2 text-[#F0EAE0] md:bottom-14 md:left-[10%]">
+    <div className="pointer-events-none absolute bottom-10 left-[7%] z-10 flex flex-col gap-2 text-[#F0EAE0] md:bottom-14 md:left-[10%]">
       <span className="text-xs font-semibold tabular-nums tracking-wider text-white/70"><RollingText value={String(wrap(head) + 1).padStart(2,"0")} /> <span className="text-white/45">/ {String(count).padStart(2,"0")}</span></span>
       {headTitle && <span className="font-wide text-2xl font-extrabold uppercase leading-none tracking-tight md:text-4xl"><RollingText value={headTitle} /></span>}
     </div>
