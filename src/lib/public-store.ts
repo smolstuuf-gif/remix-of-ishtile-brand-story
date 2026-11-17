@@ -115,7 +115,7 @@ export async function fetchPublicBrandInfo() {
 }
 
 export type PublicLook = {
-  id: string; slug: string; title: string; description: string | null; image_url: string;
+  id: string; slug: string; title: string; description: string | null; image_url: string; video_url: string | null;
   collection_id: string | null; alt_text: string | null; season: "spring" | "summer" | "festive" | "monsoon" | "winter" | null; sort_order: number;
   products: { product: Product; defaultSize: string | null; defaultColor: string | null; defaultQuantity: number; sortOrder: number }[];
 };
