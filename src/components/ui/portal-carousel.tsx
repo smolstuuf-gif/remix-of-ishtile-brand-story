@@ -72,8 +72,9 @@ export default function PortalCarousel({ images, label = "NEXT", thumbWidth = 19
     let placed = false, frame = 0;
     const tick = () => {
       const rect = root.getBoundingClientRect(), w = follower.offsetWidth, h = follower.offsetHeight;
-      const goalX = pointer.active ? pointer.x : rect.width - w - 28;
-      const goalY = pointer.active ? pointer.y : rect.height - h - 28;
+      const mobile = window.matchMedia("(max-width: 767px)").matches;
+      const goalX = pointer.active ? pointer.x : rect.width - w - (mobile ? 16 : 28);
+      const goalY = pointer.active ? pointer.y : rect.height - h - (mobile ? 62 : 28);
       const ease = reducedMotion() ? 1 : Math.min(1, Math.max(.02, followSpeed));
       if (!placed) { position.x = goalX; position.y = goalY; placed = true; }
       else { position.x += (goalX - position.x) * ease; position.y += (goalY - position.y) * ease; }
@@ -137,7 +138,7 @@ export default function PortalCarousel({ images, label = "NEXT", thumbWidth = 19
     <div className="absolute inset-0 z-[1]">{layers.map((layer) => <ExpandingLayer key={layer.id} layer={layer} image={images[layer.index]} duration={duration} onDone={onLayerDone} />)}</div>
     {children && <div className="pointer-events-none absolute inset-0 z-40">{children}</div>}
     {count > 1 && <>
-      <div ref={followerRef} className="pointer-events-none absolute left-0 top-0 z-30 aspect-square will-change-transform" style={{ width: `min(${thumbWidth}px, 38vw)` }}>
+      <div ref={followerRef} className="pointer-events-none absolute left-0 top-0 z-30 aspect-square max-md:!w-[76px] will-change-transform" style={{ width: `min(${thumbWidth}px, 38vw)` }}>
         <button ref={thumbRef} type="button" data-portal-next aria-label={`Show next look: ${thumbImage.alt ?? thumbImage.title ?? "Next"}`} className="pointer-events-auto block h-full w-full overflow-hidden border border-white/70 shadow-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"><img src={thumbImage.src} alt="" draggable={false} className="h-full w-full object-cover" /></button>
       </div>
       <span ref={tagRef} aria-hidden="true" className="pointer-events-none absolute left-0 top-0 z-30 bg-[#171717] px-2 py-1 text-[9px] font-semibold uppercase tracking-[.2em] text-[#F0EAE0] will-change-transform">{label}</span>
