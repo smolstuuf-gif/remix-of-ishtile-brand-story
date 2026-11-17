@@ -35,14 +35,7 @@ export function FeaturedProducts() {
               <article className="group flex h-full flex-col overflow-hidden rounded-xl bg-card shadow-[0_1px_2px_0_color-mix(in_oklab,var(--foreground)_6%,transparent)]">
                 <div className="relative overflow-hidden">
                   <a href={`/shop/${p.id}`} aria-label={p.name}>
-                    <img
-                      src={p.image}
-                      alt={p.name}
-                      width={1024}
-                      height={640}
-                      loading="lazy"
-                      className="aspect-[1.75/1] w-full object-cover object-[50%_25%] transition-transform duration-500 group-hover:scale-[1.04] md:aspect-[2.3/1]"
-                    />
+                    {p.videoUrl ? <video src={p.videoUrl} autoPlay muted loop playsInline poster={p.image} className="aspect-[1.75/1] w-full object-cover object-[50%_25%] transition-transform duration-500 group-hover:scale-[1.04] md:aspect-[2.3/1]" /> : <img src={p.image} alt={p.name} width={1024} height={640} loading="lazy" className="aspect-[1.75/1] w-full object-cover object-[50%_25%] transition-transform duration-500 group-hover:scale-[1.04] md:aspect-[2.3/1]" />}
                   </a>
                   {(p.isOutOfStock || p.tags?.length) && <div className="absolute left-2.5 top-2.5 flex flex-wrap gap-1.5">{p.isOutOfStock && <span className="rounded-full bg-[#171717] px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white">Sold Out</span>}{(p.tags ?? []).slice(0, 2).map((tag) => <span key={tag} className="rounded-full bg-[#F0EAE0] px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-[#171717]">{tag}</span>)}</div>}
                   <FavoriteButton
