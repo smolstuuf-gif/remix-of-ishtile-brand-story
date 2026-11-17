@@ -248,10 +248,12 @@ function ProductPage() {
                 <span className="font-medium tabular-nums">{product.rating.toFixed(1)}</span>
                 <span className="text-muted-foreground">({product.reviews} reviews)</span>
               </span>
-              {(product.isOutOfStock || product.badge || product.isFeatured || product.tags?.length) && (
-                <span className="rounded-full bg-lime px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-primary-foreground">
-                  {product.badge}
-                </span>
+              {(product.isOutOfStock || product.isFeatured || product.tags?.length) && (
+                <div className="flex flex-wrap gap-1.5">
+                  {product.isOutOfStock && <span className="rounded-full bg-[#171717] px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-white">Sold Out</span>}
+                  {product.isFeatured && !product.isOutOfStock && <span className="rounded-full bg-lime px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-primary-foreground">Featured</span>}
+                  {(product.tags ?? []).map((tag) => <span key={tag} className="rounded-full border border-border px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide">{tag}</span>)}
+                </div>
               )}
             </div>
 
