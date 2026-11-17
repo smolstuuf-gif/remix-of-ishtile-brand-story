@@ -283,7 +283,7 @@ function Dashboard({
                     ) : <EmptyState title="No paid sales in this period" detail="Once an order is recorded and marked paid, the daily revenue chart will appear here." />}
                   </div>
 
-                  <div id="brands" className="scroll-mt-24" className="border border-black/10 bg-[#171717] p-4 text-[#F0EAE0] md:p-6">
+                  <div id="brands" className="scroll-mt-24 border border-black/10 bg-[#171717] p-4 text-[#F0EAE0] md:p-6">
                     <div className="flex items-start justify-between"><div><p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/45">Brand portfolio</p><h2 className="mt-1 text-lg font-bold">Sales by brand</h2></div><TrendingUp className="h-5 w-5 text-[#D5FE00]" /></div>
                     <div className="mt-5 space-y-5">
                       {brandStats.map((brand) => (
@@ -323,7 +323,7 @@ function Dashboard({
                     {productStats.length ? <div className="mt-4 divide-y divide-black/10">{productStats.map((product, index) => <div key={product.name} className="flex items-center justify-between gap-3 py-3"><div className="flex min-w-0 items-center gap-3"><span className="grid h-7 w-7 shrink-0 place-items-center bg-[#D5FE00] text-[10px] font-black">{String(index + 1).padStart(2, "0")}</span><div className="min-w-0"><p className="truncate text-sm font-semibold">{product.name}</p><p className="text-[10px] uppercase tracking-[0.12em] text-black/45">{product.brand}</p></div></div><div className="text-right"><p className="text-sm font-bold tabular-nums">{number(product.units)} sold</p><p className="text-[10px] text-black/45">{money(product.revenue)}</p></div></div>)}</div> : <EmptyState title="No product sales yet" detail="Top sellers will be ranked from paid order items." />}
                   </div>
 
-                  <div id="inventory" className="scroll-mt-24" className="border border-black/10 bg-[#F7F3EC] p-4 md:p-6">
+                  <div id="inventory" className="scroll-mt-24 border border-black/10 bg-[#F7F3EC] p-4 md:p-6">
                     <div className="flex items-center justify-between"><div><p className="text-[10px] font-bold uppercase tracking-[0.2em] text-black/45">Inventory watch</p><h2 className="mt-1 text-lg font-bold">Stock attention</h2></div><Boxes className="h-5 w-5" /></div>
                     <div className="mt-4 grid grid-cols-2 gap-3">
                       <div className="bg-[#D5FE00] p-3"><p className="text-[9px] font-bold uppercase tracking-[0.14em]">Low stock</p><p className="mt-1 text-2xl font-black tabular-nums">{number(lowStock.length)}</p><p className="mt-1 text-[10px]">5 units or fewer</p></div>
@@ -333,7 +333,7 @@ function Dashboard({
                   </div>
                 </section>
 
-                <section id="orders" className="scroll-mt-24" className="border border-black/10 bg-[#F7F3EC]">
+                <section id="orders" className="scroll-mt-24 border border-black/10 bg-[#F7F3EC]">
                   <div className="flex items-center justify-between border-b border-black/10 px-4 py-4 md:px-6"><div><p className="text-[10px] font-bold uppercase tracking-[0.2em] text-black/45">Latest activity</p><h2 className="mt-1 text-lg font-bold">Recent orders</h2></div><span className="text-[10px] text-black/45">{number(validOrders.length)} in range</span></div>
                   {data.orders.length ? (
                     <div className="overflow-x-auto">
