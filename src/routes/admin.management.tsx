@@ -422,7 +422,7 @@ function CollectionLookEditor({ collection, look, looksCount, products, session,
     <summary className="flex cursor-pointer list-none items-center gap-3 p-3 [&::-webkit-details-marker]:hidden">
       {look?.image_url ? <img src={look.image_url} alt="" className="h-16 w-12 shrink-0 object-cover" /> : <div className="grid h-16 w-12 shrink-0 place-items-center bg-[#E8E1D6]"><ImagePlus className="h-4 w-4 text-black/35" /></div>}
       <span className="min-w-0 flex-1"><span className="block truncate text-xs font-black">{look?.title || "Add a lookbook image"}</span><span className="mt-1 block text-[10px] text-black/45">{look ? \`\${look.slug} · \${linked.length} products · \${look.is_active ? "Published" : "Hidden"}\` : "New editorial image · add its own products"}</span></span>
-      <ChevronRight className="h-4 w-4 shrink-0 text-black/45 transition-transform [details[open]_&]:rotate-90" />
+      <ChevronRight className="h-4 w-4 shrink-0 text-black/45 transition-transform group-open:rotate-90" />
     </summary>
     <form onSubmit={(event) => { void save(event).catch((error: unknown) => window.alert(error instanceof Error ? error.message : "Could not save this lookbook image.")); }} className="grid gap-3 border-t border-black/10 p-4 md:grid-cols-2">
       <Field label="Image title" name="title" value={draft.title} required onChange={(value) => setDraft((d) => ({ ...d, title: value, slug: look ? d.slug : slugify(value) }))} />
