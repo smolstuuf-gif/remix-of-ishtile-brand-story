@@ -33,7 +33,7 @@ export async function fetchHomepageCollections() {
 
 export type PublicBrand = { id: string; name: string; logo_url: string | null; image_url: string | null };
 export async function fetchPublicBrands() {
-  return publicRows<PublicBrand[]>("brands?select=id,name,logo_url,image_url&is_active=eq.true&order=sort_order.asc");
+  return publicRows<PublicBrand>("brands?select=id,name,logo_url,image_url&is_active=eq.true&order=sort_order.asc");
 }
 
 type DatabaseProduct = {
