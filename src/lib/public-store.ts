@@ -39,9 +39,9 @@ export async function fetchHomepageCollections() {
   return publicRows<PublicCollection>("collections?select=id,title,image_url,video_url,description,campaign_label,slug,show_homepage&is_active=eq.true&order=sort_order.asc");
 }
 
-export type PublicBrand = { id: string; name: string; logo_url: string | null; image_url: string | null; video_url: string | null };
+export type PublicBrand = { id: string; name: string; logo_url: string | null; image_url: string | null; video_url: string | null; description: string | null; motto: string | null };
 export async function fetchPublicBrands() {
-  return publicRows<PublicBrand>("brands?select=id,name,logo_url,image_url,video_url&is_active=eq.true&order=sort_order.asc");
+  return publicRows<PublicBrand>("brands?select=id,name,logo_url,image_url,video_url,description,motto&is_active=eq.true&order=sort_order.asc");
 }
 
 type DatabaseProduct = {
@@ -130,7 +130,7 @@ type PublicLookRow = {
 export async function fetchPublicLooks(): Promise<PublicLook[] | null> {
   if (!url || !key) return null;
   const rows = await publicRows<PublicLookRow>(
-    "lookbook_looks?select=id,slug,title,description,image_url,video_url,collection_id,alt_text,season,sort_order,lookbook_look_products(sort_order,default_size,default_color,default_quantity,products(slug,name,price,image_url,image_urls,category,sizes,colors,description,created_at,is_featured,is_out_of_stock,stock_quantity,tags,brands(name)))&is_active=eq.true&order=sort_order.asc"
+    "lookbook_looks?select=id,slug,title,description,image_url,video_url,collection_id,alt_text,season,sort_order,lookbook_look_products(sort_order,default_size,default_color,default_quantity,products(slug,name,price,image_url,image_urls,video_url,category,sizes,colors,description,created_at,is_featured,is_out_of_stock,stock_quantity,tags,brands(name)))&is_active=eq.true&order=sort_order.asc"
   );
   return rows.map((look) => ({
     id: look.id, slug: look.slug, title: look.title, description: look.description,
