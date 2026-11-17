@@ -13,7 +13,7 @@ const fallbackSlides = [
 ];
 
 export function Component() {
-  const [slides, setSlides] = useState(fallbackSlides);
+  const [slides, setSlides] = useState<(typeof fallbackSlides[number] & { video?: string })[]>(fallbackSlides);
   const [active, setActive] = useState(0);
   const slide = slides[active] ?? slides[0]!;
   useEffect(() => { let live = true; fetchPublicBrands().then((items) => { if (live && items.length) { setSlides(items.map((item) => ({ name: item.name, title: item.motto || "Discover the label.", description: item.description || "", image: item.image_url || item.logo_url || "", video: item.video_url || undefined }))); setActive(0); } }).catch(() => undefined); return () => { live = false; }; }, []);
@@ -21,7 +21,7 @@ export function Component() {
   useEffect(() => {
     const timer = window.setInterval(() => setActive((current) => (current + 1) % slides.length), 6500);
     return () => window.clearInterval(timer);
-  }, []);
+  }, [slides.length]);
 
   useEffect(() => {
     const copy = document.querySelector(".lumina-brands__copy");
