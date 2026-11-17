@@ -34,6 +34,7 @@ export type Product = {
   tags?: string[];
   isFeatured?: boolean;
   isOutOfStock?: boolean;
+  stockQuantity?: number | null;
   blurb: string;
   details: string[];
   care: string;
