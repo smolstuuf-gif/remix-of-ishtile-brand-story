@@ -44,6 +44,20 @@ export function AccountAccess({ defaultMode = "customer" }: { defaultMode?: Acce
     setBusy(true);
     clearMessages();
     try {
+      // Admins use the same sign-in form, but are authenticated and authorised
+      // against admin_users before being routed to the private dashboard.
+      if (identifier.trim().includes("@")) {
+        try {
+          await signInAdmin(identifier.trim(), password);
+          setPassword("");
+          await navigate({ to: "/admin" });
+          return;
+        } catch {
+          // Not an authorised admin (or not an admin account): continue with
+          // the customer identifier flow below.
+        }
+      }
+
       const { data, error: invokeError } = await supabase.functions.invoke("customer-login", {
         body: { identifier: identifier.trim(), password },
       });
