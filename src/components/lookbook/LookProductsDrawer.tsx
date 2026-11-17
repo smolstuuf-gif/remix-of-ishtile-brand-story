@@ -18,7 +18,7 @@ export function LookProductsDrawer({ look, open, onOpenChange }: { look: PublicL
     if (!look) return;
     const next: Record<string, Selection> = {};
     look.products.forEach(({ product, defaultSize, defaultColor, defaultQuantity }) => {
-      next[product.id] = { selected: true, size: defaultSize || product.sizes[0] || "One Size", color: defaultColor || product.colors[0]?.name || "Default", qty: defaultQuantity || 1 };
+      next[product.id] = { selected: true, size: defaultSize || product.sizes[0] || "One Size", color: defaultColor || product.colors[0]?.name || "Default", qty: Math.max(1, Math.min(10, defaultQuantity || 1, product.stockQuantity ?? 10)) };
     });
     setSelection(next);
   }, [look?.id, open]);
