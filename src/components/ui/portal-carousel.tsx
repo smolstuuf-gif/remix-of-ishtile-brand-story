@@ -113,8 +113,9 @@ export default function PortalCarousel({ images, label = "NEXT", thumbWidth = 19
   const onTouchEnd = (event: TouchEvent<HTMLDivElement>) => {
     const start = touchStartRef.current, end = event.changedTouches[0]?.clientX;
     touchStartRef.current = null;
-    if (start === null || end === undefined || Math.abs(end - start) < 45) return;
+    if (count < 2 || start === null || end === undefined || Math.abs(end - start) < 45) return;
     ignoreClickRef.current = true;
+    window.setTimeout(() => { ignoreClickRef.current = false; }, 500);
     if (end < start) advance();
     else {
       const index = wrap(head - 1);
@@ -131,7 +132,7 @@ export default function PortalCarousel({ images, label = "NEXT", thumbWidth = 19
   const currentImage = images[wrap(current)];
   const thumbImage = images[thumbIndex];
   const headTitle = images[wrap(head)].title;
-  return <div ref={rootRef} role="region" aria-roledescription="carousel" aria-label="ISHTILE lookbook" tabIndex={0} onKeyDown={onKeyDown} onClick={onRootClick} onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} className={`relative h-svh min-h-[560px] w-full cursor-pointer select-none overflow-hidden bg-[#171717] outline-none ${className}`}>
+  return <div ref={rootRef} role="region" aria-roledescription="carousel" aria-label="ISHTILE lookbook" tabIndex={0} onKeyDown={onKeyDown} onClick={onRootClick} onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} className={`relative h-svh min-h-[560px] w-full cursor-pointer select-none overflow-hidden bg-[#171717] touch-pan-y outline-none ${className}`}>
     <img src={currentImage.src} alt={currentImage.alt ?? currentImage.title ?? ""} draggable={false} className="absolute inset-0 h-full w-full object-cover" />
     <div className="absolute inset-0 z-[1]">{layers.map((layer) => <ExpandingLayer key={layer.id} layer={layer} image={images[layer.index]} duration={duration} onDone={onLayerDone} />)}</div>
     {children && <div className="pointer-events-none absolute inset-0 z-[1000]">{children}</div>}
