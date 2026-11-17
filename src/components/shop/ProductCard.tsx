@@ -13,6 +13,7 @@ export function ProductCard({ product, className }: { product: Product; classNam
   const defaultColor = product.colors[0]?.name ?? "";
 
   const add = () => {
+    if (product.isOutOfStock) return;
     addItem(product, { size: defaultSize, color: defaultColor });
     openCart();
   };
@@ -53,10 +54,11 @@ export function ProductCard({ product, className }: { product: Product; classNam
         <button
           type="button"
           onClick={add}
+          disabled={product.isOutOfStock}
           className="absolute bottom-2.5 right-2.5 inline-flex items-center gap-1.5 rounded-full bg-ink px-3.5 py-2 text-[13px] font-medium text-ink-foreground opacity-0 transition-[opacity,transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:shadow-lg active:translate-y-px active:scale-[0.97] group-hover:opacity-100 focus-visible:opacity-100 disabled:cursor-not-allowed disabled:opacity-100"
         >
           <Plus className="h-3.5 w-3.5" strokeWidth={2.4} />
-          Add to Bag
+          {product.isOutOfStock ? "Out of Stock" : "Add to Bag"}
         </button>
       </div>
 
