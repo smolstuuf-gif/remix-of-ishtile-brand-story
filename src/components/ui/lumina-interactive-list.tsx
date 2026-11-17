@@ -37,7 +37,7 @@ export function Component(){
  },[]);
  useEffect(()=>{const chars=titleRef.current?.querySelectorAll("span");if(chars?.length)gsap.fromTo(chars,{y:20,opacity:0},{y:0,opacity:1,duration:1,stagger:.03,ease:"power3.out",delay:.5});if(descRef.current)gsap.fromTo(descRef.current,{y:20,opacity:0},{y:0,opacity:1,duration:1,ease:"power3.out",delay:.8});},[]);
  useEffect(()=>{const el=progressRef.current;if(!el)return;gsap.killTweensOf(el);gsap.fromTo(el,{scaleX:0},{scaleX:1,duration:5,ease:"none",repeat:-1});return()=>{gsap.killTweensOf(el);};},[active]);
- return <main className="lumina-brands" data-header-theme="dark">
+ return <main className={`lumina-brands${ready ? " is-ready" : ""}`} data-header-theme="dark">
   <canvas ref={canvasRef} className="lumina-brands__canvas" aria-hidden="true"/>
   {!ready&&<img className="lumina-brands__fallback" src={slide.image} alt=""/>}
   <div className="lumina-brands__shade"/>
