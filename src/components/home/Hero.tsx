@@ -26,7 +26,7 @@ function Headline({ className }: { className?: string }) {
   );
 }
 
-const desktopSlides: { image: string; video?: string; alt: string; lines: string[]; accent: string; tagline: string; link: string; href: string }[] = [
+const desktopSlides: { image?: string; video?: string; alt: string; lines: string[]; accent: string; tagline: string; link: string; href: string }[] = [
   {
     image: heroDesktop,
     alt: "Model in sunglasses with a lime crown sketch, lotus and colour arcs collage",
@@ -99,7 +99,7 @@ export function DesktopHero() {
           )}
           aria-hidden={i !== index}
         >
-          {item.video ? <video src={item.video} autoPlay={i === index} muted loop playsInline preload={i === 0 ? "auto" : "metadata"} poster={item.image} className="h-full w-full object-cover object-center" /> : <img src={item.image} alt={item.alt} className="h-full w-full object-cover object-center" loading={i === 0 ? "eager" : "lazy"} />}
+          {item.video ? <video src={item.video} autoPlay={i === index} muted loop playsInline preload={i === 0 ? "auto" : "metadata"} poster={item.image || undefined} className="h-full w-full object-cover object-center" /> : item.image ? <img src={item.image} alt={item.alt} className="h-full w-full object-cover object-center" loading={i === 0 ? "eager" : "lazy"} /> : <div className="h-full w-full bg-ink" />}
           <div className="absolute inset-0 bg-gradient-to-r from-black/65 via-black/15 to-transparent" />
         </div>
       ))}
@@ -152,7 +152,7 @@ export function DesktopHero() {
   );
 }
 
-const slides: { image: string; video?: string; alt: string; lines: string[]; accent: string; href: string }[] = [
+const slides: { image?: string; video?: string; alt: string; lines: string[]; accent: string; href: string }[] = [
   { image: heroMobile, alt: "Model in sunglasses looking up, black and white", lines: ["More", "Fashion."], accent: "More You.", href: "#shop" },
   { image: cardNewArrivals, alt: "Model with dreadlocks on a beige wall", lines: ["New", "Arrivals."], accent: "Just Dropped.", href: "#shop" },
   { image: brandFarak, alt: "Model in a black dress against a lilac wall", lines: ["Different", "Brands."], accent: "One Universe.", href: "#shop" },
@@ -197,7 +197,7 @@ export function MobileHero() {
             )}
             aria-hidden={i !== index}
           >
-            {s.video ? <video src={s.video} autoPlay={i === index} muted loop playsInline preload={i === 0 ? "auto" : "metadata"} poster={s.image} className="h-full w-full object-cover grayscale" /> : <img src={s.image} alt={s.alt} className="h-full w-full object-cover grayscale" loading={i === 0 ? "eager" : "lazy"} />}
+            {s.video ? <video src={s.video} autoPlay={i === index} muted loop playsInline preload={i === 0 ? "auto" : "metadata"} poster={s.image || undefined} className="h-full w-full object-cover grayscale" /> : s.image ? <img src={s.image} alt={s.alt} className="h-full w-full object-cover grayscale" loading={i === 0 ? "eager" : "lazy"} /> : <div className="h-full w-full bg-ink" />}
             <div className="absolute inset-0 bg-gradient-to-b from-ink/30 via-transparent to-ink/80" />
             <div className="absolute bottom-[12%] left-[7%] right-[6%] origin-bottom-left -rotate-[7deg]">
               <h2 className="font-headline text-[12.6vw] font-extrabold italic uppercase tracking-[-0.035em] [&>span]:leading-[0.88]">
