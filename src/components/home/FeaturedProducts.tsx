@@ -11,7 +11,7 @@ export function FeaturedProducts() {
   const { toggleWish, isWished } = useCart();
   const [liveProducts, setLiveProducts] = useState<Product[] | null>(null);
   useEffect(() => { let live = true; fetchPublicProducts().then((items) => { if (live && items !== null) setLiveProducts(items); }).catch(() => undefined); return () => { live = false; }; }, []);
-  const visibleProducts = liveProducts ?? products;
+  const visibleProducts = liveProducts ? liveProducts.filter((product) => product.isFeatured).slice(0, 8) : products.slice(0, 8);\n  if (liveProducts && visibleProducts.length === 0) return null;
 
   return (
     <section id="shop" aria-labelledby="featured-title" className="rounded-2xl md:border md:border-border/70 md:bg-panel/60 md:px-[4%] md:py-8">
@@ -42,6 +42,7 @@ export function FeaturedProducts() {
                       className="aspect-[1.75/1] w-full object-cover object-[50%_25%] transition-transform duration-500 group-hover:scale-[1.04] md:aspect-[2.3/1]"
                     />
                   </a>
+                  {(p.isOutOfStock || p.tags?.length) && <div className="absolute left-2.5 top-2.5 flex flex-wrap gap-1.5">{p.isOutOfStock && <span className="rounded-full bg-[#171717] px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white">Sold Out</span>}{(p.tags ?? []).slice(0, 2).map((tag) => <span key={tag} className="rounded-full bg-[#F0EAE0] px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-[#171717]">{tag}</span>)}</div>}
                   <FavoriteButton
                     active={wished}
                     onToggle={() => toggleWish(p.id)}
