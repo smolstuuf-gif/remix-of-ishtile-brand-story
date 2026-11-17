@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { AccountAccess } from "@/components/account/AccountAccess";
 import {
   Activity,
@@ -58,6 +58,7 @@ const dateTime = (value: string) =>
   new Intl.DateTimeFormat("en-BD", { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" }).format(new Date(value));
 
 function AdminPage() {
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
   const [session, setSession] = useState<AdminSession | null>(null);
   const [checking, setChecking] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -121,6 +122,9 @@ function AdminPage() {
     setSession(null);
     setData(null);
   }
+
+  // /admin/management is a nested route; render its page instead of the dashboard.
+  if (pathname === "/admin/management") return <Outlet />;
 
   if (checking) {
     return (
