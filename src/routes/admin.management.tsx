@@ -320,7 +320,7 @@ function LookbookPanel({ looks, products, session, busy, perform }: {
                   <label className={labelClass}>Default colour<select className={inputClass} value={item.default_color} onChange={(event) => setLinked((current) => current.map((entry) => entry.product_id === product.id ? { ...entry, default_color: event.target.value } : entry))}><option value="">Choose in drawer</option>{product.colors.map((color) => <option key={color.name}>{color.name}</option>)}</select></label>
                   <label className={labelClass}>Qty<input className={inputClass} type="number" min="1" max="10" value={item.default_quantity} onChange={(event) => setLinked((current) => current.map((entry) => entry.product_id === product.id ? { ...entry, default_quantity: event.target.value } : entry))} /></label>
                 </div>}
-                {item && product.is_out_of_stock && <p className="mt-2 text-[10px] font-bold text-red-700">Currently marked out of stock — customers cannot add it.</p>}
+                {item && (product.is_out_of_stock || product.stock_quantity === 0) && <p className="mt-2 text-[10px] font-bold text-red-700">Currently marked out of stock — customers cannot add it.</p>}
               </div>;
             })}
           </div>
