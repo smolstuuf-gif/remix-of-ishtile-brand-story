@@ -281,7 +281,6 @@ function LookbookPanel({ looks, products, session, busy, perform }: {
     const look = { ...(selected ? { id: selected.id } : {}), ...draft, slug: slugify(draft.slug || draft.title), sort_order: Number(draft.sort_order), starts_at: draft.starts_at ? new Date(draft.starts_at).toISOString() : null, ends_at: draft.ends_at ? new Date(draft.ends_at).toISOString() : null };
     const associations = linked.map((item) => ({ product_id: item.product_id, default_size: item.default_size || null, default_color: item.default_color || null, default_quantity: Number(item.default_quantity) || 1 }));
     await perform(() => adminRpc<string>("save_lookbook_look", session, { p_look: look, p_products: associations }), selected ? "Look updated and products synchronized." : "Look created and products linked.");
-    reset();
   }
   const visibleProducts = products.filter((product) => product.is_active && `${product.name} ${product.slug} ${product.sku ?? ""}`.toLowerCase().includes(query.toLowerCase()));
   return <>
