@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { ScrollGallery } from "@/components/ui/scroll-gallery";
+import { fetchHomepageCollections } from "@/lib/public-store";
 import colSpring from "@/assets/col-spring.jpg";
 import colSummer from "@/assets/col-summer.jpg";
 import colFestive from "@/assets/col-festive.jpg";
@@ -28,11 +30,25 @@ const slides = [
 ];
 
 function CollectionsPage() {
+  const [liveSlides, setLiveSlides] = useState<typeof slides | null>(null);
+  useEffect(() => {
+    let live = true;
+    fetchHomepageCollections().then((items) => {
+      if (!live || !items.length) return;
+      const mapped = items.filter((item) => item.is_active !== false && (item.video_url || item.image_url)).map((item) => {
+        const slug = item.slug.toLowerCase();
+        const season = ["spring", "summer", "festive", "monsoon", "winter"].find((value) => slug.includes(value));
+        return { title: item.title, image: item.image_url || "", video: item.video_url || undefined, url: season ? `/lookbook?season=${season}` : `/lookbook`, linkLabel: `Explore ${item.title}` };
+      });
+      if (mapped.length) setLiveSlides(mapped);
+    }).catch(() => undefined);
+    return () => { live = false; };
+  }, []);
   return (
     <div className="min-h-screen bg-[#F0EAE0] text-[#171717]">
       <main>
         <ScrollGallery
-          slides={slides}
+          slides={liveSlides ?? slides}
           variant="studio"
           prefixLabel="ISHTILE+ / COLLECTIONS"
           linkLabel="Explore"
