@@ -909,9 +909,7 @@ export function ScrollGallery({
     >
       <div className={classes.images} ref={slideImagesRef}>
         <div className={classes.imageFrame}>
-          {firstSlide ? (
-            {firstSlide.video ? <video src={firstSlide.video} poster={firstSlide.image} autoPlay muted loop playsInline preload="auto" className={classes.image} ref={firstImgRef} style={imageScaleStyle(initialImageScale)} /> : <img alt={firstSlide.title} className={classes.image} ref={firstImgRef} src={firstSlide.image} style={imageScaleStyle(initialImageScale)} />}
-          ) : null}
+          {firstSlide ? (firstSlide.video ? <video src={firstSlide.video} poster={firstSlide.image} autoPlay muted loop playsInline preload="auto" className={classes.image} ref={(node) => { firstImgRef.current = node; }} style={imageScaleStyle(initialImageScale)} /> : <img alt={firstSlide.title} className={classes.image} ref={(node) => { firstImgRef.current = node; }} src={firstSlide.image} style={imageScaleStyle(initialImageScale)} />) : null}
         </div>
       </div>
 
