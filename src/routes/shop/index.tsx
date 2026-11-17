@@ -13,6 +13,7 @@ import { Footer } from "@/components/home/Footer";
 import { FilterPanel } from "@/components/shop/FilterPanel";
 import { ProductCard } from "@/components/shop/ProductCard";
 import {
+  brands,
   categories,
   defaultFilters,
   filterProducts,
@@ -53,7 +54,12 @@ function ShopPage() {
   const [liveProducts, setLiveProducts] = useState<Product[] | null>(null);
   useEffect(() => { let live = true; fetchPublicProducts().then((items) => { if (live && items !== null) setLiveProducts(items); }).catch(() => undefined); return () => { live = false; }; }, []);
   const catalogue = liveProducts ?? products;
-  const [filters, setFilters] = useState<Filters>(defaultFilters);
+  const [filters, setFilters] = useState<Filters>(() => {
+    const requestedBrand = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("brand") : null;
+    return requestedBrand && (brands as readonly string[]).includes(requestedBrand)
+      ? { ...defaultFilters, brand: requestedBrand as Filters["brand"] }
+      : defaultFilters;
+  });
   const [sort, setSort] = useState<SortKey>("newest");
   const [sheetOpen, setSheetOpen] = useState(false);
 
