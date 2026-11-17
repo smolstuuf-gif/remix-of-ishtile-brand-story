@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { AccountAccess } from "@/components/account/AccountAccess";
+import { MenuToggleIcon } from "@/components/ui/menu-toggle-icon";
 import {
   Activity,
   ArrowUpRight,
@@ -205,41 +206,42 @@ function Dashboard({
   const untrackedStock = (data?.products ?? []).filter((product) => product.stock_quantity === null).length;
   const pendingOrders = validOrders.filter((order) => order.fulfillment_status === "new" || order.fulfillment_status === "confirmed" || order.fulfillment_status === "processing").length;
   const rankedBrands = [...brandStats].sort((a, b) => b.revenue - a.revenue);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   return (
     <main className="min-h-screen bg-[#F0EAE0] text-[#171717]">
       <div className="flex min-h-screen">
-        <aside className="hidden w-[236px] shrink-0 flex-col border-r border-white/10 bg-[#171717] px-5 py-7 text-[#F0EAE0] lg:flex">
-          <div className="font-display text-2xl font-black tracking-[-0.07em]">ISHTILE<span className="text-[#D5FE00]">+</span></div>
-          <p className="mt-1 text-[9px] font-bold uppercase tracking-[0.24em] text-white/40">Operations desk</p>
-          <div className="mt-12 space-y-1">
-            <a href="#overview" className="flex items-center gap-3 bg-[#D5FE00] px-3 py-3 text-xs font-bold uppercase tracking-[0.1em] text-[#171717]"><ChartNoAxesCombined className="h-4 w-4" /> Overview</a>
-            <a href="#brands" className="flex items-center gap-3 px-3 py-3 text-xs font-semibold text-white/65 transition hover:bg-white/10 hover:text-white"><TrendingUp className="h-4 w-4" /> Brand sales</a>
-            <a href="#orders" className="flex items-center gap-3 px-3 py-3 text-xs font-semibold text-white/65 transition hover:bg-white/10 hover:text-white"><ShoppingBag className="h-4 w-4" /> Orders</a>
-            <a href="#inventory" className="flex items-center gap-3 px-3 py-3 text-xs font-semibold text-white/65 transition hover:bg-white/10 hover:text-white"><Boxes className="h-4 w-4" /> Inventory</a>
-          </div>
-          <div className="mt-auto border-t border-white/10 pt-5">
-            <p className="truncate text-xs font-semibold">{session.user.email ?? "Administrator"}</p>
-            <p className="mt-1 text-[10px] text-white/40">Authorised administrator</p>
-            <button onClick={onSignOut} className="mt-5 flex items-center gap-2 text-xs font-semibold text-white/55 transition hover:text-[#D5FE00]"><LogOut className="h-4 w-4" /> Sign out</button>
-          </div>
+        {drawerOpen && <button type="button" aria-label="Close dashboard menu" onClick={() => setDrawerOpen(false)} className="fixed inset-0 z-40 cursor-default bg-[#171717]/55 backdrop-blur-[2px]" />}
+        <aside className={`fixed inset-y-0 left-0 z-50 flex w-[min(86vw,300px)] flex-col border-r border-white/10 bg-[#171717] px-5 py-7 text-[#F0EAE0] shadow-[24px_0_70px_rgba(0,0,0,.24)] transition-transform duration-300 ease-[cubic-bezier(.22,1,.36,1)] ${drawerOpen ? "translate-x-0" : "-translate-x-full"}`} aria-hidden={!drawerOpen}>
+          <div className="flex items-center justify-between"><div><div className="font-display text-2xl font-black tracking-[-0.07em]">ISHTILE<span className="text-[#D5FE00]">+</span></div><p className="mt-1 text-[9px] font-bold uppercase tracking-[0.24em] text-white/40">Operations desk</p></div><button type="button" onClick={() => setDrawerOpen(false)} aria-label="Close menu" className="grid h-9 w-9 place-items-center border border-white/15 text-white/70 hover:border-[#D5FE00] hover:text-[#D5FE00]"><MenuToggleIcon open className="h-5 w-5" strokeWidth={2.2} duration={500} /></button></div>
+          <p className="mb-3 mt-12 text-[9px] font-bold uppercase tracking-[0.2em] text-white/35">Dashboard</p>
+          <nav className="space-y-1" aria-label="Dashboard sections">
+            <a href="#overview" onClick={() => setDrawerOpen(false)} className="flex items-center gap-3 bg-[#D5FE00] px-3 py-3 text-xs font-bold uppercase tracking-[0.1em] text-[#171717]"><ChartNoAxesCombined className="h-4 w-4" /> Overview</a>
+            <a href="#brands" onClick={() => setDrawerOpen(false)} className="flex items-center gap-3 px-3 py-3 text-xs font-semibold text-white/65 transition hover:bg-white/10 hover:text-white"><TrendingUp className="h-4 w-4" /> Brand sales</a>
+            <a href="#orders" onClick={() => setDrawerOpen(false)} className="flex items-center gap-3 px-3 py-3 text-xs font-semibold text-white/65 transition hover:bg-white/10 hover:text-white"><ShoppingBag className="h-4 w-4" /> Orders</a>
+            <a href="#inventory" onClick={() => setDrawerOpen(false)} className="flex items-center gap-3 px-3 py-3 text-xs font-semibold text-white/65 transition hover:bg-white/10 hover:text-white"><Boxes className="h-4 w-4" /> Inventory</a>
+          </nav>
+          <Link to="/admin/management" onClick={() => setDrawerOpen(false)} className="mt-5 flex items-center gap-2 border border-white/15 px-3 py-3 text-xs font-bold text-white/70 transition hover:border-[#D5FE00] hover:text-[#D5FE00]">Manage store <ArrowUpRight className="h-4 w-4" /></Link>
+          <div className="mt-auto border-t border-white/10 pt-5"><p className="truncate text-xs font-semibold">{session.user.email ?? "Administrator"}</p><p className="mt-1 text-[10px] text-white/40">Authorised administrator</p><button onClick={onSignOut} className="mt-5 flex items-center gap-2 text-xs font-semibold text-white/55 transition hover:text-[#D5FE00]"><LogOut className="h-4 w-4" /> Sign out</button></div>
         </aside>
 
         <div className="min-w-0 flex-1">
           <header className="sticky top-0 z-20 flex items-center justify-between border-b border-black/10 bg-[#F0EAE0]/95 px-5 py-4 backdrop-blur md:px-8">
-            <div>
+            <div className="flex min-w-0 items-center gap-3">
+              <button type="button" onClick={() => setDrawerOpen(true)} aria-label="Open dashboard menu" aria-expanded={drawerOpen} className="grid h-10 w-10 shrink-0 place-items-center bg-[#171717] text-[#D5FE00] transition hover:bg-black"><MenuToggleIcon open={drawerOpen} className="h-6 w-6" strokeWidth={2.2} duration={500} /></button>
+              <div className="min-w-0">
               <p className="text-[9px] font-bold uppercase tracking-[0.22em] text-black/45">ISHTILE+ / Admin</p>
               <h1 className="mt-1 font-display text-2xl font-black tracking-[-0.055em] md:text-3xl">Overview<span className="text-black/25">.</span></h1>
+              </div>
             </div>
             <div className="flex items-center gap-2">
-              <Link to="/admin/management" className="inline-flex h-10 items-center gap-2 bg-[#171717] px-3 text-xs font-bold uppercase tracking-wide text-[#F0EAE0] transition hover:bg-black/80">Manage store</Link>
+              <Link to="/admin/management" className="hidden h-10 items-center gap-2 bg-[#171717] px-3 text-xs font-bold uppercase tracking-wide text-[#F0EAE0] transition hover:bg-black/80 sm:inline-flex">Manage store</Link>
               <select value={days} onChange={(event) => setDays(Number(event.target.value))} className="h-10 border border-black/15 bg-transparent px-3 text-xs font-semibold outline-none focus:border-black">
                 <option value={7}>Weekly performance · 7 days</option>
                 <option value={30}>Monthly performance · 30 days</option>
                 <option value={90}>Last 90 days</option>
               </select>
               <button onClick={onRefresh} aria-label="Refresh dashboard" className="grid h-10 w-10 place-items-center border border-black/15 transition hover:bg-black hover:text-[#F0EAE0]"><RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} /></button>
-              <button onClick={onSignOut} aria-label="Sign out" className="grid h-10 w-10 place-items-center border border-black/15 lg:hidden"><LogOut className="h-4 w-4" /></button>
             </div>
           </header>
 
