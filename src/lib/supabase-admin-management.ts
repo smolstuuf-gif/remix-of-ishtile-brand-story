@@ -87,6 +87,11 @@ export type AdminCollection = {
   campaign_label: string | null; show_homepage: boolean; is_active: boolean; starts_at: string | null;
   ends_at: string | null; sort_order: number; collection_products?: { product_id: string; sort_order: number }[];
 };
+export type AdminLook = {
+  id: string; slug: string; title: string; description: string | null; image_url: string;
+  alt_text: string | null; sort_order: number; is_active: boolean; starts_at: string | null; ends_at: string | null;
+  lookbook_look_products?: { product_id: string; sort_order: number; default_size: string | null; default_color: string | null; default_quantity: number }[];
+};
 export type SiteBrandInfo = {
   id: number; social_links: Record<string, string>; contact_numbers: string[]; address: string | null;
   motto: string | null; about_text: string | null; logo_url: string | null; symbol_url: string | null;
@@ -102,17 +107,28 @@ export type AdminOrder = {
 };
 
 export async function loadAdminWorkspace(session: AdminSession) {
-  const [brands, products, slides, collections, customers, admins, settings, orders] = await Promise.all([
+  const [brands, products, slides, collections, looks, customers, admins, settings, orders] = await Promise.all([
     adminData<AdminBrand[]>("brands?select=*&order=sort_order.asc,name.asc", session),
     adminData<AdminProduct[]>("products?select=*&order=created_at.desc", session),
     adminData<HeroSlide[]>("hero_slides?select=*&order=sort_order.asc,created_at.desc", session),
     adminData<AdminCollection[]>("collections?select=*,collection_products(product_id,sort_order)&order=sort_order.asc,created_at.desc", session),
+    adminData<AdminLook[]>("lookbook_looks?select=*,lookbook_look_products(product_id,sort_order,default_size,default_color,default_quantity)&order=sort_order.asc,created_at.desc", session),
     adminData<CustomerProfile[]>("customer_profiles?select=*&order=created_at.desc&limit=500", session),
     adminData<{ user_id: string; created_at: string }[]>("admin_users?select=user_id,created_at&order=created_at.asc", session),
     adminData<SiteBrandInfo[]>("site_brand_info?select=*&id=eq.1&limit=1", session),
     adminData<AdminOrder[]>("orders?select=id,order_number,customer_phone,created_at,total,payment_status,fulfillment_status,order_items(brand_name,quantity,line_total)&order=created_at.desc&limit=500", session),
   ]);
-  return { brands, products, slides, collections, customers, admins, settings: settings[0], orders };
+  return { brands, products, slides, collections, looks, customers, admins, settings: settings[0], orders };
+}
+
+export async function adminRpc<T>(name: string, session: AdminSession, body: unknown): Promise<T> {
+  const { url, key } = config();
+  const response = await fetch(`${url}/rest/v1/rpc/${name}`, {
+    method: "POST",
+    headers: { apikey: key, Authorization: `Bearer ${session.access_token}`, "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  return parse<T>(response);
 }
 
 export function slugify(value: string) {
