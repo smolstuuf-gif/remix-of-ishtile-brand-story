@@ -259,6 +259,54 @@ function ProductsPanel({ products, brands, initialBrandFilter, session, busy, pe
   </div>;
 }
 
+function HeroSlideEditor({ slide, session, busy, perform }: {
+  slide: HeroSlide; session: AdminSession; busy: boolean;
+  perform: (action: () => Promise<unknown>, message: string) => Promise<void>;
+}) {
+  const [draft, setDraft] = useState({
+    title: slide.title ?? "", subtitle: slide.subtitle ?? "", image_url: slide.image_url ?? "",
+    mobile_image_url: slide.mobile_image_url ?? "", link_url: slide.link_url ?? "",
+    sort_order: String(slide.sort_order), starts_at: dateInputValue(slide.starts_at), ends_at: dateInputValue(slide.ends_at),
+  });
+  useEffect(() => setDraft({
+    title: slide.title ?? "", subtitle: slide.subtitle ?? "", image_url: slide.image_url ?? "",
+    mobile_image_url: slide.mobile_image_url ?? "", link_url: slide.link_url ?? "",
+    sort_order: String(slide.sort_order), starts_at: dateInputValue(slide.starts_at), ends_at: dateInputValue(slide.ends_at),
+  }), [slide]);
+  async function save(event: FormEvent) {
+    event.preventDefault();
+    await perform(() => adminWrite(`hero_slides?id=eq.${slide.id}`, session, "PATCH", {
+      ...draft, sort_order: Number(draft.sort_order),
+      starts_at: draft.starts_at ? new Date(draft.starts_at).toISOString() : null,
+      ends_at: draft.ends_at ? new Date(draft.ends_at).toISOString() : null,
+    }), "Hero slide updated.");
+  }
+  return <details className="border border-black/10 bg-[#F7F3EC]">
+    <summary className="flex cursor-pointer list-none flex-wrap items-center gap-3 p-3 [&::-webkit-details-marker]:hidden">
+      <img src={slide.image_url} alt="" className="h-20 w-28 shrink-0 bg-[#E8E1D6] object-cover" />
+      <span className="min-w-[130px] flex-1"><span className="block text-sm font-bold">{slide.title || "Untitled slide"}</span><span className="mt-1 block text-[10px] text-black/45">Order {slide.sort_order} · {slide.is_active ? "Enabled" : "Disabled"}</span><span className="mt-1 block text-[10px] text-black/45">{slide.starts_at ? new Date(slide.starts_at).toLocaleString() : "No start date"}{slide.ends_at ? ` → ${new Date(slide.ends_at).toLocaleString()}` : ""}</span></span>
+      <span className="text-[10px] font-bold uppercase tracking-wider text-black/45">Edit slide <ChevronRight className="ml-1 inline h-4 w-4" /></span>
+    </summary>
+    <div className="border-t border-black/10 p-4">
+      <form onSubmit={save} className="grid gap-3 sm:grid-cols-2">
+        <Field label="Title" name={`hero-title-${slide.id}`} value={draft.title} onChange={(v) => setDraft({ ...draft, title: v })} />
+        <Field label="Subtitle" name={`hero-subtitle-${slide.id}`} value={draft.subtitle} onChange={(v) => setDraft({ ...draft, subtitle: v })} />
+        <div className="space-y-2 sm:col-span-2"><ImageUrlField label="Desktop image URL" name={`hero-image-${slide.id}`} value={draft.image_url} onChange={(v) => setDraft({ ...draft, image_url: v })} /><UploadField label="Replace desktop image" session={session} folder="hero" busy={busy} onUploaded={(url) => setDraft((d) => ({ ...d, image_url: url }))} /></div>
+        <div className="space-y-2 sm:col-span-2"><ImageUrlField label="Mobile image URL" name={`hero-mobile-${slide.id}`} value={draft.mobile_image_url} onChange={(v) => setDraft({ ...draft, mobile_image_url: v })} /><UploadField label="Replace mobile image" session={session} folder="hero" busy={busy} onUploaded={(url) => setDraft((d) => ({ ...d, mobile_image_url: url }))} /></div>
+        <Field label="Link URL" name={`hero-link-${slide.id}`} value={draft.link_url} onChange={(v) => setDraft({ ...draft, link_url: v })} />
+        <Field label="Display order" name={`hero-order-${slide.id}`} type="number" value={draft.sort_order} onChange={(v) => setDraft({ ...draft, sort_order: v })} />
+        <Field label="Starts" name={`hero-start-${slide.id}`} type="datetime-local" value={draft.starts_at} onChange={(v) => setDraft({ ...draft, starts_at: v })} />
+        <Field label="Ends" name={`hero-end-${slide.id}`} type="datetime-local" value={draft.ends_at} onChange={(v) => setDraft({ ...draft, ends_at: v })} />
+        <div className="flex flex-wrap gap-2 sm:col-span-2">
+          <button className={buttonClass} disabled={busy || !draft.image_url}><Save className="h-4 w-4" /> Save changes</button>
+          <button type="button" className={secondaryClass} disabled={busy} onClick={() => void perform(() => adminWrite(`hero_slides?id=eq.${slide.id}`, session, "PATCH", { is_active: !slide.is_active }), slide.is_active ? "Slide disabled." : "Slide enabled.")}>{slide.is_active ? "Disable slide" : "Enable slide"}</button>
+          <button type="button" className={secondaryClass} disabled={busy} onClick={() => { if (confirm("Remove this hero slide?")) void perform(() => adminWrite(`hero_slides?id=eq.${slide.id}`, session, "DELETE"), "Hero slide removed."); }}><Trash2 className="h-4 w-4" /> Delete</button>
+        </div>
+      </form>
+    </div>
+  </details>;
+}
+
 function HeroPanel({ slides, settings, session, busy, perform }: { slides: HeroSlide[]; settings?: SiteBrandInfo; session: AdminSession; busy: boolean; perform: (action: () => Promise<unknown>, message: string) => Promise<void> }) {
   const [draft, setDraft] = useState({ title: "", subtitle: "", image_url: "", mobile_image_url: "", link_url: "", sort_order: String(slides.length), starts_at: "", ends_at: "" });
   const [interval, setInterval] = useState(String(settings?.hero_autoplay_ms ?? 5000));
@@ -266,7 +314,7 @@ function HeroPanel({ slides, settings, session, busy, perform }: { slides: HeroS
   return <><PanelHeading eyebrow="Homepage media" title="Hero controls" detail="Choose which slide is live, set autoplay timing and schedule slides for campaigns." />
     <div className="mb-5 flex flex-wrap items-end gap-3 border border-black/10 bg-[#171717] p-4 text-[#F0EAE0]"><label className="text-[10px] font-bold uppercase tracking-wide text-white/60">Auto-scroll interval (milliseconds)<input className="mt-2 block w-44 border border-white/20 bg-white/10 px-3 py-2 text-sm text-white" type="number" min="1000" max="15000" step="500" value={interval} onChange={(e) => setInterval(e.target.value)} /></label><button className={`${buttonClass} bg-[#D5FE00] text-[#171717] hover:bg-[#c5ed00]`} disabled={busy} onClick={() => void perform(() => adminWrite("site_brand_info?id=eq.1", session, "PATCH", { hero_autoplay_ms: Math.min(15000, Math.max(1000, Number(interval))) }), "Hero autoplay timing saved.")}><Save className="h-4 w-4" /> Save timing</button><span className="text-[10px] text-white/45">1,000–15,000 ms</span></div>
     <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
-      <div className="space-y-3">{slides.map((slide) => <div key={slide.id} className="flex flex-wrap items-center gap-3 border border-black/10 bg-[#F7F3EC] p-3"><img src={slide.image_url} alt="" className="h-20 w-28 bg-[#E8E1D6] object-cover" /><div className="min-w-[130px] flex-1"><p className="text-sm font-bold">{slide.title || "Untitled slide"}</p><p className="mt-1 text-[10px] text-black/45">Order {slide.sort_order} · {slide.starts_at ? new Date(slide.starts_at).toLocaleString() : "No start date"}{slide.ends_at ? ` → ${new Date(slide.ends_at).toLocaleString()}` : ""}</p><p className="mt-1 text-[10px] text-black/45">{slide.is_active ? "Enabled" : "Disabled"}</p></div><button className={secondaryClass} disabled={busy} onClick={() => void perform(() => adminWrite(`hero_slides?id=eq.${slide.id}`, session, "PATCH", { is_active: !slide.is_active }), slide.is_active ? "Slide disabled." : "Slide enabled.")}>{slide.is_active ? "Disable" : "Enable"}</button><button className={secondaryClass} disabled={busy} onClick={() => { if (confirm("Remove this hero slide?")) void perform(() => adminWrite(`hero_slides?id=eq.${slide.id}`, session, "DELETE"), "Hero slide removed."); }}><Trash2 className="h-4 w-4" /></button></div>)}{!slides.length && <Empty title="No hero slides yet" detail="Add the first slide using the form." />}</div>
+      <div className="space-y-3">{slides.map((slide) => <HeroSlideEditor key={slide.id} slide={slide} session={session} busy={busy} perform={perform} />)}{!slides.length && <Empty title="No hero slides yet" detail="Add the first slide using the form." />}</div>
       <form onSubmit={addSlide} className="space-y-3 border border-black/10 bg-[#F7F3EC] p-4"><h3 className="text-sm font-black">Add hero slide</h3><Field label="Title" name="title" value={draft.title} onChange={(v) => setDraft({ ...draft, title: v })} /><Field label="Subtitle" name="subtitle" value={draft.subtitle} onChange={(v) => setDraft({ ...draft, subtitle: v })} /><ImageUrlField label="Desktop image URL" name="image_url" value={draft.image_url} onChange={(v) => setDraft({ ...draft, image_url: v })} /><UploadField label="Upload desktop image" session={session} folder="hero" busy={busy} onUploaded={(url) => setDraft((d) => ({ ...d, image_url: url }))} /><ImageUrlField label="Mobile image URL (optional)" name="mobile_image_url" value={draft.mobile_image_url} onChange={(v) => setDraft({ ...draft, mobile_image_url: v })} /><UploadField label="Upload mobile image" session={session} folder="hero" busy={busy} onUploaded={(url) => setDraft((d) => ({ ...d, mobile_image_url: url }))} /><Field label="Link URL" name="link_url" value={draft.link_url} onChange={(v) => setDraft({ ...draft, link_url: v })} /><Field label="Display order" name="sort_order" type="number" value={draft.sort_order} onChange={(v) => setDraft({ ...draft, sort_order: v })} /><div className="grid grid-cols-2 gap-2"><Field label="Starts" name="starts_at" type="datetime-local" value={draft.starts_at} onChange={(v) => setDraft({ ...draft, starts_at: v })} /><Field label="Ends" name="ends_at" type="datetime-local" value={draft.ends_at} onChange={(v) => setDraft({ ...draft, ends_at: v })} /></div><button className={buttonClass} disabled={busy || !draft.image_url}><Plus className="h-4 w-4" /> Add slide</button></form>
     </div>
   </>;
