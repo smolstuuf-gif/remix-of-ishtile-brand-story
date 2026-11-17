@@ -19,12 +19,11 @@ export const Route = createFileRoute("/admin/management")({
   component: ManagementPage,
 });
 
-type Tab = "products" | "hero" | "collections" | "lookbook" | "brands" | "accounts" | "brand-info";
+type Tab = "products" | "hero" | "collections" | "brands" | "accounts" | "brand-info";
 const tabs: { id: Tab; label: string; hint: string }[] = [
   { id: "products", label: "Products", hint: "Catalogue and inventory" },
   { id: "hero", label: "Hero controls", hint: "Slides and scheduling" },
   { id: "collections", label: "Collections", hint: "Homepage campaigns" },
-  { id: "lookbook", label: "Buy the Look", hint: "Model shoots and outfit sets" },
   { id: "brands", label: "Brands", hint: "Brand workspaces" },
   { id: "accounts", label: "Accounts", hint: "Administrators and customers" },
   { id: "brand-info", label: "Brand info", hint: "Main ISHTILE identity" },
@@ -105,9 +104,9 @@ function ManagementPage() {
           <Link to="/admin" onClick={() => setDrawerOpen(false)} className="mt-8 flex items-center gap-2 border border-white/15 px-3 py-3 text-xs font-semibold text-white/65 transition hover:border-[#D5FE00] hover:text-[#D5FE00]"><ArrowLeft className="h-4 w-4" /> Back to dashboard</Link>
           <p className="mb-3 mt-9 text-[9px] font-bold uppercase tracking-[0.2em] text-white/35">Management sections</p>
           <nav className="space-y-1.5" aria-label="Store management sections">
-            {tabs.map((item, index) => <button key={item.id} type="button" onClick={() => { setTab(item.id); setDrawerOpen(false); }} aria-current={tab === item.id ? "page" : undefined} className={`group flex w-full items-center gap-3 py-3.5 text-left transition-all duration-200 ${item.id === "lookbook" ? "ml-7 w-[calc(100%-1.75rem)] border-l border-white/20 pl-3 pr-2" : "px-3"} ${tab === item.id ? "bg-[#D5FE00] text-[#171717] shadow-[4px_4px_0_rgba(213,254,0,.18)]" : "text-white/65 hover:translate-x-1 hover:bg-white/10 hover:text-white"}`}>
-              <span className={`grid h-8 w-8 shrink-0 place-items-center text-[10px] font-black ${tab === item.id ? "bg-[#171717] text-[#D5FE00]" : "bg-white/10 text-white/55"}`}>{item.id === "lookbook" ? "↳" : `0${index + 1}`}</span>
-              <span className="min-w-0 flex-1"><span className="block text-xs font-black uppercase tracking-[0.07em]">{item.id === "lookbook" ? "Lookbook" : item.label}</span><span className={`mt-1 block text-[10px] ${tab === item.id ? "text-black/60" : "text-white/35"}`}>{item.id === "lookbook" ? "Buy the Look · Collections" : item.hint}</span></span>
+            {tabs.map((item, index) => <button key={item.id} type="button" onClick={() => { setTab(item.id); setDrawerOpen(false); }} aria-current={tab === item.id ? "page" : undefined} className={`group flex w-full items-center gap-3 px-3 py-3.5 text-left transition-all duration-200 ${tab === item.id ? "bg-[#D5FE00] text-[#171717] shadow-[4px_4px_0_rgba(213,254,0,.18)]" : "text-white/65 hover:translate-x-1 hover:bg-white/10 hover:text-white"}`}>
+              <span className={`grid h-8 w-8 shrink-0 place-items-center text-[10px] font-black ${tab === item.id ? "bg-[#171717] text-[#D5FE00]" : "bg-white/10 text-white/55"}`}>{`0${index + 1}`}</span>
+              <span className="min-w-0 flex-1"><span className="block text-xs font-black uppercase tracking-[0.07em]">{item.label}</span><span className={`mt-1 block text-[10px] ${tab === item.id ? "text-black/60" : "text-white/35"}`}>{item.hint}</span></span>
               <ChevronRight className={`h-4 w-4 transition-transform ${tab === item.id ? "translate-x-0 text-[#171717]" : "-translate-x-1 opacity-0 group-hover:translate-x-0 group-hover:opacity-70"}`} />
             </button>)}
           </nav>
@@ -128,8 +127,7 @@ function ManagementPage() {
               <>
                 {tab === "products" && <ProductsPanel products={workspace.products} brands={workspace.brands} initialBrandFilter={brandFilterRequest} session={session} busy={busy} perform={perform} />}
                 {tab === "hero" && <HeroPanel slides={workspace.slides} settings={workspace.settings} session={session} busy={busy} perform={perform} />}
-                {tab === "collections" && <CollectionsPanel collections={workspace.collections} products={workspace.products} session={session} busy={busy} perform={perform} />}
-                {tab === "lookbook" && <LookbookPanel looks={workspace.looks} products={workspace.products} session={session} busy={busy} perform={perform} />}
+                {tab === "collections" && <CollectionsPanel collections={workspace.collections} looks={workspace.looks} products={workspace.products} session={session} busy={busy} perform={perform} />}
                 {tab === "brands" && <BrandsPanel brands={workspace.brands} products={workspace.products} orders={workspace.orders} onManageProducts={(brandId) => { setBrandFilterRequest(brandId); setTab("products"); }} session={session} busy={busy} perform={perform} />}
                 {tab === "accounts" && <AccountsPanel admins={workspace.admins} customers={workspace.customers} orders={workspace.orders} session={session} busy={busy} perform={perform} />}
                 {tab === "brand-info" && <BrandInfoPanel settings={workspace.settings} session={session} busy={busy} perform={perform} />}
@@ -253,55 +251,150 @@ function HeroPanel({ slides, settings, session, busy, perform }: { slides: HeroS
   </>;
 }
 
-function CollectionsPanel({ collections, products, session, busy, perform }: { collections: AdminCollection[]; products: AdminProduct[]; session: AdminSession; busy: boolean; perform: (action: () => Promise<unknown>, message: string) => Promise<void> }) {
+function collectionSeason(slug: string): AdminLook["season"] {
+  if (slug.includes("spring")) return "spring";
+  if (slug.includes("summer")) return "summer";
+  if (slug.includes("festive")) return "festive";
+  if (slug.includes("monsoon")) return "monsoon";
+  if (slug.includes("winter")) return "winter";
+  return null;
+}
+
+function CollectionsPanel({ collections, looks, products, session, busy, perform }: {
+  collections: AdminCollection[]; looks: AdminLook[]; products: AdminProduct[]; session: AdminSession; busy: boolean;
+  perform: (action: () => Promise<unknown>, message: string) => Promise<void>;
+}) {
   const [draft, setDraft] = useState({ title: "", slug: "", description: "", image_url: "", campaign_label: "", sort_order: String(collections.length), starts_at: "", ends_at: "" });
-  const [selected, setSelected] = useState<AdminCollection | null>(null);
-  const [chosen, setChosen] = useState<string[]>([]);
-  const [collectionDraft, setCollectionDraft] = useState({ title: "", slug: "", description: "", image_url: "", campaign_label: "", sort_order: "0", starts_at: "", ends_at: "" });
   const [filter, setFilter] = useState("all");
   const active = collections.filter((c) => filter === "all" || (filter === "home" ? c.show_homepage : !c.show_homepage));
-  useEffect(() => { setChosen(selected?.collection_products?.map((x) => x.product_id) ?? []); if (selected) setCollectionDraft({ title: selected.title, slug: selected.slug, description: selected.description ?? "", image_url: selected.image_url ?? "", campaign_label: selected.campaign_label ?? "", sort_order: String(selected.sort_order), starts_at: dateInputValue(selected.starts_at), ends_at: dateInputValue(selected.ends_at) }); }, [selected]);
-  async function add(e: FormEvent) { e.preventDefault(); await perform(() => adminWrite("collections", session, "POST", { ...draft, slug: slugify(draft.slug || draft.title), sort_order: Number(draft.sort_order), show_homepage: false, is_active: true, starts_at: draft.starts_at ? new Date(draft.starts_at).toISOString() : null, ends_at: draft.ends_at ? new Date(draft.ends_at).toISOString() : null }), "Collection campaign added."); setDraft({ title: "", slug: "", description: "", image_url: "", campaign_label: "", sort_order: String(collections.length + 1), starts_at: "", ends_at: "" }); }
-  async function saveProducts() { if (!selected) return; await perform(async () => { await adminWrite(`collection_products?collection_id=eq.${selected.id}`, session, "DELETE"); if (chosen.length) await adminWrite("collection_products", session, "POST", chosen.map((product_id, sort_order) => ({ collection_id: selected.id, product_id, sort_order }))); }, "Collection products updated."); }
-  async function saveCollectionDetails(e: FormEvent) { e.preventDefault(); if (!selected) return; await perform(() => adminWrite(`collections?id=eq.${selected.id}`, session, "PATCH", { ...collectionDraft, slug: slugify(collectionDraft.slug || collectionDraft.title), sort_order: Number(collectionDraft.sort_order), starts_at: collectionDraft.starts_at ? new Date(collectionDraft.starts_at).toISOString() : null, ends_at: collectionDraft.ends_at ? new Date(collectionDraft.ends_at).toISOString() : null }), "Collection details updated."); }
-  return <><PanelHeading eyebrow="Homepage campaigns" title="Collection controls" detail="Manage current and previous campaigns, homepage visibility, campaign dates, artwork and the products inside each collection." action={<select className="border border-black/15 bg-white/60 px-3 py-2 text-xs" value={filter} onChange={(e) => setFilter(e.target.value)}><option value="all">All collections</option><option value="home">Homepage only</option><option value="hidden">Not on homepage</option></select>} />
-    <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]"><div className="space-y-3">{active.map((c) => <div key={c.id} className={`border bg-[#F7F3EC] p-4 ${selected?.id === c.id ? "border-black" : "border-black/10"}`}><div className="flex flex-wrap items-center gap-3">{c.image_url && <img src={c.image_url} alt="" className="h-16 w-24 object-cover" />}<div className="min-w-[140px] flex-1"><p className="text-sm font-bold">{c.title}</p><p className="mt-1 text-[10px] text-black/45">{c.campaign_label || "Campaign"} · {c.collection_products?.length ?? 0} products</p><p className="mt-1 text-[10px] text-black/45">{c.is_active ? "Active" : "Inactive"} · {c.show_homepage ? "Shown on homepage" : "Hidden from homepage"}</p></div><button className={secondaryClass} onClick={() => setSelected(c)}>Edit products</button><button className={secondaryClass} disabled={busy} onClick={() => void perform(() => adminWrite(`collections?id=eq.${c.id}`, session, "PATCH", { show_homepage: !c.show_homepage }), c.show_homepage ? "Collection hidden from homepage." : "Collection shown on homepage.")}>{c.show_homepage ? "Hide" : "Show"}</button><button className={secondaryClass} disabled={busy} onClick={() => void perform(() => adminWrite(`collections?id=eq.${c.id}`, session, "PATCH", { is_active: !c.is_active }), c.is_active ? "Campaign paused." : "Campaign activated.")}>{c.is_active ? "Pause" : "Activate"}</button><button className={secondaryClass} disabled={busy} onClick={() => { if (confirm(`Delete collection ${c.title}?`)) void perform(() => adminWrite(`collections?id=eq.${c.id}`, session, "DELETE"), "Collection deleted."); }}><Trash2 className="h-4 w-4" /></button></div></div>)}{!active.length && <Empty title="No collections found" detail="Create a campaign with the form." />}
-      {selected && <div className="space-y-5 border border-black/10 bg-white/60 p-4">
-        <form onSubmit={saveCollectionDetails} className="grid gap-3 border-b border-black/10 pb-5 sm:grid-cols-2">
-          <div className="flex items-center justify-between sm:col-span-2"><h3 className="text-sm font-black">Edit {selected.title}</h3><button type="button" onClick={() => setSelected(null)} className="text-xs underline">Close</button></div>
-          <Field label="Collection title" name="title" value={collectionDraft.title} required onChange={(v) => setCollectionDraft({ ...collectionDraft, title: v })} />
-          <Field label="Slug" name="slug" value={collectionDraft.slug} onChange={(v) => setCollectionDraft({ ...collectionDraft, slug: v })} />
-          <Field label="Campaign label" name="campaign_label" value={collectionDraft.campaign_label} onChange={(v) => setCollectionDraft({ ...collectionDraft, campaign_label: v })} />
-          <Field label="Display order" name="sort_order" type="number" value={collectionDraft.sort_order} onChange={(v) => setCollectionDraft({ ...collectionDraft, sort_order: v })} />
-          <div className="space-y-2 sm:col-span-2"><ImageUrlField label="Collection image URL" name="image_url" value={collectionDraft.image_url} onChange={(v) => setCollectionDraft({ ...collectionDraft, image_url: v })} /><UploadField label="Replace collection artwork" session={session} folder="collections" busy={busy} onUploaded={(url) => setCollectionDraft((d) => ({ ...d, image_url: url }))} /></div>
-          <div className="sm:col-span-2"><TextField label="Description" name="description" value={collectionDraft.description} onChange={(v) => setCollectionDraft({ ...collectionDraft, description: v })} /></div><Field label="Starts" name="starts_at" type="datetime-local" value={collectionDraft.starts_at} onChange={(v) => setCollectionDraft({ ...collectionDraft, starts_at: v })} /><Field label="Ends" name="ends_at" type="datetime-local" value={collectionDraft.ends_at} onChange={(v) => setCollectionDraft({ ...collectionDraft, ends_at: v })} />
-          <button className={buttonClass} disabled={busy || !collectionDraft.title}><Save className="h-4 w-4" /> Save collection details</button>
-        </form>
-        <div><div className="mb-3 flex items-center justify-between"><h3 className="text-sm font-black">Products in {selected.title}</h3><span className="text-[10px] text-black/45">{chosen.length} selected</span></div><div className="grid gap-2 sm:grid-cols-2">{products.map((p) => <ProductSelectionCard key={p.id} product={p} checked={chosen.includes(p.id)} onChange={() => setChosen((old) => old.includes(p.id) ? old.filter((id) => id !== p.id) : [...old, p.id])} />)}</div><button className={`${buttonClass} mt-4`} disabled={busy} onClick={() => void saveProducts()}><Save className="h-4 w-4" /> Save product selection</button></div></div>}
+
+  async function add(e: FormEvent) {
+    e.preventDefault();
+    await perform(() => adminWrite("collections", session, "POST", {
+      ...draft, slug: slugify(draft.slug || draft.title), sort_order: Number(draft.sort_order),
+      show_homepage: false, is_active: true,
+      starts_at: draft.starts_at ? new Date(draft.starts_at).toISOString() : null,
+      ends_at: draft.ends_at ? new Date(draft.ends_at).toISOString() : null,
+    }), "Collection created.");
+    setDraft({ title: "", slug: "", description: "", image_url: "", campaign_label: "", sort_order: String(collections.length + 1), starts_at: "", ends_at: "" });
+  }
+
+  return <>
+    <PanelHeading eyebrow="Collection workspace" title="Collections & lookbooks" detail="Each collection owns its lookbook images. Open a collection, edit its identity, add editorial images, then assign a separate product set to every image." action={<select className="border border-black/15 bg-white/60 px-3 py-2 text-xs" value={filter} onChange={(e) => setFilter(e.target.value)}><option value="all">All collections</option><option value="home">Homepage only</option><option value="hidden">Not on homepage</option></select>} />
+    <div className="space-y-3">
+      {active.map((collection) => {
+        const collectionLooks = looks.filter((look) => look.collection_id === collection.id).sort((a, b) => a.sort_order - b.sort_order);
+        return <details key={collection.id} className="group border border-black/15 bg-[#F7F3EC]">
+          <summary className="flex cursor-pointer list-none flex-wrap items-center gap-3 p-4 [&::-webkit-details-marker]:hidden">
+            {collection.image_url ? <img src={collection.image_url} alt="" className="h-16 w-24 shrink-0 object-cover" /> : <div className="grid h-16 w-24 shrink-0 place-items-center bg-[#E8E1D6] text-[9px] font-bold uppercase text-black/35">No cover</div>}
+            <span className="min-w-0 flex-1"><span className="block text-sm font-black">{collection.title}</span><span className="mt-1 block text-[10px] text-black/45">/{collection.slug} · {collectionLooks.length} lookbook images · {collection.is_active ? "Active" : "Paused"}</span><span className="mt-1 block text-[10px] text-black/45">{collection.show_homepage ? "Shown on homepage" : "Hidden from homepage"}</span></span>
+            <span className="flex items-center gap-2 text-[10px] font-bold uppercase text-black/45"><span className="hidden sm:inline">Manage collection</span><ChevronRight className="h-4 w-4 transition-transform group-open:rotate-90" /></span>
+          </summary>
+          <div className="space-y-5 border-t border-black/10 p-4 md:p-5">
+            <form onSubmit={(event) => {
+              event.preventDefault();
+              void perform(() => adminWrite(\`collections?id=eq.\${collection.id}\`, session, "PATCH", {
+                title: collection.title, slug: collection.slug,
+              }), "Collection identity updated.");
+            }} className="hidden" />
+            <CollectionDetailsEditor collection={collection} session={session} busy={busy} perform={perform} />
+            <div className="flex flex-wrap items-center justify-between gap-2 border-t border-black/10 pt-4">
+              <div><h3 className="text-sm font-black">Lookbook images</h3><p className="mt-1 text-[10px] text-black/45">Each image has its own linked products, default size, colour and quantity.</p></div>
+              <span className="text-[10px] font-bold uppercase text-black/45">{collectionLooks.length} images</span>
+            </div>
+            <div className="space-y-3">
+              {collectionLooks.map((look) => <CollectionLookEditor key={look.id} collection={collection} look={look} looksCount={collectionLooks.length} products={products} session={session} busy={busy} perform={perform} />)}
+              <CollectionLookEditor key={\`new-\${collection.id}\`} collection={collection} looksCount={collectionLooks.length} products={products} session={session} busy={busy} perform={perform} />
+            </div>
+            <div className="flex flex-wrap gap-2 border-t border-black/10 pt-4">
+              <button type="button" className={secondaryClass} disabled={busy} onClick={() => void perform(() => adminWrite(\`collections?id=eq.\${collection.id}\`, session, "PATCH", { show_homepage: !collection.show_homepage }), collection.show_homepage ? "Collection hidden from homepage." : "Collection shown on homepage.")}>{collection.show_homepage ? "Hide from homepage" : "Show on homepage"}</button>
+              <button type="button" className={secondaryClass} disabled={busy} onClick={() => void perform(() => adminWrite(\`collections?id=eq.\${collection.id}\`, session, "PATCH", { is_active: !collection.is_active }), collection.is_active ? "Collection paused." : "Collection activated.")}>{collection.is_active ? "Pause collection" : "Activate collection"}</button>
+              <button type="button" className={secondaryClass} disabled={busy} onClick={() => { if (confirm(\`Delete collection “\${collection.title}” and all its nested lookbook images?\`)) void perform(() => adminWrite(\`collections?id=eq.\${collection.id}\`, session, "DELETE"), "Collection and its lookbook images deleted."); }}><Trash2 className="h-4 w-4" /> Delete collection</button>
+            </div>
+          </div>
+        </details>;
+      })}
+      {!active.length && <Empty title="No collections found" detail="Create a collection with the form below." />}
     </div>
-    <form onSubmit={add} className="space-y-3 border border-black/10 bg-[#F7F3EC] p-4"><h3 className="text-sm font-black">Add collection campaign</h3><Field label="Collection title" name="title" value={draft.title} required onChange={(v) => setDraft({ ...draft, title: v, slug: slugify(v) })} /><Field label="Slug" name="slug" value={draft.slug} onChange={(v) => setDraft({ ...draft, slug: v })} /><Field label="Campaign label" name="campaign_label" value={draft.campaign_label} onChange={(v) => setDraft({ ...draft, campaign_label: v })} /><ImageUrlField label="Image URL" name="image_url" value={draft.image_url} onChange={(v) => setDraft({ ...draft, image_url: v })} /><UploadField label="Upload collection artwork" session={session} folder="collections" busy={busy} onUploaded={(url) => setDraft((d) => ({ ...d, image_url: url }))} /><TextField label="Description" name="description" value={draft.description} onChange={(v) => setDraft({ ...draft, description: v })} /><Field label="Display order" name="sort_order" type="number" value={draft.sort_order} onChange={(v) => setDraft({ ...draft, sort_order: v })} /><div className="grid grid-cols-2 gap-2"><Field label="Starts" name="starts_at" type="datetime-local" value={draft.starts_at} onChange={(v) => setDraft({ ...draft, starts_at: v })} /><Field label="Ends" name="ends_at" type="datetime-local" value={draft.ends_at} onChange={(v) => setDraft({ ...draft, ends_at: v })} /></div><button className={buttonClass} disabled={busy || !draft.title}><Plus className="h-4 w-4" /> Add collection</button></form></div>
+    <form onSubmit={add} className="grid gap-3 border border-black/10 bg-[#F7F3EC] p-4 md:grid-cols-2">
+      <div className="md:col-span-2"><h3 className="text-sm font-black">Add collection</h3><p className="mt-1 text-[10px] text-black/45">A new collection starts with an empty lookbook. Add its editorial images after saving.</p></div>
+      <Field label="Collection name" name="title" value={draft.title} required onChange={(v) => setDraft({ ...draft, title: v, slug: slugify(v) })} />
+      <Field label="Slug" name="slug" value={draft.slug} onChange={(v) => setDraft({ ...draft, slug: v })} />
+      <Field label="Campaign label" name="campaign_label" value={draft.campaign_label} onChange={(v) => setDraft({ ...draft, campaign_label: v })} />
+      <Field label="Display order" name="sort_order" type="number" value={draft.sort_order} onChange={(v) => setDraft({ ...draft, sort_order: v })} />
+      <div className="space-y-2 md:col-span-2"><ImageUrlField label="Collection cover image URL" name="image_url" value={draft.image_url} onChange={(v) => setDraft({ ...draft, image_url: v })} /><UploadField label="Upload collection cover" session={session} folder="collections" busy={busy} onUploaded={(url) => setDraft((d) => ({ ...d, image_url: url }))} /></div>
+      <div className="md:col-span-2"><TextField label="Description" name="description" value={draft.description} onChange={(v) => setDraft({ ...draft, description: v })} /></div>
+      <Field label="Starts" name="starts_at" type="datetime-local" value={draft.starts_at} onChange={(v) => setDraft({ ...draft, starts_at: v })} />
+      <Field label="Ends" name="ends_at" type="datetime-local" value={draft.ends_at} onChange={(v) => setDraft({ ...draft, ends_at: v })} />
+      <button className={buttonClass} disabled={busy || !draft.title.trim()}><Plus className="h-4 w-4" /> Create collection</button>
+    </form>
   </>;
 }
 
-
-function LookbookPanel({ looks, products, session, busy, perform }: {
-  looks: AdminLook[]; products: AdminProduct[]; session: AdminSession; busy: boolean;
+function CollectionDetailsEditor({ collection, session, busy, perform }: {
+  collection: AdminCollection; session: AdminSession; busy: boolean;
   perform: (action: () => Promise<unknown>, message: string) => Promise<void>;
 }) {
-  const [selected, setSelected] = useState<AdminLook | null>(null);
-  const [draft, setDraft] = useState({ title: "", slug: "", description: "", image_url: "", alt_text: "", season: "", sort_order: "0", is_active: true, starts_at: "", ends_at: "" });
-  const [linked, setLinked] = useState<{ product_id: string; default_size: string; default_color: string; default_quantity: string }[]>([]);
+  const [draft, setDraft] = useState({
+    title: collection.title, slug: collection.slug, description: collection.description ?? "",
+    image_url: collection.image_url ?? "", campaign_label: collection.campaign_label ?? "",
+    sort_order: String(collection.sort_order), starts_at: dateInputValue(collection.starts_at), ends_at: dateInputValue(collection.ends_at),
+  });
+  useEffect(() => setDraft({
+    title: collection.title, slug: collection.slug, description: collection.description ?? "",
+    image_url: collection.image_url ?? "", campaign_label: collection.campaign_label ?? "",
+    sort_order: String(collection.sort_order), starts_at: dateInputValue(collection.starts_at), ends_at: dateInputValue(collection.ends_at),
+  }), [collection]);
+  async function save(event: FormEvent) {
+    event.preventDefault();
+    await perform(() => adminWrite(\`collections?id=eq.\${collection.id}\`, session, "PATCH", {
+      ...draft, slug: slugify(draft.slug || draft.title), sort_order: Number(draft.sort_order),
+      starts_at: draft.starts_at ? new Date(draft.starts_at).toISOString() : null,
+      ends_at: draft.ends_at ? new Date(draft.ends_at).toISOString() : null,
+    }), "Collection details saved.");
+  }
+  return <form onSubmit={save} className="grid gap-3 border-b border-black/10 pb-5 sm:grid-cols-2">
+    <div className="sm:col-span-2"><p className="text-[9px] font-bold uppercase tracking-[.16em] text-black/45">Collection details</p></div>
+    <Field label="Collection name" name="title" value={draft.title} required onChange={(v) => setDraft({ ...draft, title: v })} />
+    <Field label="Slug" name="slug" value={draft.slug} onChange={(v) => setDraft({ ...draft, slug: v })} />
+    <Field label="Campaign label" name="campaign_label" value={draft.campaign_label} onChange={(v) => setDraft({ ...draft, campaign_label: v })} />
+    <Field label="Display order" name="sort_order" type="number" value={draft.sort_order} onChange={(v) => setDraft({ ...draft, sort_order: v })} />
+    <div className="space-y-2 sm:col-span-2"><ImageUrlField label="Collection cover image URL" name="image_url" value={draft.image_url} onChange={(v) => setDraft({ ...draft, image_url: v })} /><UploadField label="Replace collection cover" session={session} folder="collections" busy={busy} onUploaded={(url) => setDraft((d) => ({ ...d, image_url: url }))} /></div>
+    <div className="sm:col-span-2"><TextField label="Description" name="description" value={draft.description} onChange={(v) => setDraft({ ...draft, description: v })} /></div>
+    <Field label="Starts" name="starts_at" type="datetime-local" value={draft.starts_at} onChange={(v) => setDraft({ ...draft, starts_at: v })} />
+    <Field label="Ends" name="ends_at" type="datetime-local" value={draft.ends_at} onChange={(v) => setDraft({ ...draft, ends_at: v })} />
+    <button className={buttonClass} disabled={busy || !draft.title.trim()}><Save className="h-4 w-4" /> Save collection</button>
+  </form>;
+}
+
+function CollectionLookEditor({ collection, look, looksCount, products, session, busy, perform }: {
+  collection: AdminCollection; look?: AdminLook; looksCount: number; products: AdminProduct[]; session: AdminSession; busy: boolean;
+  perform: (action: () => Promise<unknown>, message: string) => Promise<void>;
+}) {
+  const [draft, setDraft] = useState({
+    title: look?.title ?? "", slug: look?.slug ?? "", description: look?.description ?? "",
+    image_url: look?.image_url ?? "", alt_text: look?.alt_text ?? "",
+    season: look?.season ?? collectionSeason(collection.slug) ?? "",
+    sort_order: String(look?.sort_order ?? looksCount), is_active: look?.is_active ?? true,
+    starts_at: dateInputValue(look?.starts_at ?? null), ends_at: dateInputValue(look?.ends_at ?? null),
+  });
+  const [linked, setLinked] = useState((look?.lookbook_look_products ?? []).slice().sort((a, b) => a.sort_order - b.sort_order).map((item) => ({
+    product_id: item.product_id, default_size: item.default_size ?? "", default_color: item.default_color ?? "", default_quantity: String(item.default_quantity ?? 1),
+  })));
   const [query, setQuery] = useState("");
   useEffect(() => {
-    if (!selected) return;
-    setDraft({ title: selected.title, slug: selected.slug, description: selected.description ?? "", image_url: selected.image_url, alt_text: selected.alt_text ?? "", season: selected.season ?? "", sort_order: String(selected.sort_order), is_active: selected.is_active, starts_at: dateInputValue(selected.starts_at), ends_at: dateInputValue(selected.ends_at) });
-    setLinked((selected.lookbook_look_products ?? []).sort((a,b) => a.sort_order-b.sort_order).map((item) => ({ product_id: item.product_id, default_size: item.default_size ?? "", default_color: item.default_color ?? "", default_quantity: String(item.default_quantity ?? 1) })));
-  }, [selected]);
-  function reset() {
-    setSelected(null);
-    setDraft({ title: "", slug: "", description: "", image_url: "", alt_text: "", season: "", sort_order: String(looks.length), is_active: true, starts_at: "", ends_at: "" });
-    setLinked([]);
-  }
+    setDraft({
+      title: look?.title ?? "", slug: look?.slug ?? "", description: look?.description ?? "",
+      image_url: look?.image_url ?? "", alt_text: look?.alt_text ?? "",
+      season: look?.season ?? collectionSeason(collection.slug) ?? "",
+      sort_order: String(look?.sort_order ?? looksCount), is_active: look?.is_active ?? true,
+      starts_at: dateInputValue(look?.starts_at ?? null), ends_at: dateInputValue(look?.ends_at ?? null),
+    });
+    setLinked((look?.lookbook_look_products ?? []).slice().sort((a, b) => a.sort_order - b.sort_order).map((item) => ({
+      product_id: item.product_id, default_size: item.default_size ?? "", default_color: item.default_color ?? "", default_quantity: String(item.default_quantity ?? 1),
+    })));
+  }, [look, collection.slug, looksCount]);
+
   function toggleProduct(product: AdminProduct) {
     setLinked((current) => current.some((item) => item.product_id === product.id)
       ? current.filter((item) => item.product_id !== product.id)
@@ -309,60 +402,63 @@ function LookbookPanel({ looks, products, session, busy, perform }: {
   }
   async function save(event: FormEvent) {
     event.preventDefault();
-    if (!draft.season) throw new Error("Choose a season before saving this look.");
-    if (!draft.image_url.trim()) throw new Error("Upload a model-shoot image before saving this look.");
-    if (!linked.length) throw new Error("Add at least one product to this look.");
-    const look = { ...(selected ? { id: selected.id } : {}), ...draft, slug: slugify(draft.slug || draft.title), sort_order: Number(draft.sort_order), starts_at: draft.starts_at ? new Date(draft.starts_at).toISOString() : null, ends_at: draft.ends_at ? new Date(draft.ends_at).toISOString() : null };
-    const associations = linked.map((item) => ({ product_id: item.product_id, default_size: item.default_size || null, default_color: item.default_color || null, default_quantity: Number(item.default_quantity) || 1 }));
-    await perform(() => adminRpc<string>("save_lookbook_look", session, { p_look: look, p_products: associations }), selected ? "Look updated and products synchronized." : "Look created and products linked.");
+    if (!draft.season) throw new Error("Choose a season for this lookbook image.");
+    if (!draft.image_url.trim()) throw new Error("Add a lookbook image before saving.");
+    if (!linked.length) throw new Error("Add at least one product to this image.");
+    const payload = {
+      ...(look ? { id: look.id } : {}), ...draft, collection_id: collection.id,
+      slug: slugify(draft.slug || draft.title), sort_order: Number(draft.sort_order),
+      starts_at: draft.starts_at ? new Date(draft.starts_at).toISOString() : null,
+      ends_at: draft.ends_at ? new Date(draft.ends_at).toISOString() : null,
+    };
+    const associations = linked.map((item) => ({
+      product_id: item.product_id, default_size: item.default_size || null,
+      default_color: item.default_color || null, default_quantity: Number(item.default_quantity) || 1,
+    }));
+    await perform(() => adminRpc<string>("save_lookbook_look", session, { p_look: payload, p_products: associations }), look ? "Lookbook image and product set saved." : "Lookbook image created with its product set.");
   }
-  const visibleProducts = products.filter((product) => product.is_active && `${product.name} ${product.slug} ${product.sku ?? ""}`.toLowerCase().includes(query.toLowerCase()));
-  return <>
-    <PanelHeading eyebrow="Editorial commerce" title="Buy the Look" detail="Build seasonal model-shoot looks from catalogue products. Every look belongs to one season; product prices, sizes and availability always come from live product records." action={<button type="button" className={buttonClass} onClick={reset}><Plus className="h-4 w-4" /> New look</button>} />
-    <div className="grid gap-5 xl:grid-cols-[minmax(260px,.8fr)_minmax(0,1.2fr)]">
-      <section className="border border-black/10 bg-[#F7F3EC]">
-        <div className="flex items-center justify-between border-b border-black/10 px-4 py-3"><p className="text-xs font-black uppercase tracking-wider">Lookbook gallery</p><span className="text-[10px] text-black/45">{looks.length} looks</span></div>
-        <div className="max-h-[760px] divide-y divide-black/10 overflow-y-auto">
-          {looks.map((look) => <button type="button" key={look.id} onClick={() => setSelected(look)} className={`flex w-full items-center gap-3 p-3 text-left transition hover:bg-black/[.035] ${selected?.id === look.id ? "bg-[#D5FE00]/20" : ""}`}>
-            <img src={look.image_url} alt={look.alt_text || look.title} className="h-20 w-16 shrink-0 bg-[#E8E1D6] object-cover" />
-            <span className="min-w-0 flex-1"><span className="block truncate text-xs font-bold">{look.title}</span><span className="mt-1 block text-[10px] text-black/45">{look.season ? look.season.charAt(0).toUpperCase() + look.season.slice(1) : "Unassigned"} · {look.lookbook_look_products?.length ?? 0} products · {look.is_active ? "Published" : "Hidden"}</span></span>
-            <ChevronRight className="h-4 w-4 shrink-0" />
-          </button>)}
-          {!looks.length && <Empty title="No looks yet" detail="Create your first model-shoot look and connect products from the catalogue." />}
+  const visibleProducts = products.filter((product) => product.is_active && \`\${product.name} \${product.slug} \${product.sku ?? ""}\`.toLowerCase().includes(query.toLowerCase()));
+  return <details className="border border-black/10 bg-white/55" open={!look}>
+    <summary className="flex cursor-pointer list-none items-center gap-3 p-3 [&::-webkit-details-marker]:hidden">
+      {look?.image_url ? <img src={look.image_url} alt="" className="h-16 w-12 shrink-0 object-cover" /> : <div className="grid h-16 w-12 shrink-0 place-items-center bg-[#E8E1D6]"><ImagePlus className="h-4 w-4 text-black/35" /></div>}
+      <span className="min-w-0 flex-1"><span className="block truncate text-xs font-black">{look?.title || "Add a lookbook image"}</span><span className="mt-1 block text-[10px] text-black/45">{look ? \`\${look.slug} · \${linked.length} products · \${look.is_active ? "Published" : "Hidden"}\` : "New editorial image · add its own products"}</span></span>
+      <ChevronRight className="h-4 w-4 shrink-0 text-black/45 transition-transform [details[open]_&]:rotate-90" />
+    </summary>
+    <form onSubmit={(event) => { void save(event).catch((error: unknown) => window.alert(error instanceof Error ? error.message : "Could not save this lookbook image.")); }} className="grid gap-3 border-t border-black/10 p-4 md:grid-cols-2">
+      <Field label="Image title" name="title" value={draft.title} required onChange={(value) => setDraft((d) => ({ ...d, title: value, slug: look ? d.slug : slugify(value) }))} />
+      <Field label="URL slug" name="slug" value={draft.slug} onChange={(value) => setDraft((d) => ({ ...d, slug: value }))} />
+      <label className={labelClass}>Season<select required className={inputClass} value={draft.season} onChange={(event) => setDraft((d) => ({ ...d, season: event.target.value }))}><option value="">Choose season</option><option value="spring">Spring</option><option value="summer">Summer</option><option value="festive">Festive</option><option value="monsoon">Monsoon</option><option value="winter">Winter</option></select></label>
+      <Field label="Display order" name="sort_order" type="number" value={draft.sort_order} onChange={(value) => setDraft((d) => ({ ...d, sort_order: value }))} />
+      <div className="md:col-span-2"><TextField label="Description" name="description" value={draft.description} onChange={(value) => setDraft((d) => ({ ...d, description: value }))} /></div>
+      <div className="space-y-2 md:col-span-2"><ImageUrlField label="Lookbook image URL" name="image_url" value={draft.image_url} onChange={(value) => setDraft((d) => ({ ...d, image_url: value }))} /><UploadField label="Upload lookbook image" session={session} folder="lookbook" busy={busy} onUploaded={(url) => setDraft((d) => ({ ...d, image_url: url }))} /></div>
+      {draft.image_url && <img src={draft.image_url} alt={draft.alt_text || draft.title} className="h-48 w-full bg-[#E8E1D6] object-cover md:col-span-2" />}
+      <div className="md:col-span-2"><Field label="Image alt text" name="alt_text" value={draft.alt_text} onChange={(value) => setDraft((d) => ({ ...d, alt_text: value }))} /></div>
+      <label className={labelClass}>Visibility<select className={inputClass} value={draft.is_active ? "active" : "hidden"} onChange={(event) => setDraft((d) => ({ ...d, is_active: event.target.value === "active" }))}><option value="active">Published</option><option value="hidden">Hidden</option></select></label>
+      <Field label="Publish from" name="starts_at" type="datetime-local" value={draft.starts_at} onChange={(value) => setDraft((d) => ({ ...d, starts_at: value }))} />
+      <Field label="Unpublish at" name="ends_at" type="datetime-local" value={draft.ends_at} onChange={(value) => setDraft((d) => ({ ...d, ends_at: value }))} />
+      <section className="space-y-3 border-t border-black/10 pt-4 md:col-span-2">
+        <div className="flex flex-wrap items-center justify-between gap-2"><div><h4 className="text-xs font-black uppercase tracking-wider">Products attached to this image</h4><p className="mt-1 text-[10px] text-black/45">Product selection is independent for every lookbook image.</p></div><span className="text-[10px] font-bold">{linked.length} selected</span></div>
+        <input className={inputClass} placeholder="Search catalogue products" value={query} onChange={(event) => setQuery(event.target.value)} />
+        <div className="grid max-h-[460px] gap-2 overflow-y-auto sm:grid-cols-2">
+          {visibleProducts.map((product) => {
+            const item = linked.find((entry) => entry.product_id === product.id);
+            return <ProductSelectionCard key={product.id} product={product} checked={!!item} onChange={() => toggleProduct(product)}>
+              {item && <div className="grid grid-cols-3 gap-2">
+                <label className={labelClass}>Default size<select className={inputClass} value={item.default_size} onChange={(event) => setLinked((current) => current.map((entry) => entry.product_id === product.id ? { ...entry, default_size: event.target.value } : entry))}><option value="">Choose in drawer</option>{product.sizes.map((size) => <option key={size}>{size}</option>)}</select></label>
+                <label className={labelClass}>Default colour<select className={inputClass} value={item.default_color} onChange={(event) => setLinked((current) => current.map((entry) => entry.product_id === product.id ? { ...entry, default_color: event.target.value } : entry))}><option value="">Choose in drawer</option>{product.colors.map((color) => <option key={color.name}>{color.name}</option>)}</select></label>
+                <label className={labelClass}>Qty<input className={inputClass} type="number" min="1" max="10" value={item.default_quantity} onChange={(event) => setLinked((current) => current.map((entry) => entry.product_id === product.id ? { ...entry, default_quantity: event.target.value } : entry))} /></label>
+              </div>}
+              {item && (product.is_out_of_stock || product.stock_quantity === 0) && <p className="mt-2 text-[10px] font-bold text-red-700">Currently out of stock — customers cannot add it.</p>}
+            </ProductSelectionCard>;
+          })}
         </div>
       </section>
-      <form onSubmit={(event) => { void save(event).catch((error: unknown) => window.alert(error instanceof Error ? error.message : "Could not save this look.")); }} className="space-y-4 border border-black/10 bg-[#F7F3EC] p-4 md:p-5">
-        <div className="flex items-center justify-between"><div><p className="text-[9px] font-bold uppercase tracking-[.18em] text-black/45">Look editor</p><h3 className="mt-1 text-sm font-black">{selected ? "Edit selected look" : "Create a look"}</h3></div>{selected && <button type="button" className={secondaryClass} onClick={reset}>New look</button>}</div>
-        <Field label="Look title" name="title" value={draft.title} required onChange={(value) => setDraft((d) => ({ ...d, title: value, slug: selected ? d.slug : slugify(value) }))} />
-        <Field label="URL slug" name="slug" value={draft.slug} onChange={(value) => setDraft((d) => ({ ...d, slug: value }))} />
-        <label className={labelClass}>Season<select required className={inputClass} value={draft.season} onChange={(event) => setDraft((d) => ({ ...d, season: event.target.value }))}><option value="">Unassigned — hidden from seasonal pages</option><option value="spring">Spring</option><option value="summer">Summer</option><option value="festive">Festive</option><option value="monsoon">Monsoon</option><option value="winter">Winter</option></select></label>
-        <TextField label="Description" name="description" value={draft.description} onChange={(value) => setDraft((d) => ({ ...d, description: value }))} />
-        <div className="space-y-2"><ImageUrlField label="Model-shoot image URL" name="image_url" value={draft.image_url} onChange={(value) => setDraft((d) => ({ ...d, image_url: value }))} /><UploadField label="Upload model-shoot image" session={session} folder="lookbook" busy={busy} onUploaded={(url) => setDraft((d) => ({ ...d, image_url: url }))} /></div>
-        {draft.image_url && <img src={draft.image_url} alt={draft.alt_text || draft.title} className="h-52 w-full bg-[#E8E1D6] object-cover" />}
-        <Field label="Image alt text" name="alt_text" value={draft.alt_text} onChange={(value) => setDraft((d) => ({ ...d, alt_text: value }))} />
-        <div className="grid grid-cols-2 gap-3"><Field label="Display order" name="sort_order" type="number" value={draft.sort_order} onChange={(value) => setDraft((d) => ({ ...d, sort_order: value }))} /><label className={labelClass}>Visibility<select className={inputClass} value={draft.is_active ? "active" : "hidden"} onChange={(event) => setDraft((d) => ({ ...d, is_active: event.target.value === "active" }))}><option value="active">Published</option><option value="hidden">Hidden</option></select></label></div>
-        <div className="grid grid-cols-2 gap-3"><Field label="Publish from" name="starts_at" type="datetime-local" value={draft.starts_at} onChange={(value) => setDraft((d) => ({ ...d, starts_at: value }))} /><Field label="Unpublish at" name="ends_at" type="datetime-local" value={draft.ends_at} onChange={(value) => setDraft((d) => ({ ...d, ends_at: value }))} /></div>
-        <div className="border-t border-black/10 pt-4">
-          <div className="flex items-center justify-between"><h4 className="text-xs font-black uppercase tracking-wider">Products in this look</h4><span className="text-[10px] text-black/45">{linked.length} selected</span></div>
-          <input className={inputClass} placeholder="Search catalogue products" value={query} onChange={(event) => setQuery(event.target.value)} />
-          <div className="mt-2 max-h-[360px] space-y-2 overflow-y-auto">
-            {visibleProducts.map((product) => {
-              const item = linked.find((entry) => entry.product_id === product.id);
-              return <ProductSelectionCard key={product.id} product={product} checked={!!item} onChange={() => toggleProduct(product)}>
-                {item && <div className="grid grid-cols-3 gap-2">
-                  <label className={labelClass}>Default size<select className={inputClass} value={item.default_size} onChange={(event) => setLinked((current) => current.map((entry) => entry.product_id === product.id ? { ...entry, default_size: event.target.value } : entry))}><option value="">Choose in drawer</option>{product.sizes.map((size) => <option key={size}>{size}</option>)}</select></label>
-                  <label className={labelClass}>Default colour<select className={inputClass} value={item.default_color} onChange={(event) => setLinked((current) => current.map((entry) => entry.product_id === product.id ? { ...entry, default_color: event.target.value } : entry))}><option value="">Choose in drawer</option>{product.colors.map((color) => <option key={color.name}>{color.name}</option>)}</select></label>
-                  <label className={labelClass}>Qty<input className={inputClass} type="number" min="1" max="10" value={item.default_quantity} onChange={(event) => setLinked((current) => current.map((entry) => entry.product_id === product.id ? { ...entry, default_quantity: event.target.value } : entry))} /></label>
-                </div>}
-                {item && (product.is_out_of_stock || product.stock_quantity === 0) && <p className="mt-2 text-[10px] font-bold text-red-700">Currently marked out of stock — customers cannot add it.</p>}
-              </ProductSelectionCard>;
-            })}
-          </div>
-        </div>
-        <div className="flex flex-wrap gap-2 border-t border-black/10 pt-4"><button className={buttonClass} disabled={busy || !draft.title.trim() || !draft.season || !linked.length}><Save className="h-4 w-4" /> Save look</button>{selected && <button type="button" className={secondaryClass} disabled={busy} onClick={() => { setDraft((d) => ({ ...d, title: `${d.title} Copy`, slug: slugify(`${d.title} Copy`), sort_order: String(looks.length) })); setSelected(null); }}><Plus className="h-4 w-4" /> Duplicate</button>}{selected && <button type="button" className={secondaryClass} disabled={busy} onClick={() => { if (confirm(`Delete “${selected.title}” and its product links?`)) void perform(() => adminWrite(`lookbook_looks?id=eq.${selected.id}`, session, "DELETE"), "Look deleted."); }}><Trash2 className="h-4 w-4" /> Delete look</button>}</div>
-      </form>
-    </div>
-  </>;
+      <div className="flex flex-wrap gap-2 border-t border-black/10 pt-4 md:col-span-2">
+        <button className={buttonClass} disabled={busy || !draft.title.trim() || !draft.season || !draft.image_url.trim() || !linked.length}><Save className="h-4 w-4" /> Save image & products</button>
+        {look && <button type="button" className={secondaryClass} disabled={busy} onClick={() => { if (confirm(\`Delete lookbook image “\${look.title}” and its product links?\`)) void perform(() => adminWrite(\`lookbook_looks?id=eq.\${look.id}\`, session, "DELETE"), "Lookbook image deleted."); }}><Trash2 className="h-4 w-4" /> Delete image</button>}
+      </div>
+    </form>
+  </details>;
 }
 
 function BrandsPanel({ brands, products, orders, onManageProducts, session, busy, perform }: { brands: AdminBrand[]; products: AdminProduct[]; orders: AdminOrder[]; onManageProducts: (brandId: string) => void; session: AdminSession; busy: boolean; perform: (action: () => Promise<unknown>, message: string) => Promise<void> }) {
