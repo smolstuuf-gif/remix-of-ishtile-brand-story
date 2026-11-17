@@ -88,7 +88,6 @@ function LookbookPage() {
     return () => { live = false; };
   }, []);
   const displayLooks = looks.length ? looks : demoLooks;
-  const isDemo = looks.length === 0;
   const seasonalLooks = season ? displayLooks.filter((look) => look.season === season) : displayLooks;
   const images = useMemo(() => seasonalLooks.map((look) => ({ src: look.image_url, alt: look.alt_text || look.title, title: look.title })), [seasonalLooks]);
   const activeLook = seasonalLooks[activeIndex] ?? null;
