@@ -78,10 +78,10 @@ function ManagementPage() {
 
   useEffect(() => { if (session) void refresh(); }, [session?.user.id, refresh]);
 
-  async function perform(action: () => Promise<unknown>, message: string) {
+  async function perform(action: () => Promise<unknown>, message: string): Promise<boolean> {
     setBusy(true); setError(""); setNotice("");
-    try { await action(); await refresh(); setNotice(message); }
-    catch (e) { setError(e instanceof Error ? e.message : "The change could not be saved."); }
+    try { await action(); await refresh(); setNotice(message); return true; }
+    catch (e) { setError(e instanceof Error ? e.message : "The change could not be saved."); return false; }
     finally { setBusy(false); }
   }
 
@@ -280,7 +280,8 @@ function LookbookPanel({ looks, products, session, busy, perform }: {
     if (!linked.length) throw new Error("Add at least one product to this look.");
     const look = { ...(selected ? { id: selected.id } : {}), ...draft, slug: slugify(draft.slug || draft.title), sort_order: Number(draft.sort_order), starts_at: draft.starts_at ? new Date(draft.starts_at).toISOString() : null, ends_at: draft.ends_at ? new Date(draft.ends_at).toISOString() : null };
     const associations = linked.map((item) => ({ product_id: item.product_id, default_size: item.default_size || null, default_color: item.default_color || null, default_quantity: Number(item.default_quantity) || 1 }));
-    await perform(() => adminRpc<string>("save_lookbook_look", session, { p_look: look, p_products: associations }), selected ? "Look updated and products synchronized." : "Look created and products linked.");
+    const saved = await perform(() => adminRpc<string>("save_lookbook_look", session, { p_look: look, p_products: associations }), selected ? "Look updated and products synchronized." : "Look created and products linked.");
+    if (saved) reset();
   }
   const visibleProducts = products.filter((product) => product.is_active && `${product.name} ${product.slug} ${product.sku ?? ""}`.toLowerCase().includes(query.toLowerCase()));
   return <>
@@ -325,7 +326,7 @@ function LookbookPanel({ looks, products, session, busy, perform }: {
             })}
           </div>
         </div>
-        <div className="flex flex-wrap gap-2 border-t border-black/10 pt-4"><button className={buttonClass} disabled={busy || !draft.title.trim() || !linked.length}><Save className="h-4 w-4" /> Save look</button>{selected && <button type="button" className={secondaryClass} disabled={busy} onClick={() => { if (confirm(`Delete “${selected.title}” and its product links?`)) void perform(() => adminWrite(`lookbook_looks?id=eq.${selected.id}`, session, "DELETE"), "Look deleted."); }}><Trash2 className="h-4 w-4" /> Delete look</button>}</div>
+        <div className="flex flex-wrap gap-2 border-t border-black/10 pt-4"><button className={buttonClass} disabled={busy || !draft.title.trim() || !linked.length}><Save className="h-4 w-4" /> Save look</button>{selected && <button type="button" className={secondaryClass} disabled={busy} onClick={() => { setDraft((d) => ({ ...d, title: `${d.title} Copy`, slug: slugify(`${d.title} Copy`), sort_order: String(looks.length) })); setSelected(null); }}><Plus className="h-4 w-4" /> Duplicate</button>}{selected && <button type="button" className={secondaryClass} disabled={busy} onClick={() => { if (confirm(`Delete “${selected.title}” and its product links?`)) void perform(() => adminWrite(`lookbook_looks?id=eq.${selected.id}`, session, "DELETE"), "Look deleted."); }}><Trash2 className="h-4 w-4" /> Delete look</button>}</div>
       </form>
     </div>
   </>;
