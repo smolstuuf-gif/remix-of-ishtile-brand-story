@@ -11,7 +11,7 @@ import type { PublicLook } from "@/lib/public-store";
 
 type Selection = { selected: boolean; size: string; color: string; qty: number };
 export function BuyTheLookButton({ onClick }: { onClick: () => void }) {
-  return <button type="button" onClick={onClick} className="fixed bottom-4 right-4 z-40 inline-flex items-center gap-1.5 rounded-full bg-[#D5FE00] px-3 py-2 text-[10px] font-black uppercase tracking-[.06em] text-[#171717] shadow-[0_8px_35px_rgba(0,0,0,.3)] transition-transform hover:scale-[1.04] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#D5FE00] md:bottom-9 md:right-9 md:gap-2 md:px-5 md:py-3.5 md:text-xs"><Shirt className="h-3.5 w-3.5 md:h-4 md:w-4" strokeWidth={2.2} /><span>Buy the look</span></button>;
+  return <button type="button" onClick={onClick} aria-label="Buy the look" className="fixed bottom-4 right-4 z-40 inline-flex h-11 w-11 items-center justify-center rounded-full bg-[#D5FE00] p-0 text-[#171717] shadow-[0_8px_35px_rgba(0,0,0,.3)] transition-transform hover:scale-[1.04] animate-pulse focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#D5FE00] md:bottom-9 md:right-9 md:h-auto md:w-auto md:gap-2 md:px-5 md:py-3.5 md:text-xs md:animate-none"><Shirt className="h-[18px] w-[18px] md:h-4 md:w-4" strokeWidth={2.2} /><span className="hidden md:inline">Buy the look</span></button>;
 }
 export function LookProductsDrawer({ look, open, onOpenChange }: { look: PublicLook | null; open: boolean; onOpenChange: (open: boolean) => void }) {
   const { addItem, openCart } = useCart();
