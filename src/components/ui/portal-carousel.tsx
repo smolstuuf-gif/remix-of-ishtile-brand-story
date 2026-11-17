@@ -143,7 +143,7 @@ export default function PortalCarousel({ images, label = "NEXT", thumbWidth = 19
       </div>
       <span ref={tagRef} aria-hidden="true" className="pointer-events-none absolute left-0 top-0 z-30 bg-[#171717] px-2 py-1 text-[9px] font-semibold uppercase tracking-[.2em] text-[#F0EAE0] will-change-transform">{label}</span>
     </>}
-    <div className="pointer-events-none absolute bottom-10 left-[7%] z-10 flex flex-col gap-2 text-[#F0EAE0] md:bottom-14 md:left-[10%]">
+    <div className="pointer-events-none absolute bottom-10 left-[7%] z-10 flex flex-col gap-2 text-white [mix-blend-mode:difference] md:bottom-14 md:left-[10%]">
       <span className="text-xs font-semibold tabular-nums tracking-wider text-white/70"><RollingText value={String(wrap(head) + 1).padStart(2,"0")} /> <span className="text-white/45">/ {String(count).padStart(2,"0")}</span></span>
       {headTitle && <span className="font-wide text-2xl font-extrabold uppercase leading-none tracking-tight md:text-4xl"><RollingText value={headTitle} /></span>}
     </div>
