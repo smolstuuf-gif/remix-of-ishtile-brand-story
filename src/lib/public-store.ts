@@ -103,3 +103,35 @@ export async function fetchPublicBrandInfo() {
   const rows = await publicRows<PublicBrandInfo[]>("site_brand_info?select=social_links,contact_numbers,address,motto,about_text,logo_url,symbol_url&id=eq.1&limit=1");
   return rows[0] ?? null;
 }
+
+export type PublicLook = {
+  id: string; slug: string; title: string; description: string | null; image_url: string;
+  alt_text: string | null; sort_order: number;
+  products: { product: Product; defaultSize: string | null; defaultColor: string | null; defaultQuantity: number; sortOrder: number }[];
+};
+type PublicLookRow = {
+  id: string; slug: string; title: string; description: string | null; image_url: string;
+  alt_text: string | null; sort_order: number;
+  lookbook_look_products?: {
+    sort_order: number; default_size: string | null; default_color: string | null; default_quantity: number;
+    products: DatabaseProduct | null;
+  }[];
+};
+export async function fetchPublicLooks(): Promise<PublicLook[] | null> {
+  if (!url || !key) return null;
+  const rows = await publicRows<PublicLookRow>(
+    "lookbook_looks?select=id,slug,title,description,image_url,alt_text,sort_order,lookbook_look_products(sort_order,default_size,default_color,default_quantity,products(slug,name,price,image_url,image_urls,category,sizes,colors,description,created_at,is_featured,is_out_of_stock,tags,brands(name)))&is_active=eq.true&order=sort_order.asc"
+  );
+  return rows.map((look) => ({
+    id: look.id, slug: look.slug, title: look.title, description: look.description,
+    image_url: look.image_url, alt_text: look.alt_text, sort_order: look.sort_order,
+    products: (look.lookbook_look_products ?? [])
+      .filter((item) => item.products)
+      .sort((a, b) => a.sort_order - b.sort_order)
+      .map((item) => ({
+        product: toCatalogProduct(item.products as DatabaseProduct),
+        defaultSize: item.default_size, defaultColor: item.default_color,
+        defaultQuantity: item.default_quantity, sortOrder: item.sort_order,
+      })),
+  }));
+}
