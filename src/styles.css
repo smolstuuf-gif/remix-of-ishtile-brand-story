@@ -158,17 +158,17 @@
 }
 
 
-/* Transparent, persistent navigation with a gentle contrast shift between sections. */
+/* Transparent global navigation. Difference blending inverts the live pixels
+   beneath the header, keeping the logo, links and controls legible over any surface. */
 .site-header {
-  --header-foreground: oklch(0.955 0.016 82);
-  color: var(--header-foreground);
+  color: white;
   background: transparent;
   border-color: transparent;
-  transition: color 150ms ease;
 }
 
-.site-header[data-theme="light"] {
-  --header-foreground: oklch(0.17 0.006 75);
+.site-header__content {
+  color: white;
+  mix-blend-mode: difference;
 }
 
 .site-header a,
