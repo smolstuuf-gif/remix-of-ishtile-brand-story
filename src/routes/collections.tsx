@@ -20,11 +20,11 @@ export const Route = createFileRoute("/collections")({
 });
 
 const slides = [
-  { title: "Spring '25", image: colSpring, url: "/lookbook", linkLabel: "Explore Spring" },
-  { title: "Summer Essentials '25", image: colSummer, url: "/lookbook", linkLabel: "Explore Summer" },
-  { title: "Festive Collection '25", image: colFestive, url: "/lookbook", linkLabel: "Explore Festive" },
-  { title: "Monsoon '25", image: colMonsoon, url: "/lookbook", linkLabel: "Explore Monsoon" },
-  { title: "Winter Collection", image: cardWinter, url: "/lookbook", linkLabel: "Explore Winter" },
+  { title: "Spring '25", image: colSpring, url: "/lookbook?season=spring", linkLabel: "Explore Spring" },
+  { title: "Summer Essentials '25", image: colSummer, url: "/lookbook?season=summer", linkLabel: "Explore Summer" },
+  { title: "Festive Collection '25", image: colFestive, url: "/lookbook?season=festive", linkLabel: "Explore Festive" },
+  { title: "Monsoon '25", image: colMonsoon, url: "/lookbook?season=monsoon", linkLabel: "Explore Monsoon" },
+  { title: "Winter Collection", image: cardWinter, url: "/lookbook?season=winter", linkLabel: "Explore Winter" },
 ];
 
 function CollectionsPage() {
