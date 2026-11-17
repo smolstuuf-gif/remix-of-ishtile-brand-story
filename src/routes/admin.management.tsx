@@ -53,6 +53,17 @@ function ManagementPage() {
     return () => { live = false; };
   }, []);
 
+  // Dashboard burger links deep-link directly to a management workspace.
+  useEffect(() => {
+    const syncTabFromHash = () => {
+      const requested = window.location.hash.slice(1) as Tab;
+      if (tabs.some((item) => item.id === requested)) setTab(requested);
+    };
+    syncTabFromHash();
+    window.addEventListener("hashchange", syncTabFromHash);
+    return () => window.removeEventListener("hashchange", syncTabFromHash);
+  }, []);
+
   const refresh = useCallback(async () => {
     const current = await restoreAdminSession();
     if (!current) { setSession(null); setWorkspace(null); return; }
