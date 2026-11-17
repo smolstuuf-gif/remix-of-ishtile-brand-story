@@ -28,13 +28,35 @@ export function SiteHeader() {
 
   useEffect(() => {
     let frame = 0;
+
+    const readLuminance = (color: string): number | null => {
+      const rgb = color.match(/rgba?\\(([^)]+)\\)/i);
+      if (rgb) {
+        const channels = (rgb[1] ?? "").split(/[\\s,/]+/).filter(Boolean).map(Number);
+        const alpha = channels[3] ?? 1;
+        if (channels.length >= 3 && alpha > 0.12 && channels.slice(0, 3).every(Number.isFinite)) {
+          const [red = 255, green = red, blue = red] = channels;
+          return (0.2126 * red + 0.7152 * green + 0.0722 * blue) / 255;
+        }
+      }
+
+      // The site's theme tokens compute to OKLCH in modern browsers.
+      const oklch = color.match(/oklch\\(\\s*([\\d.]+%?)/i);
+      if (oklch) {
+        const lightness = Number((oklch[1] ?? "").replace("%", ""));
+        if (Number.isFinite(lightness)) return lightness > 1 ? lightness / 100 : lightness;
+      }
+      return null;
+    };
+
     const updateTheme = () => {
       const probeY = 36;
       let explicitTheme: "dark" | "light" | null = null;
       document.querySelectorAll<HTMLElement>("[data-header-theme]").forEach((section) => {
         const rect = section.getBoundingClientRect();
         if (rect.top <= probeY && rect.bottom > probeY) {
-          explicitTheme = section.dataset["headerTheme"] === "light" ? "light" : "dark";
+          const value = section.dataset["headerTheme"];
+          if (value === "light" || value === "dark") explicitTheme = value;
         }
       });
 
@@ -50,25 +72,32 @@ export function SiteHeader() {
       const luminances: number[] = [];
 
       for (const point of points) {
-        for (const element of document.elementsFromPoint(point.x, point.y)) {
-          if (!(element instanceof HTMLElement) || element.closest(".site-header")) continue;
-          let current: HTMLElement | null = element;
-          while (current && current !== document.body) {
-            const color = window.getComputedStyle(current).backgroundColor;
-            const match = color.match(/rgba?\(([^)]+)\)/);
-            if (match) {
-              const channels = (match[1] ?? "").split(/[\s,/]+/).filter(Boolean).map(Number);
-              const alpha = channels[3] ?? 1;
-              if (channels.length >= 3 && alpha > 0.12 && channels.slice(0, 3).every(Number.isFinite)) {
-                const [red = 255, green = red, blue = red] = channels;
-                luminances.push((0.2126 * red + 0.7152 * green + 0.0722 * blue) / 255);
-                break;
-              }
+        const hitElements = document.elementsFromPoint(point.x, point.y);
+        let pointLuminance: number | null = null;
+
+        for (const hit of hitElements) {
+          if (!(hit instanceof HTMLElement) || hit.closest(".site-header")) continue;
+          let current: HTMLElement | null = hit;
+          while (current) {
+            const style = window.getComputedStyle(current);
+            const luminance = readLuminance(style.backgroundColor);
+            if (luminance !== null) {
+              pointLuminance = luminance;
+              break;
             }
+            if (current === document.body) break;
             current = current.parentElement;
           }
-          break;
+          if (pointLuminance !== null) break;
         }
+
+        // Fall back to the page's actual root surface when the section is transparent.
+        if (pointLuminance === null) {
+          pointLuminance =
+            readLuminance(window.getComputedStyle(document.body).backgroundColor) ??
+            readLuminance(window.getComputedStyle(document.documentElement).backgroundColor);
+        }
+        if (pointLuminance !== null) luminances.push(pointLuminance);
       }
 
       if (luminances.length) {
@@ -84,6 +113,7 @@ export function SiteHeader() {
         updateTheme();
       });
     };
+
     updateTheme();
     window.addEventListener("scroll", schedule, { passive: true });
     window.addEventListener("resize", schedule, { passive: true });
