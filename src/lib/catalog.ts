@@ -27,6 +27,7 @@ export type Product = {
   category: "Men" | "Women" | "Accessories" | "Traditional";
   brand: "ISHTILE" | "ONEN+" | "FARAK" | "MOCHA+" | "PILGRIM";
   sizes: string[];
+  sizeGuide?: { size: string; chest: string; length: string }[];
   colors: ProductColor[];
   rating: number;
   reviews: number;
