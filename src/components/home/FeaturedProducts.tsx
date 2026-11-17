@@ -11,7 +11,8 @@ export function FeaturedProducts() {
   const { toggleWish, isWished } = useCart();
   const [liveProducts, setLiveProducts] = useState<Product[] | null>(null);
   useEffect(() => { let live = true; fetchPublicProducts().then((items) => { if (live && items !== null) setLiveProducts(items); }).catch(() => undefined); return () => { live = false; }; }, []);
-  const visibleProducts = liveProducts ? liveProducts.filter((product) => product.isFeatured).slice(0, 8) : products.slice(0, 8);\n  if (liveProducts && visibleProducts.length === 0) return null;
+  const visibleProducts = liveProducts ? liveProducts.filter((product) => product.isFeatured).slice(0, 8) : products.slice(0, 8);
+  if (liveProducts && visibleProducts.length === 0) return null;
 
   return (
     <section id="shop" aria-labelledby="featured-title" className="rounded-2xl md:border md:border-border/70 md:bg-panel/60 md:px-[4%] md:py-8">
