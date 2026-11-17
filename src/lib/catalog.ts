@@ -23,6 +23,7 @@ export type Product = {
   price: number;
   image: string;
   galleryImages?: string[];
+  videoUrl?: string;
   alt: string;
   category: "Men" | "Women" | "Accessories" | "Traditional";
   brand: "ISHTILE" | "ONEN+" | "FARAK" | "MOCHA+" | "PILGRIM";
@@ -416,6 +417,7 @@ export function formatTaka(amount: number) {
  * three crops of it. Swap for real photography when the owner sends it.
  */
 export function galleryViews(p: Product) {
+  if (p.videoUrl) return [{ label: "Video", position: "50% 50%", src: p.videoUrl, video: true }, ...((p.galleryImages ?? [p.image]).map((src, index) => ({ label: `Image ${index + 1}`, position: "50% 50%", src, video: false })))];
   if (p.galleryImages && p.galleryImages.length > 1) {
     return p.galleryImages.map((src, index) => ({
       label: index === 0 ? "Full" : `View ${index + 1}`,
