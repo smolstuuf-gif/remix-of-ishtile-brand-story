@@ -7,7 +7,7 @@ type AccessMode = "customer" | "admin";
 
 export function AccountAccess({ defaultMode = "customer" }: { defaultMode?: AccessMode }) {
   const navigate = useNavigate();
-  const [mode, setMode] = useState<AccessMode>(defaultMode);
+  const mode = defaultMode;
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
@@ -75,22 +75,15 @@ export function AccountAccess({ defaultMode = "customer" }: { defaultMode?: Acce
           <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-black/45">Your account</span>
         </div>
         <h1 className="mt-9 font-display text-4xl font-black leading-none tracking-[-0.06em] sm:text-5xl">
-          {mode === "customer" ? "Create account." : "Admin sign in."}
+          {mode === "customer" ? "Create account." : "Administrator access."}
         </h1>
         <p className="mt-3 max-w-md text-sm leading-6 text-black/55">
           {mode === "customer"
             ? "Save your contact and delivery details for a quicker checkout."
-            : "Sign in with your authorised administrator email and password."}
+            : "This private sign-in is reserved for authorised ISHTILE administrators."}
         </p>
 
-        <div className="mt-8 grid grid-cols-2 border border-black/15 p-1">
-          <button type="button" onClick={() => { setMode("customer"); setError(""); setSuccess(""); }} className={`flex items-center justify-center gap-2 px-3 py-3 text-[10px] font-bold uppercase tracking-[0.12em] transition ${mode === "customer" ? "bg-[#D5FE00] text-[#171717]" : "text-black/55 hover:bg-black/5"}`}>
-            <UserRound className="h-4 w-4" /> Customer
-          </button>
-          <button type="button" onClick={() => { setMode("admin"); setError(""); setSuccess(""); }} className={`flex items-center justify-center gap-2 px-3 py-3 text-[10px] font-bold uppercase tracking-[0.12em] transition ${mode === "admin" ? "bg-[#171717] text-[#F0EAE0]" : "text-black/55 hover:bg-black/5"}`}>
-            <ShieldCheck className="h-4 w-4" /> Admin
-          </button>
-        </div>
+        {mode === "admin" && <div className="mt-8 flex items-center gap-2 border border-black/15 bg-black/[0.03] px-3 py-3 text-[10px] font-bold uppercase tracking-[0.12em]"><ShieldCheck className="h-4 w-4" /> Restricted administrator access</div>}
 
         {mode === "customer" ? (
           <form onSubmit={submitCustomer} className="mt-7 space-y-5">
