@@ -21,7 +21,7 @@ export const Route = createFileRoute("/collections")({
 });
 
 const slides = [
-  { title: "Spring '25", image: colSpring, url: "/shop", linkLabel: "Explore Spring" },
+  { title: "Spring '25", image: colSpring, url: "/lookbook", linkLabel: "Explore Spring" },
   { title: "Summer Essentials '25", image: colSummer, url: "/shop", linkLabel: "Explore Summer" },
   { title: "Festive Collection '25", image: colFestive, url: "/shop", linkLabel: "Explore Festive" },
   { title: "Monsoon '25", image: colMonsoon, url: "/shop", linkLabel: "Explore Monsoon" },
