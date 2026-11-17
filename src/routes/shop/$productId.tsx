@@ -248,7 +248,7 @@ function ProductPage() {
                 <span className="font-medium tabular-nums">{product.rating.toFixed(1)}</span>
                 <span className="text-muted-foreground">({product.reviews} reviews)</span>
               </span>
-              {product.badge && (
+              {(product.isOutOfStock || product.badge || product.isFeatured || product.tags?.length) && (
                 <span className="rounded-full bg-lime px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-primary-foreground">
                   {product.badge}
                 </span>
@@ -343,7 +343,7 @@ function ProductPage() {
                 onClick={addToBag}
                 className="min-w-[200px] flex-1 rounded-full bg-lime px-6 py-3.5 text-sm font-semibold text-primary-foreground transition-transform hover:scale-[1.01] active:scale-[0.99]"
               >
-                Add to Bag · {formatTaka(product.price * qty)}
+                {product.isOutOfStock ? "Currently Out of Stock" : `Add to Bag · ${formatTaka(product.price * qty)}`}
               </button>
 
               <button
