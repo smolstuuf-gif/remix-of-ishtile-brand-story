@@ -198,14 +198,34 @@ export async function signInAdmin(email: string, password: string): Promise<Admi
 export async function restoreAdminSession(): Promise<AdminSession | null> {
   const session = readSession();
   if (!session) return null;
+
+  let current: AdminSession;
   try {
-    const current = await validSession(session);
+    current = await validSession(session);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "";
+    // Only discard a session when Supabase explicitly rejects its refresh token.
+    // Network failures and temporary service errors must not sign an administrator out.
+    if (/invalid refresh token|refresh token.*(not found|expired|invalid)|invalid grant/i.test(message)) {
+      window.localStorage.removeItem(SESSION_KEY);
+      return null;
+    }
+    return session;
+  }
+
+  try {
     await authRequest("/auth/v1/user", current);
     await assertAdmin(current);
     return current;
-  } catch {
-    window.localStorage.removeItem(SESSION_KEY);
-    return null;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "";
+    if (/invalid jwt|jwt expired|unauthorized|not authenticated|does not have ISHTILE administrator access/i.test(message)) {
+      window.localStorage.removeItem(SESSION_KEY);
+      return null;
+    }
+    // Keep the last known-good admin session during transient API or connectivity
+    // failures. The dashboard can then surface its own retryable data error.
+    return current;
   }
 }
 
