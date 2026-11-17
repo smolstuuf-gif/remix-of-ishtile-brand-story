@@ -3,7 +3,6 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, LoaderCircle } from "lucide-react";
 import PortalCarousel from "@/components/ui/portal-carousel";
 import { BuyTheLookButton, LookProductsDrawer } from "@/components/lookbook/LookProductsDrawer";
-import { Footer } from "@/components/home/Footer";
 import { fetchPublicLooks, type PublicLook } from "@/lib/public-store";
 import { productById } from "@/lib/catalog";
 
