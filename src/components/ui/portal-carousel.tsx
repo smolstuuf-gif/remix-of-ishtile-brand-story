@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent, type MouseEvent, type ReactNode } from "react";
 import gsap from "gsap";
 
 export type PortalCarouselImage = { src: string; alt?: string; title?: string };
@@ -87,13 +87,13 @@ export default function PortalCarousel({ images, label = "NEXT", thumbWidth = 19
     idRef.current += 1;
     setLayer({ id: idRef.current, index: next, origin: { left: b.left - a.left, top: b.top - a.top, width: b.width, height: b.height } });
   };
-  const onClick = (event: React.MouseEvent<HTMLDivElement>) => {
+  const onClick = (event: MouseEvent<HTMLDivElement>) => {
     const target = event.target as HTMLElement;
     const interactive = target.closest("a,button,input,select,textarea,[role=button]");
     if (interactive && !interactive.hasAttribute("data-portal-next")) return;
     advance();
   };
-  const onKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+  const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     if (event.key === "ArrowRight" || event.key === " ") { event.preventDefault(); advance(); }
     if (event.key === "ArrowLeft" && count > 1) { event.preventDefault(); setCurrent((value) => { const index = (value - 1 + count) % count; onIndexChange?.(index); return index; }); }
   };
