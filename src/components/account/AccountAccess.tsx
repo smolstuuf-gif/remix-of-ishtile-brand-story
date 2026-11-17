@@ -92,6 +92,7 @@ export function AccountAccess({ defaultMode = "customer" }: { defaultMode?: Acce
         password,
         options: {
           data: {
+            account_type: "customer",
             full_name: name.trim(),
             mobile_number: mobile,
             delivery_address: address.trim(),
