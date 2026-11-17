@@ -89,7 +89,7 @@ function LookbookPage() {
   }, []);
   const displayLooks = looks.length ? looks : demoLooks;
   const seasonalLooks = season ? displayLooks.filter((look) => look.season === season) : displayLooks;
-  const images = useMemo(() => seasonalLooks.map((look) => ({ src: look.image_url, alt: look.alt_text || look.title, title: look.title })), [seasonalLooks]);
+  const images = useMemo(() => seasonalLooks.map((look) => ({ src: look.image_url, video: look.video_url || undefined, alt: look.alt_text || look.title, title: look.title })), [seasonalLooks]);
   const activeLook = seasonalLooks[activeIndex] ?? null;
 
   if (loading) return <main className="grid min-h-[80svh] place-items-center bg-[#171717] text-[#F0EAE0]"><LoaderCircle className="h-7 w-7 animate-spin" aria-label="Loading lookbook" /></main>;
