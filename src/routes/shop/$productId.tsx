@@ -180,15 +180,7 @@ function ProductPage() {
                       view === i ? "border-ink" : "border-transparent hover:border-border",
                     )}
                   >
-                    <img
-                      src={v.src}
-                      alt=""
-                      aria-hidden="true"
-                      width={64}
-                      height={80}
-                      className="h-full w-full object-cover"
-                      style={{ objectPosition: v.position }}
-                    />
+                    {"video" in v && v.video ? <video src={v.src} muted playsInline className="h-full w-full object-cover" /> : <img src={v.src} alt="" aria-hidden="true" width={64} height={80} className="h-full w-full object-cover" style={{ objectPosition: v.position }} />}
                   </button>
                 </li>
               ))}
@@ -196,14 +188,7 @@ function ProductPage() {
 
             <figure className="min-w-0 flex-1">
               <div className="overflow-hidden rounded-xl bg-card">
-                <img
-                  src={views[view]?.src ?? product.image}
-                  alt={product.alt}
-                  width={1024}
-                  height={640}
-                  className="aspect-[4/5] w-full object-cover transition-[object-position] duration-500 md:aspect-[3/2.4]"
-                  style={{ objectPosition: views[view]?.position ?? "50% 25%" }}
-                />
+                {views[view] && "video" in views[view] && views[view].video ? <video src={views[view].src} controls autoPlay muted loop playsInline poster={product.image} className="aspect-[4/5] w-full object-cover md:aspect-[3/2.4]" /> : <img src={views[view]?.src ?? product.image} alt={product.alt} width={1024} height={640} className="aspect-[4/5] w-full object-cover transition-[object-position] duration-500 md:aspect-[3/2.4]" style={{ objectPosition: views[view]?.position ?? "50% 25%" }} />}
               </div>
               <ul className="mt-3 flex gap-2 sm:hidden">
                 {views.map((v, i) => (
@@ -218,15 +203,7 @@ function ProductPage() {
                         view === i ? "border-ink" : "border-transparent",
                       )}
                     >
-                      <img
-                        src={v.src}
-                        alt=""
-                        aria-hidden="true"
-                        width={56}
-                        height={64}
-                        className="h-full w-full object-cover"
-                        style={{ objectPosition: v.position }}
-                      />
+                      {"video" in v && v.video ? <video src={v.src} muted playsInline className="h-full w-full object-cover" /> : <img src={v.src} alt="" aria-hidden="true" width={56} height={64} className="h-full w-full object-cover" style={{ objectPosition: v.position }} />}
                     </button>
                   </li>
                 ))}
