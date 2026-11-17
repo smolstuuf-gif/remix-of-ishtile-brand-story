@@ -16,7 +16,7 @@ export function Component() {
   const [slides, setSlides] = useState(fallbackSlides);
   const [active, setActive] = useState(0);
   const slide = slides[active] ?? slides[0]!;
-  useEffect(() => { let live = true; fetchPublicBrands().then((items) => { if (live && items.length) setSlides(items.map((item) => ({ name: item.name, title: item.motto || "Discover the label.", description: item.description || "", image: item.image_url || item.logo_url || "", video: item.video_url || undefined }))); }).catch(() => undefined); return () => { live = false; }; }, []);
+  useEffect(() => { let live = true; fetchPublicBrands().then((items) => { if (live && items.length) { setSlides(items.map((item) => ({ name: item.name, title: item.motto || "Discover the label.", description: item.description || "", image: item.image_url || item.logo_url || "", video: item.video_url || undefined }))); setActive(0); } }).catch(() => undefined); return () => { live = false; }; }, []);
 
   useEffect(() => {
     const timer = window.setInterval(() => setActive((current) => (current + 1) % slides.length), 6500);
@@ -33,7 +33,7 @@ export function Component() {
     <main className="lumina-brands" data-header-theme="dark">
       <div className="lumina-brands__media" aria-hidden="true">
         {slides.map((item, index) => (
-          {item.video ? <video key={`${item.name}-${active}`} src={item.video} autoPlay muted loop playsInline poster={item.image || undefined} className={index === active ? "is-active" : ""} /> : <img key={`${item.name}-${active}`} src={item.image} alt="" className={index === active ? "is-active" : ""} />}
+          item.video ? <video key={`${item.name}-${active}`} src={item.video} autoPlay muted loop playsInline poster={item.image || undefined} className={index === active ? "is-active" : ""} /> : <img key={`${item.name}-${active}`} src={item.image} alt="" className={index === active ? "is-active" : ""} />
         ))}
       </div>
       <svg className="lumina-brands__filters" aria-hidden="true" focusable="false">
