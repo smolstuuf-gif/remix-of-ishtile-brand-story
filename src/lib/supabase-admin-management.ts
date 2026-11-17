@@ -95,7 +95,7 @@ export type AdminProduct = {
   colors: { name: string; hex: string }[]; stock_quantity: number | null; sku: string | null; is_active: boolean; is_featured: boolean; is_out_of_stock: boolean; tags: string[];
 };
 export type HeroSlide = {
-  id: string; title: string | null; subtitle: string | null; image_url: string; mobile_image_url: string | null; video_url: string | null; mobile_video_url: string | null;
+  id: string; title: string | null; subtitle: string | null; image_url: string | null; mobile_image_url: string | null; video_url: string | null; mobile_video_url: string | null;
   link_url: string | null; sort_order: number; is_active: boolean; starts_at: string | null; ends_at: string | null;
 };
 export type AdminCollection = {
