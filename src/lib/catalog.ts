@@ -30,7 +30,7 @@ export type Product = {
   colors: ProductColor[];
   rating: number;
   reviews: number;
-  badge?: "New" | "Best Seller" | "Limited";
+  badge?: string;\n  tags?: string[];\n  isFeatured?: boolean;\n  isOutOfStock?: boolean;
   blurb: string;
   details: string[];
   care: string;
