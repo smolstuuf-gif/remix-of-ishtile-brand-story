@@ -68,7 +68,7 @@ function BrandTile({ tile }: { tile: Tile }) {
 
 export function Brands() {
   const scroller = useRef<HTMLDivElement>(null);
-  const [liveBrands, setLiveBrands] = useState<{ id: string; name: string; logo_url: string | null; image_url: string | null }[] | null>(null);
+  const [liveBrands, setLiveBrands] = useState<{ id: string; name: string; logo_url: string | null; image_url: string | null; video_url?: string | null }[] | null>(null);
   useEffect(() => { let live = true; fetchPublicBrands().then((items) => { if (live && items.length) setLiveBrands(items); }).catch(() => undefined); return () => { live = false; }; }, []);
   const scrollBy = (dir: number) =>
     scroller.current?.scrollBy({ left: dir * scroller.current.clientWidth * 0.6, behavior: "smooth" });
@@ -107,7 +107,7 @@ export function Brands() {
       >
         {liveBrands?.some((brand) => brand.image_url || brand.logo_url) ? liveBrands.map((brand) => (
           <a key={brand.id} href="/brands" aria-label={`Explore ${brand.name}`} className={cn(tileBase, "group flex items-center justify-center bg-ink p-3 text-ink-foreground")}>
-            {brand.image_url ? <img src={brand.image_url} alt={brand.name} className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" /> : brand.logo_url ? <img src={brand.logo_url} alt={brand.name} className="max-h-[55%] max-w-[80%] object-contain" /> : <span className="text-center text-[clamp(.9rem,1.4vw,1.35rem)] font-semibold">{brand.name}</span>}
+            {brand.video_url ? <video src={brand.video_url} autoPlay muted loop playsInline poster={brand.image_url || undefined} className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" /> : brand.image_url ? <img src={brand.image_url} alt={brand.name} className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" /> : brand.logo_url ? <img src={brand.logo_url} alt={brand.name} className="max-h-[55%] max-w-[80%] object-contain" /> : <span className="text-center text-[clamp(.9rem,1.4vw,1.35rem)] font-semibold">{brand.name}</span>}
           </a>
         )) : tiles.map((t, i) => (
           <BrandTile key={i} tile={t} />
