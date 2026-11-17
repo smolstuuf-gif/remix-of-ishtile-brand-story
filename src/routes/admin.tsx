@@ -220,10 +220,10 @@ function Dashboard({
               ["products", "01", "Products", "Catalogue, pricing and stock"],
               ["hero", "02", "Hero controls", "Homepage slides and schedule"],
               ["collections", "03", "Collections", "Campaigns and featured edits"],
-              ["lookbook", "07", "Buy the Look", "Model shoots and outfit sets"],
-              ["brands", "04", "Brands", "Brand profiles and performance"],
-              ["accounts", "05", "Accounts", "Admins and customers"],
-              ["brand-info", "06", "Brand info", "Store identity and contact details"],
+              ["lookbook", "04", "Buy the Look", "Model shoots and outfit sets"],
+              ["brands", "05", "Brands", "Brand profiles and performance"],
+              ["accounts", "06", "Accounts", "Admins and customers"],
+              ["brand-info", "07", "Brand info", "Store identity and contact details"],
             ].map(([tab, number, label, hint]) => (
               <Link key={tab} to={`/admin/management#${tab}`} onClick={() => setDrawerOpen(false)} className="group flex items-center gap-3 px-3 py-3 text-white/70 transition-all duration-200 hover:translate-x-1 hover:bg-white/10 hover:text-white">
                 <span className="grid h-8 w-8 shrink-0 place-items-center bg-white/10 text-[10px] font-black text-[#D5FE00]">{number}</span>
