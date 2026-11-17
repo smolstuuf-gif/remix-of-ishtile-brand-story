@@ -16,6 +16,7 @@ export function BuyTheLookButton({ onClick }: { onClick: () => void }) {
 export function LookProductsDrawer({ look, open, onOpenChange }: { look: PublicLook | null; open: boolean; onOpenChange: (open: boolean) => void }) {
   const { addItem, openCart } = useCart();
   const [selection, setSelection] = useState<Record<string, Selection>>({});
+  const [adding, setAdding] = useState(false);
   useEffect(() => {
     if (!look) return;
     const next: Record<string, Selection> = {};
@@ -34,7 +35,9 @@ export function LookProductsDrawer({ look, open, onOpenChange }: { look: PublicL
     setSelection((current) => ({ ...current, [product.id]: { ...current[product.id], ...value } }));
   }
   async function addLook() {
-    if (!look) return;
+    if (!look || adding) return;
+    setAdding(true);
+    try {
     const latestProducts = await fetchPublicProducts();
     if (!latestProducts) {
       toast.error("We couldn't verify current product availability. Please try again.");
@@ -64,6 +67,11 @@ export function LookProductsDrawer({ look, open, onOpenChange }: { look: PublicL
     if (unavailable) toast.warning(`${unavailable} piece(s) were unavailable and weren't added.`);
     onOpenChange(false);
     openCart();
+    } catch {
+      toast.error("Something went wrong while adding this look. Please try again.");
+    } finally {
+      setAdding(false);
+    }
   }
   return <Sheet open={open} onOpenChange={onOpenChange}>
     <SheetContent side="right" className="flex w-full flex-col gap-0 border-l border-[#171717]/10 bg-[#F0EAE0] p-0 text-[#171717] sm:max-w-[520px]">
@@ -93,7 +101,7 @@ export function LookProductsDrawer({ look, open, onOpenChange }: { look: PublicL
       </div>
       <div className="border-t border-[#171717]/15 px-5 pb-6 pt-4 md:px-7">
         <div className="mb-3 flex items-center justify-between text-xs"><span className="text-[#171717]/55">{selectedCount} of {available.length} available pieces selected</span><span className="font-bold tabular-nums">{formatTaka(total)}</span></div>
-        <button type="button" disabled={!selectedCount} onClick={addLook} className="flex w-full items-center justify-center gap-2 bg-[#171717] py-4 text-xs font-black uppercase tracking-[.1em] text-[#F0EAE0] transition hover:bg-black disabled:cursor-not-allowed disabled:opacity-40"><ShoppingBag className="h-4 w-4" /> Buy the look · Add to bag</button>
+        <button type="button" disabled={!selectedCount || adding} onClick={() => { void addLook(); }} className="flex w-full items-center justify-center gap-2 bg-[#171717] py-4 text-xs font-black uppercase tracking-[.1em] text-[#F0EAE0] transition hover:bg-black disabled:cursor-not-allowed disabled:opacity-40"><ShoppingBag className="h-4 w-4" /> {adding ? "Checking availability…" : "Buy the look · Add to bag"}</button>
         <p className="mt-2 text-center text-[9px] leading-4 text-[#171717]/45">Your selections are added to your existing bag. Review the bag before checkout.</p>
       </div>
     </SheetContent>
