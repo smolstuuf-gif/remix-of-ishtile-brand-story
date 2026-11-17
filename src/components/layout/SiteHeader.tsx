@@ -68,12 +68,22 @@ export function SiteHeader() {
 
       setTheme((current) => current === nextTheme ? current : nextTheme);
     };
+    let frame = 0;
+    const scheduleThemeUpdate = () => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(() => {
+        frame = 0;
+        updateTheme();
+      });
+    };
+
     updateTheme();
-    window.addEventListener("scroll", updateTheme, { passive: true });
-    window.addEventListener("resize", updateTheme);
+    window.addEventListener("scroll", scheduleThemeUpdate, { passive: true });
+    window.addEventListener("resize", scheduleThemeUpdate, { passive: true });
     return () => {
-      window.removeEventListener("scroll", updateTheme);
-      window.removeEventListener("resize", updateTheme);
+      window.removeEventListener("scroll", scheduleThemeUpdate);
+      window.removeEventListener("resize", scheduleThemeUpdate);
+      if (frame) window.cancelAnimationFrame(frame);
     };
   }, [isHome]);
 
