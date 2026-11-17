@@ -412,7 +412,7 @@ function CollectionLookEditor({ collection, look, looksCount, products, session,
     await perform(() => adminRpc<string>("save_lookbook_look", session, { p_look: payload, p_products: associations }), look ? "Lookbook image and product set saved." : "Lookbook image created with its product set.");
   }
   const visibleProducts = products.filter((product) => product.is_active && `${product.name} ${product.slug} ${product.sku ?? ""}`.toLowerCase().includes(query.toLowerCase()));
-  return <details className="group border border-black/10 bg-white/55" defaultOpen={!look}>
+  return <details className="group border border-black/10 bg-white/55">
     <summary className="flex cursor-pointer list-none items-center gap-3 p-3 [&::-webkit-details-marker]:hidden">
       {look?.image_url ? <img src={look.image_url} alt="" className="h-16 w-12 shrink-0 object-cover" /> : <div className="grid h-16 w-12 shrink-0 place-items-center bg-[#E8E1D6]"><ImagePlus className="h-4 w-4 text-black/35" /></div>}
       <span className="min-w-0 flex-1"><span className="block truncate text-xs font-black">{look?.title || "Add a lookbook image"}</span><span className="mt-1 block text-[10px] text-black/45">{look ? `${look.slug} · ${linked.length} products · ${look.is_active ? "Published" : "Hidden"}` : "New editorial image · add its own products"}</span></span>
@@ -430,8 +430,12 @@ function CollectionLookEditor({ collection, look, looksCount, products, session,
       <label className={labelClass}>Visibility<select className={inputClass} value={draft.is_active ? "active" : "hidden"} onChange={(event) => setDraft((d) => ({ ...d, is_active: event.target.value === "active" }))}><option value="active">Published</option><option value="hidden">Hidden</option></select></label>
       <Field label="Publish from" name="starts_at" type="datetime-local" value={draft.starts_at} onChange={(value) => setDraft((d) => ({ ...d, starts_at: value }))} />
       <Field label="Unpublish at" name="ends_at" type="datetime-local" value={draft.ends_at} onChange={(value) => setDraft((d) => ({ ...d, ends_at: value }))} />
-      <section className="space-y-3 border-t border-black/10 pt-4 md:col-span-2">
-        <div className="flex flex-wrap items-center justify-between gap-2"><div><h4 className="text-xs font-black uppercase tracking-wider">Products attached to this image</h4><p className="mt-1 text-[10px] text-black/45">Product selection is independent for every lookbook image.</p></div><span className="text-[10px] font-bold">{linked.length} selected</span></div>
+      <details className="border-t border-black/10 pt-4 md:col-span-2">
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-3 py-2 [&::-webkit-details-marker]:hidden">
+          <span><span className="block text-xs font-black uppercase tracking-wider">Products attached to this image</span><span className="mt-1 block text-[10px] text-black/45">Product selection is independent for every lookbook image.</span></span>
+          <span className="text-[10px] font-bold">{linked.length} selected</span>
+        </summary>
+        <div className="space-y-3 pt-3">
         <input className={inputClass} placeholder="Search catalogue products" value={query} onChange={(event) => setQuery(event.target.value)} />
         <div className="grid max-h-[460px] gap-2 overflow-y-auto sm:grid-cols-2">
           {visibleProducts.map((product) => {
@@ -446,7 +450,8 @@ function CollectionLookEditor({ collection, look, looksCount, products, session,
             </ProductSelectionCard>;
           })}
         </div>
-      </section>
+        </div>
+      </details>
       <div className="flex flex-wrap gap-2 border-t border-black/10 pt-4 md:col-span-2">
         <button className={buttonClass} disabled={busy || !draft.title.trim() || !draft.season || !draft.image_url.trim() || !linked.length}><Save className="h-4 w-4" /> Save image & products</button>
         {look && <button type="button" className={secondaryClass} disabled={busy} onClick={() => { if (confirm(`Delete lookbook image “${look.title}” and its product links?`)) void perform(() => adminWrite(`lookbook_looks?id=eq.${look.id}`, session, "DELETE"), "Lookbook image deleted."); }}><Trash2 className="h-4 w-4" /> Delete image</button>}
