@@ -3,9 +3,17 @@ import { productById, type Product } from "@/lib/catalog";
 const url = (import.meta.env.VITE_SUPABASE_URL as string | undefined)?.replace(/\/$/, "");
 const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined;
 
+function publicApiHeaders(): HeadersInit {
+  // Supabase publishable keys (sb_publishable_...) are API keys, not JWTs.
+  // Sending one as a Bearer token causes PostgREST requests to be rejected.
+  return key?.startsWith("sb_publishable_")
+    ? { apikey: key }
+    : { apikey: key ?? "", Authorization: `Bearer ${key ?? ""}` };
+}
+
 async function publicRows<T>(path: string): Promise<T[]> {
   if (!url || !key) return [];
-  const response = await fetch(`${url}/rest/v1/${path}`, { headers: { apikey: key, Authorization: `Bearer ${key}` } });
+  const response = await fetch(`${url}/rest/v1/${path}`, { headers: publicApiHeaders() });
   if (!response.ok) return [];
   return (await response.json()) as T[];
 }
@@ -74,7 +82,7 @@ function toCatalogProduct(row: DatabaseProduct): Product {
 export async function fetchPublicProducts(): Promise<Product[] | null> {
   if (!url || !key) return null;
   const response = await fetch(`${url}/rest/v1/products?select=slug,name,price,image_url,image_urls,category,sizes,colors,description,created_at,is_featured,is_out_of_stock,stock_quantity,tags,brands(name)&is_active=eq.true&order=created_at.desc`, {
-    headers: { apikey: key, Authorization: `Bearer ${key}` },
+    headers: publicApiHeaders(),
   });
   if (!response.ok) return null;
   const rows = await response.json() as DatabaseProduct[];
@@ -83,7 +91,7 @@ export async function fetchPublicProducts(): Promise<Product[] | null> {
 export async function fetchPublicProduct(slug: string): Promise<Product | null | undefined> {
   if (!url || !key) return undefined;
   const response = await fetch(`${url}/rest/v1/products?select=slug,name,price,image_url,image_urls,category,sizes,colors,description,created_at,brands(name)&slug=eq.${encodeURIComponent(slug)}&is_active=eq.true&limit=1`, {
-    headers: { apikey: key, Authorization: `Bearer ${key}` },
+    headers: publicApiHeaders(),
   });
   if (!response.ok) return undefined;
   const rows = await response.json() as DatabaseProduct[];
