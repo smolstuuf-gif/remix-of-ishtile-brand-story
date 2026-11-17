@@ -33,7 +33,7 @@ export function Component() {
     <main className="lumina-brands" data-header-theme="dark">
       <div className="lumina-brands__media" aria-hidden="true">
         {slides.map((item, index) => (
-          item.video ? <video key={`${item.name}-${active}`} src={item.video} autoPlay muted loop playsInline poster={item.image || undefined} className={index === active ? "is-active" : ""} /> : <img key={`${item.name}-${active}`} src={item.image} alt="" className={index === active ? "is-active" : ""} />
+          item.video ? <video key={`${item.name}-${active}`} src={item.video} autoPlay={index === active} muted loop playsInline poster={item.image || undefined} className={index === active ? "is-active" : ""} /> : <img key={`${item.name}-${active}`} src={item.image} alt="" className={index === active ? "is-active" : ""} />
         ))}
       </div>
       <svg className="lumina-brands__filters" aria-hidden="true" focusable="false">
