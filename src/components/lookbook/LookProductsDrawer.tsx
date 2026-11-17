@@ -9,7 +9,7 @@ import type { PublicLook } from "@/lib/public-store";
 
 type Selection = { selected: boolean; size: string; color: string; qty: number };
 export function BuyTheLookButton({ onClick }: { onClick: () => void }) {
-  return <button type="button" onClick={onClick} className="fixed bottom-6 right-5 z-[70] inline-flex items-center gap-2 rounded-full bg-[#D5FE00] px-4 py-3 text-xs font-black uppercase tracking-[.08em] text-[#171717] shadow-[0_8px_35px_rgba(0,0,0,.3)] transition-transform hover:scale-[1.04] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#D5FE00] md:bottom-9 md:right-9 md:px-5 md:py-3.5"><Shirt className="h-4 w-4" strokeWidth={2.2} /><span>Buy the look</span></button>;
+  return <button type="button" onClick={onClick} className="fixed bottom-6 right-5 z-40 inline-flex items-center gap-2 rounded-full bg-[#D5FE00] px-4 py-3 text-xs font-black uppercase tracking-[.08em] text-[#171717] shadow-[0_8px_35px_rgba(0,0,0,.3)] transition-transform hover:scale-[1.04] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#D5FE00] md:bottom-9 md:right-9 md:px-5 md:py-3.5"><Shirt className="h-4 w-4" strokeWidth={2.2} /><span>Buy the look</span></button>;
 }
 export function LookProductsDrawer({ look, open, onOpenChange }: { look: PublicLook | null; open: boolean; onOpenChange: (open: boolean) => void }) {
   const { addItem, openCart } = useCart();
