@@ -48,7 +48,8 @@ function toCatalogProduct(row: DatabaseProduct): Product {
     ...(fallback ?? {
       id: row.slug, name: row.name, price: Number(row.price), image: "", alt: row.name,
       category: "Men" as const, brand: "ISHTILE" as const, sizes: [], colors: [],
-      rating: 0, reviews: 0, blurb: "", details: [], care: "", added: row.created_at,\n      isFeatured: row.is_featured, isOutOfStock: row.is_out_of_stock, tags: row.tags ?? [],
+      rating: 0, reviews: 0, blurb: "", details: [], care: "", added: row.created_at,
+      isFeatured: row.is_featured, isOutOfStock: row.is_out_of_stock, tags: row.tags ?? [],
     }),
     id: row.slug,
     name: row.name,
@@ -65,7 +66,9 @@ function toCatalogProduct(row: DatabaseProduct): Product {
     blurb: row.description || fallback?.blurb || "",
     details: fallback?.details ?? (row.description ? [row.description] : []),
     care: fallback?.care ?? "",
-    added: row.created_at || fallback?.added || "",\n    isFeatured: row.is_featured, isOutOfStock: row.is_out_of_stock, tags: row.tags ?? [],\n    badge: (row.tags ?? []).find((tag) => ["Best Seller", "Customer Favorite", "New Arrival", "Limited Edition", "Trending", "Staff Pick", "Exclusive"].includes(tag)) || undefined,
+    added: row.created_at || fallback?.added || "",
+    isFeatured: row.is_featured, isOutOfStock: row.is_out_of_stock, tags: row.tags ?? [],
+    badge: (row.tags ?? []).find((tag) => ["Best Seller", "Customer Favorite", "New Arrival", "Limited Edition", "Trending", "Staff Pick", "Exclusive"].includes(tag)) || undefined,
   };
 }
 export async function fetchPublicProducts(): Promise<Product[] | null> {
