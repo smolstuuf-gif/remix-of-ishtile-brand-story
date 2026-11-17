@@ -220,6 +220,7 @@ function Dashboard({
               ["products", "01", "Products", "Catalogue, pricing and stock"],
               ["hero", "02", "Hero controls", "Homepage slides and schedule"],
               ["collections", "03", "Collections", "Campaigns and featured edits"],
+              ["lookbook", "07", "Buy the Look", "Model shoots and outfit sets"],
               ["brands", "04", "Brands", "Brand profiles and performance"],
               ["accounts", "05", "Accounts", "Admins and customers"],
               ["brand-info", "06", "Brand info", "Store identity and contact details"],
