@@ -36,10 +36,12 @@ export function ProductCard({ product, className }: { product: Product; classNam
           />
         </Link>
 
-        {product.badge && (
-          <span className="absolute left-2.5 top-2.5 rounded-full bg-lime px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-primary-foreground">
-            {product.badge}
-          </span>
+        {(product.isOutOfStock || product.isFeatured || product.tags?.length) && (
+          <div className="absolute left-2.5 top-2.5 flex max-w-[80%] flex-wrap gap-1.5">
+            {product.isOutOfStock && <span className="rounded-full bg-[#171717] px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white">Sold Out</span>}
+            {product.isFeatured && !product.isOutOfStock && <span className="rounded-full bg-[#D5FE00] px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-[#171717]">Featured</span>}
+            {(product.tags ?? []).slice(0, 2).map((tag) => <span key={tag} className="rounded-full bg-[#F0EAE0] px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-[#171717]">{tag}</span>)}
+          </div>
         )}
 
         <FavoriteButton
