@@ -46,7 +46,7 @@ export async function fetchPublicBrands() {
 
 type DatabaseProduct = {
   slug: string; name: string; price: number | string; image_url: string | null; image_urls: string[] | null;
-  category: string; sizes: string[] | null; colors: { name: string; hex: string }[] | null;
+  category: string; sizes: string[] | null; size_guide: { size: string; chest: string; length: string }[] | null; care_instructions: string | null; colors: { name: string; hex: string }[] | null;
   description: string | null; created_at: string; is_featured: boolean; is_out_of_stock: boolean; stock_quantity: number | null; tags: string[]; brands?: { name: string } | null;
 };
 function toCatalogProduct(row: DatabaseProduct): Product {
@@ -73,7 +73,8 @@ function toCatalogProduct(row: DatabaseProduct): Product {
     reviews: fallback?.reviews ?? 0,
     blurb: row.description || fallback?.blurb || "",
     details: fallback?.details ?? (row.description ? [row.description] : []),
-    care: fallback?.care ?? "",
+    sizeGuide: row.size_guide ?? [],
+    care: row.care_instructions || fallback?.care || "",
     added: row.created_at || fallback?.added || "",
     isFeatured: row.is_featured, isOutOfStock: row.is_out_of_stock, stockQuantity: row.stock_quantity ?? null, tags: row.tags ?? [],
     badge: (row.tags ?? []).find((tag) => ["Best Seller", "Customer Favorite", "New Arrival", "Limited Edition", "Trending", "Staff Pick", "Exclusive"].includes(tag)) || undefined,
@@ -81,7 +82,7 @@ function toCatalogProduct(row: DatabaseProduct): Product {
 }
 export async function fetchPublicProducts(): Promise<Product[] | null> {
   if (!url || !key) return null;
-  const response = await fetch(`${url}/rest/v1/products?select=slug,name,price,image_url,image_urls,category,sizes,colors,description,created_at,is_featured,is_out_of_stock,stock_quantity,tags,brands(name)&is_active=eq.true&order=created_at.desc`, {
+  const response = await fetch(`${url}/rest/v1/products?select=slug,name,price,image_url,image_urls,category,sizes,size_guide,care_instructions,colors,description,created_at,is_featured,is_out_of_stock,stock_quantity,tags,brands(name)&is_active=eq.true&order=created_at.desc`, {
     headers: publicApiHeaders(),
   });
   if (!response.ok) return null;
@@ -90,7 +91,7 @@ export async function fetchPublicProducts(): Promise<Product[] | null> {
 }
 export async function fetchPublicProduct(slug: string): Promise<Product | null | undefined> {
   if (!url || !key) return undefined;
-  const response = await fetch(`${url}/rest/v1/products?select=slug,name,price,image_url,image_urls,category,sizes,colors,description,created_at,brands(name)&slug=eq.${encodeURIComponent(slug)}&is_active=eq.true&limit=1`, {
+  const response = await fetch(`${url}/rest/v1/products?select=slug,name,price,image_url,image_urls,category,sizes,size_guide,care_instructions,colors,description,created_at,brands(name)&slug=eq.${encodeURIComponent(slug)}&is_active=eq.true&limit=1`, {
     headers: publicApiHeaders(),
   });
   if (!response.ok) return undefined;
