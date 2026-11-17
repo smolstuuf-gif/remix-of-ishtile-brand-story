@@ -214,14 +214,23 @@ function Dashboard({
         {drawerOpen && <button type="button" aria-label="Close dashboard menu" onClick={() => setDrawerOpen(false)} className="fixed inset-0 z-40 cursor-default bg-[#171717]/55 backdrop-blur-[2px]" />}
         <aside className={`fixed inset-y-0 left-0 z-50 flex w-[min(86vw,300px)] flex-col border-r border-white/10 bg-[#171717] px-5 py-7 text-[#F0EAE0] shadow-[24px_0_70px_rgba(0,0,0,.24)] transition-transform duration-300 ease-[cubic-bezier(.22,1,.36,1)] ${drawerOpen ? "translate-x-0" : "-translate-x-full"}`} aria-hidden={!drawerOpen}>
           <div className="flex items-center justify-between"><div><div className="font-display text-2xl font-black tracking-[-0.07em]">ISHTILE<span className="text-[#D5FE00]">+</span></div><p className="mt-1 text-[9px] font-bold uppercase tracking-[0.24em] text-white/40">Operations desk</p></div><button type="button" onClick={() => setDrawerOpen(false)} aria-label="Close menu" className="grid h-9 w-9 place-items-center border border-white/15 text-white/70 hover:border-[#D5FE00] hover:text-[#D5FE00]"><MenuToggleIcon open className="h-5 w-5" strokeWidth={2.2} duration={500} /></button></div>
-          <p className="mb-3 mt-12 text-[9px] font-bold uppercase tracking-[0.2em] text-white/35">Dashboard</p>
-          <nav className="space-y-1" aria-label="Dashboard sections">
-            <a href="#overview" onClick={() => setDrawerOpen(false)} className="flex items-center gap-3 bg-[#D5FE00] px-3 py-3 text-xs font-bold uppercase tracking-[0.1em] text-[#171717]"><ChartNoAxesCombined className="h-4 w-4" /> Overview</a>
-            <a href="#brands" onClick={() => setDrawerOpen(false)} className="flex items-center gap-3 px-3 py-3 text-xs font-semibold text-white/65 transition hover:bg-white/10 hover:text-white"><TrendingUp className="h-4 w-4" /> Brand sales</a>
-            <a href="#orders" onClick={() => setDrawerOpen(false)} className="flex items-center gap-3 px-3 py-3 text-xs font-semibold text-white/65 transition hover:bg-white/10 hover:text-white"><ShoppingBag className="h-4 w-4" /> Orders</a>
-            <a href="#inventory" onClick={() => setDrawerOpen(false)} className="flex items-center gap-3 px-3 py-3 text-xs font-semibold text-white/65 transition hover:bg-white/10 hover:text-white"><Boxes className="h-4 w-4" /> Inventory</a>
+          <p className="mb-3 mt-12 text-[9px] font-bold uppercase tracking-[0.2em] text-white/35">Store management</p>
+          <nav className="space-y-1.5" aria-label="Store management controls">
+            {[
+              ["products", "01", "Products", "Catalogue, pricing and stock"],
+              ["hero", "02", "Hero controls", "Homepage slides and schedule"],
+              ["collections", "03", "Collections", "Campaigns and featured edits"],
+              ["brands", "04", "Brands", "Brand profiles and performance"],
+              ["accounts", "05", "Accounts", "Admins and customers"],
+              ["brand-info", "06", "Brand info", "Store identity and contact details"],
+            ].map(([tab, number, label, hint]) => (
+              <Link key={tab} to={`/admin/management#${tab}`} onClick={() => setDrawerOpen(false)} className="group flex items-center gap-3 px-3 py-3 text-white/70 transition-all duration-200 hover:translate-x-1 hover:bg-white/10 hover:text-white">
+                <span className="grid h-8 w-8 shrink-0 place-items-center bg-white/10 text-[10px] font-black text-[#D5FE00]">{number}</span>
+                <span className="min-w-0 flex-1"><span className="block text-xs font-black uppercase tracking-[0.07em]">{label}</span><span className="mt-1 block text-[10px] text-white/35">{hint}</span></span>
+                <ArrowUpRight className="h-4 w-4 opacity-35 transition group-hover:opacity-100" />
+              </Link>
+            ))}
           </nav>
-          <Link to="/admin/management" onClick={() => setDrawerOpen(false)} className="mt-5 flex items-center gap-2 border border-white/15 px-3 py-3 text-xs font-bold text-white/70 transition hover:border-[#D5FE00] hover:text-[#D5FE00]">Manage store <ArrowUpRight className="h-4 w-4" /></Link>
           <div className="mt-auto border-t border-white/10 pt-5"><p className="truncate text-xs font-semibold">{session.user.email ?? "Administrator"}</p><p className="mt-1 text-[10px] text-white/40">Authorised administrator</p><button onClick={onSignOut} className="mt-5 flex items-center gap-2 text-xs font-semibold text-white/55 transition hover:text-[#D5FE00]"><LogOut className="h-4 w-4" /> Sign out</button></div>
         </aside>
 
