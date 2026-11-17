@@ -89,7 +89,7 @@ export type AdminCollection = {
 };
 export type AdminLook = {
   id: string; slug: string; title: string; description: string | null; image_url: string;
-  alt_text: string | null; season: "spring" | "summer" | "festive" | "monsoon" | "winter" | null; sort_order: number; is_active: boolean; starts_at: string | null; ends_at: string | null;
+  collection_id: string | null; alt_text: string | null; season: "spring" | "summer" | "festive" | "monsoon" | "winter" | null; sort_order: number; is_active: boolean; starts_at: string | null; ends_at: string | null;
   lookbook_look_products?: { product_id: string; sort_order: number; default_size: string | null; default_color: string | null; default_quantity: number }[];
 };
 export type SiteBrandInfo = {
