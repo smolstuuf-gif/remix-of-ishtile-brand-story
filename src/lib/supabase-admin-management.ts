@@ -76,7 +76,7 @@ export type AdminBrand = {
 export type AdminProduct = {
   id: string; slug: string; name: string; brand_id: string; category: string; price: number;
   image_url: string | null; image_urls: string[]; description: string | null; sizes: string[];
-  colors: { name: string; hex: string }[]; stock_quantity: number | null; sku: string | null; is_active: boolean;
+  colors: { name: string; hex: string }[]; stock_quantity: number | null; sku: string | null; is_active: boolean; is_featured: boolean; is_out_of_stock: boolean; tags: string[];
 };
 export type HeroSlide = {
   id: string; title: string | null; subtitle: string | null; image_url: string; mobile_image_url: string | null;
