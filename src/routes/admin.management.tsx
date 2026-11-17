@@ -9,8 +9,8 @@ import { productById } from "@/lib/catalog";
 import { AccountAccess } from "@/components/account/AccountAccess";
 import { restoreAdminSession, signOutAdmin, type AdminSession } from "@/lib/supabase-admin";
 import {
-  adminData, adminWrite, loadAdminWorkspace, slugify, uploadAdminMedia,
-  type AdminBrand, type AdminCollection, type AdminOrder, type AdminProduct, type CustomerProfile,
+  adminData, adminWrite, adminRpc, loadAdminWorkspace, slugify, uploadAdminMedia,
+  type AdminBrand, type AdminCollection, type AdminLook, type AdminOrder, type AdminProduct, type CustomerProfile,
   type HeroSlide, type SiteBrandInfo,
 } from "@/lib/supabase-admin-management";
 
@@ -19,11 +19,12 @@ export const Route = createFileRoute("/admin/management")({
   component: ManagementPage,
 });
 
-type Tab = "products" | "hero" | "collections" | "brands" | "accounts" | "brand-info";
+type Tab = "products" | "hero" | "collections" | "lookbook" | "brands" | "accounts" | "brand-info";
 const tabs: { id: Tab; label: string; hint: string }[] = [
   { id: "products", label: "Products", hint: "Catalogue and inventory" },
   { id: "hero", label: "Hero controls", hint: "Slides and scheduling" },
   { id: "collections", label: "Collections", hint: "Homepage campaigns" },
+  { id: "lookbook", label: "Buy the Look", hint: "Model shoots and outfit sets" },
   { id: "brands", label: "Brands", hint: "Brand workspaces" },
   { id: "accounts", label: "Accounts", hint: "Administrators and customers" },
   { id: "brand-info", label: "Brand info", hint: "Main ISHTILE identity" },
@@ -128,6 +129,7 @@ function ManagementPage() {
                 {tab === "products" && <ProductsPanel products={workspace.products} brands={workspace.brands} initialBrandFilter={brandFilterRequest} session={session} busy={busy} perform={perform} />}
                 {tab === "hero" && <HeroPanel slides={workspace.slides} settings={workspace.settings} session={session} busy={busy} perform={perform} />}
                 {tab === "collections" && <CollectionsPanel collections={workspace.collections} products={workspace.products} session={session} busy={busy} perform={perform} />}
+                {tab === "lookbook" && <LookbookPanel looks={workspace.looks} products={workspace.products} session={session} busy={busy} perform={perform} />}
                 {tab === "brands" && <BrandsPanel brands={workspace.brands} products={workspace.products} orders={workspace.orders} onManageProducts={(brandId) => { setBrandFilterRequest(brandId); setTab("products"); }} session={session} busy={busy} perform={perform} />}
                 {tab === "accounts" && <AccountsPanel admins={workspace.admins} customers={workspace.customers} orders={workspace.orders} session={session} busy={busy} perform={perform} />}
                 {tab === "brand-info" && <BrandInfoPanel settings={workspace.settings} session={session} busy={busy} perform={perform} />}
@@ -245,6 +247,88 @@ function CollectionsPanel({ collections, products, session, busy, perform }: { c
         <div><div className="mb-3 flex items-center justify-between"><h3 className="text-sm font-black">Products in {selected.title}</h3><span className="text-[10px] text-black/45">{chosen.length} selected</span></div><div className="grid gap-2 sm:grid-cols-2">{products.map((p) => <label key={p.id} className="flex items-center gap-2 border border-black/10 p-2 text-xs"><input type="checkbox" checked={chosen.includes(p.id)} onChange={(e) => setChosen((old) => e.target.checked ? [...old, p.id] : old.filter((id) => id !== p.id))} /><span className="min-w-0 flex-1 truncate">{p.name}</span><span className="text-[10px] text-black/40">{money(Number(p.price))}</span></label>)}</div><button className={`${buttonClass} mt-4`} disabled={busy} onClick={() => void saveProducts()}><Save className="h-4 w-4" /> Save product selection</button></div></div>}
     </div>
     <form onSubmit={add} className="space-y-3 border border-black/10 bg-[#F7F3EC] p-4"><h3 className="text-sm font-black">Add collection campaign</h3><Field label="Collection title" name="title" value={draft.title} required onChange={(v) => setDraft({ ...draft, title: v, slug: slugify(v) })} /><Field label="Slug" name="slug" value={draft.slug} onChange={(v) => setDraft({ ...draft, slug: v })} /><Field label="Campaign label" name="campaign_label" value={draft.campaign_label} onChange={(v) => setDraft({ ...draft, campaign_label: v })} /><Field label="Image URL" name="image_url" value={draft.image_url} onChange={(v) => setDraft({ ...draft, image_url: v })} /><UploadField label="Upload collection artwork" session={session} folder="collections" busy={busy} onUploaded={(url) => setDraft((d) => ({ ...d, image_url: url }))} /><TextField label="Description" name="description" value={draft.description} onChange={(v) => setDraft({ ...draft, description: v })} /><Field label="Display order" name="sort_order" type="number" value={draft.sort_order} onChange={(v) => setDraft({ ...draft, sort_order: v })} /><div className="grid grid-cols-2 gap-2"><Field label="Starts" name="starts_at" type="datetime-local" value={draft.starts_at} onChange={(v) => setDraft({ ...draft, starts_at: v })} /><Field label="Ends" name="ends_at" type="datetime-local" value={draft.ends_at} onChange={(v) => setDraft({ ...draft, ends_at: v })} /></div><button className={buttonClass} disabled={busy || !draft.title}><Plus className="h-4 w-4" /> Add collection</button></form></div>
+  </>;
+}
+
+
+function LookbookPanel({ looks, products, session, busy, perform }: {
+  looks: AdminLook[]; products: AdminProduct[]; session: AdminSession; busy: boolean;
+  perform: (action: () => Promise<unknown>, message: string) => Promise<void>;
+}) {
+  const [selected, setSelected] = useState<AdminLook | null>(null);
+  const [draft, setDraft] = useState({ title: "", slug: "", description: "", image_url: "", alt_text: "", sort_order: "0", is_active: true, starts_at: "", ends_at: "" });
+  const [linked, setLinked] = useState<{ product_id: string; default_size: string; default_color: string; default_quantity: string }[]>([]);
+  const [query, setQuery] = useState("");
+  useEffect(() => {
+    if (!selected) return;
+    setDraft({ title: selected.title, slug: selected.slug, description: selected.description ?? "", image_url: selected.image_url, alt_text: selected.alt_text ?? "", sort_order: String(selected.sort_order), is_active: selected.is_active, starts_at: dateInputValue(selected.starts_at), ends_at: dateInputValue(selected.ends_at) });
+    setLinked((selected.lookbook_look_products ?? []).sort((a,b) => a.sort_order-b.sort_order).map((item) => ({ product_id: item.product_id, default_size: item.default_size ?? "", default_color: item.default_color ?? "", default_quantity: String(item.default_quantity ?? 1) })));
+  }, [selected]);
+  function reset() {
+    setSelected(null);
+    setDraft({ title: "", slug: "", description: "", image_url: "", alt_text: "", sort_order: String(looks.length), is_active: true, starts_at: "", ends_at: "" });
+    setLinked([]);
+  }
+  function toggleProduct(product: AdminProduct) {
+    setLinked((current) => current.some((item) => item.product_id === product.id)
+      ? current.filter((item) => item.product_id !== product.id)
+      : [...current, { product_id: product.id, default_size: product.sizes[0] ?? "", default_color: product.colors[0]?.name ?? "", default_quantity: "1" }]);
+  }
+  async function save(event: FormEvent) {
+    event.preventDefault();
+    if (!draft.image_url.trim()) throw new Error("Upload a model-shoot image before saving this look.");
+    if (!linked.length) throw new Error("Add at least one product to this look.");
+    const look = { ...(selected ? { id: selected.id } : {}), ...draft, slug: slugify(draft.slug || draft.title), sort_order: Number(draft.sort_order), starts_at: draft.starts_at ? new Date(draft.starts_at).toISOString() : null, ends_at: draft.ends_at ? new Date(draft.ends_at).toISOString() : null };
+    const associations = linked.map((item) => ({ product_id: item.product_id, default_size: item.default_size || null, default_color: item.default_color || null, default_quantity: Number(item.default_quantity) || 1 }));
+    await perform(() => adminRpc<string>("save_lookbook_look", session, { p_look: look, p_products: associations }), selected ? "Look updated and products synchronized." : "Look created and products linked.");
+    reset();
+  }
+  const visibleProducts = products.filter((product) => product.is_active && `${product.name} ${product.slug} ${product.sku ?? ""}`.toLowerCase().includes(query.toLowerCase()));
+  return <>
+    <PanelHeading eyebrow="Editorial commerce" title="Buy the Look" detail="Build model-shoot looks from existing catalogue products. Product prices, sizes and availability always come from the live product records." action={<button type="button" className={buttonClass} onClick={reset}><Plus className="h-4 w-4" /> New look</button>} />
+    <div className="grid gap-5 xl:grid-cols-[minmax(260px,.8fr)_minmax(0,1.2fr)]">
+      <section className="border border-black/10 bg-[#F7F3EC]">
+        <div className="flex items-center justify-between border-b border-black/10 px-4 py-3"><p className="text-xs font-black uppercase tracking-wider">Lookbook gallery</p><span className="text-[10px] text-black/45">{looks.length} looks</span></div>
+        <div className="max-h-[760px] divide-y divide-black/10 overflow-y-auto">
+          {looks.map((look) => <button type="button" key={look.id} onClick={() => setSelected(look)} className={`flex w-full items-center gap-3 p-3 text-left transition hover:bg-black/[.035] ${selected?.id === look.id ? "bg-[#D5FE00]/20" : ""}`}>
+            <img src={look.image_url} alt={look.alt_text || look.title} className="h-20 w-16 shrink-0 bg-[#E8E1D6] object-cover" />
+            <span className="min-w-0 flex-1"><span className="block truncate text-xs font-bold">{look.title}</span><span className="mt-1 block text-[10px] text-black/45">{look.lookbook_look_products?.length ?? 0} products · {look.is_active ? "Published" : "Hidden"}</span></span>
+            <ChevronRight className="h-4 w-4 shrink-0" />
+          </button>)}
+          {!looks.length && <Empty title="No looks yet" detail="Create your first model-shoot look and connect products from the catalogue." />}
+        </div>
+      </section>
+      <form onSubmit={(event) => { void save(event).catch((error: unknown) => window.alert(error instanceof Error ? error.message : "Could not save this look.")); }} className="space-y-4 border border-black/10 bg-[#F7F3EC] p-4 md:p-5">
+        <div className="flex items-center justify-between"><div><p className="text-[9px] font-bold uppercase tracking-[.18em] text-black/45">Look editor</p><h3 className="mt-1 text-sm font-black">{selected ? "Edit selected look" : "Create a look"}</h3></div>{selected && <button type="button" className={secondaryClass} onClick={reset}>New look</button>}</div>
+        <Field label="Look title" name="title" value={draft.title} required onChange={(value) => setDraft((d) => ({ ...d, title: value, slug: selected ? d.slug : slugify(value) }))} />
+        <Field label="URL slug" name="slug" value={draft.slug} onChange={(value) => setDraft((d) => ({ ...d, slug: value }))} />
+        <TextField label="Description" name="description" value={draft.description} onChange={(value) => setDraft((d) => ({ ...d, description: value }))} />
+        <div className="space-y-2"><Field label="Model-shoot image URL" name="image_url" value={draft.image_url} onChange={(value) => setDraft((d) => ({ ...d, image_url: value }))} /><UploadField label="Upload model-shoot image" session={session} folder="lookbook" busy={busy} onUploaded={(url) => setDraft((d) => ({ ...d, image_url: url }))} /></div>
+        {draft.image_url && <img src={draft.image_url} alt={draft.alt_text || draft.title} className="h-52 w-full bg-[#E8E1D6] object-cover" />}
+        <Field label="Image alt text" name="alt_text" value={draft.alt_text} onChange={(value) => setDraft((d) => ({ ...d, alt_text: value }))} />
+        <div className="grid grid-cols-2 gap-3"><Field label="Display order" name="sort_order" type="number" value={draft.sort_order} onChange={(value) => setDraft((d) => ({ ...d, sort_order: value }))} /><label className={labelClass}>Visibility<select className={inputClass} value={draft.is_active ? "active" : "hidden"} onChange={(event) => setDraft((d) => ({ ...d, is_active: event.target.value === "active" }))}><option value="active">Published</option><option value="hidden">Hidden</option></select></label></div>
+        <div className="grid grid-cols-2 gap-3"><Field label="Publish from" name="starts_at" type="datetime-local" value={draft.starts_at} onChange={(value) => setDraft((d) => ({ ...d, starts_at: value }))} /><Field label="Unpublish at" name="ends_at" type="datetime-local" value={draft.ends_at} onChange={(value) => setDraft((d) => ({ ...d, ends_at: value }))} /></div>
+        <div className="border-t border-black/10 pt-4">
+          <div className="flex items-center justify-between"><h4 className="text-xs font-black uppercase tracking-wider">Products in this look</h4><span className="text-[10px] text-black/45">{linked.length} selected</span></div>
+          <input className={inputClass} placeholder="Search catalogue products" value={query} onChange={(event) => setQuery(event.target.value)} />
+          <div className="mt-2 max-h-[360px] space-y-2 overflow-y-auto">
+            {visibleProducts.map((product) => {
+              const item = linked.find((entry) => entry.product_id === product.id);
+              return <div key={product.id} className="border border-black/10 bg-white/50 p-3">
+                <label className="flex cursor-pointer items-center gap-2 text-xs font-bold"><input type="checkbox" checked={!!item} onChange={() => toggleProduct(product)} />{product.name}<span className="ml-auto font-medium text-black/45">{money(Number(product.price))}</span></label>
+                {item && <div className="mt-3 grid grid-cols-3 gap-2">
+                  <label className={labelClass}>Default size<select className={inputClass} value={item.default_size} onChange={(event) => setLinked((current) => current.map((entry) => entry.product_id === product.id ? { ...entry, default_size: event.target.value } : entry))}><option value="">Choose in drawer</option>{product.sizes.map((size) => <option key={size}>{size}</option>)}</select></label>
+                  <label className={labelClass}>Default colour<select className={inputClass} value={item.default_color} onChange={(event) => setLinked((current) => current.map((entry) => entry.product_id === product.id ? { ...entry, default_color: event.target.value } : entry))}><option value="">Choose in drawer</option>{product.colors.map((color) => <option key={color.name}>{color.name}</option>)}</select></label>
+                  <label className={labelClass}>Qty<input className={inputClass} type="number" min="1" max="10" value={item.default_quantity} onChange={(event) => setLinked((current) => current.map((entry) => entry.product_id === product.id ? { ...entry, default_quantity: event.target.value } : entry))} /></label>
+                </div>}
+                {item && product.is_out_of_stock && <p className="mt-2 text-[10px] font-bold text-red-700">Currently marked out of stock — customers cannot add it.</p>}
+              </div>;
+            })}
+          </div>
+        </div>
+        <div className="flex flex-wrap gap-2 border-t border-black/10 pt-4"><button className={buttonClass} disabled={busy || !draft.title.trim() || !linked.length}><Save className="h-4 w-4" /> Save look</button>{selected && <button type="button" className={secondaryClass} disabled={busy} onClick={() => { if (confirm(`Delete “${selected.title}” and its product links?`)) void perform(() => adminWrite(`lookbook_looks?id=eq.${selected.id}`, session, "DELETE"), "Look deleted."); }}><Trash2 className="h-4 w-4" /> Delete look</button>}</div>
+      </form>
+    </div>
   </>;
 }
 
