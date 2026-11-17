@@ -4,6 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import { Shirt, ShoppingBag } from "lucide-react";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
 import { useCart } from "@/lib/store";
+import { fetchPublicProducts } from "@/lib/public-store";
+import { toast } from "sonner";
 import { formatTaka, type Product } from "@/lib/catalog";
 import type { PublicLook } from "@/lib/public-store";
 
@@ -31,13 +33,35 @@ export function LookProductsDrawer({ look, open, onOpenChange }: { look: PublicL
   function patch(product: Product, value: Partial<Selection>) {
     setSelection((current) => ({ ...current, [product.id]: { ...current[product.id], ...value } }));
   }
-  function addLook() {
+  async function addLook() {
     if (!look) return;
-    look.products.forEach(({ product }) => {
+    const latestProducts = await fetchPublicProducts();
+    if (!latestProducts) {
+      toast.error("We couldn't verify current product availability. Please try again.");
+      return;
+    }
+    let added = 0;
+    let unavailable = 0;
+    for (const { product } of look.products) {
       const item = selection[product.id];
-      if (!item?.selected || product.isOutOfStock || product.stockQuantity === 0) return;
-      addItem(product, { size: item.size || product.sizes[0] || "One Size", color: item.color || product.colors[0]?.name || "Default", qty: item.qty });
-    });
+      if (!item?.selected) continue;
+      const latest = latestProducts.find((candidate) => candidate.id === product.id);
+      if (!latest || latest.isOutOfStock || latest.stockQuantity === 0) {
+        unavailable += 1;
+        continue;
+      }
+      const size = latest.sizes.includes(item.size) ? item.size : latest.sizes[0] || "One Size";
+      const color = latest.colors.some((candidate) => candidate.name === item.color) ? item.color : latest.colors[0]?.name || "Default";
+      const quantity = Math.min(item.qty, latest.stockQuantity ?? 10, 10);
+      if (quantity < 1) { unavailable += 1; continue; }
+      addItem(latest, { size, color, qty: quantity });
+      added += 1;
+    }
+    if (!added) {
+      toast.error("The selected pieces are no longer available.");
+      return;
+    }
+    if (unavailable) toast.warning(`${unavailable} piece(s) were unavailable and weren't added.`);
     onOpenChange(false);
     openCart();
   }
