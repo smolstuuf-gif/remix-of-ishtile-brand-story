@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Shirt, ShoppingBag, X } from "lucide-react";
+import { Shirt, ShoppingBag } from "lucide-react";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
 import { useCart } from "@/lib/store";
 import { formatTaka, type Product } from "@/lib/catalog";
@@ -44,7 +44,7 @@ export function LookProductsDrawer({ look, open, onOpenChange }: { look: PublicL
   return <Sheet open={open} onOpenChange={onOpenChange}>
     <SheetContent side="right" className="flex w-full flex-col gap-0 border-l border-[#171717]/10 bg-[#F0EAE0] p-0 text-[#171717] sm:max-w-[520px]">
       <div className="border-b border-[#171717]/15 px-5 pb-4 pt-6 md:px-7">
-        <div className="flex items-start justify-between gap-4"><div><p className="text-[9px] font-bold uppercase tracking-[.22em] text-[#171717]/45">ISHTILE+ / Styling edit</p><SheetTitle className="mt-2 font-wide text-2xl font-extrabold uppercase tracking-tight">{look?.title ?? "The look"}</SheetTitle><SheetDescription className="mt-1 text-xs text-[#171717]/55">Select the pieces you want from this complete outfit.</SheetDescription></div><button type="button" onClick={() => onOpenChange(false)} aria-label="Close Buy the Look drawer" className="grid h-9 w-9 shrink-0 place-items-center border border-[#171717]/20"><X className="h-4 w-4" /></button></div>
+        <div className="flex items-start justify-between gap-4"><div><p className="text-[9px] font-bold uppercase tracking-[.22em] text-[#171717]/45">ISHTILE+ / Styling edit</p><SheetTitle className="mt-2 font-wide text-2xl font-extrabold uppercase tracking-tight">{look?.title ?? "The look"}</SheetTitle><SheetDescription className="mt-1 text-xs text-[#171717]/55">Select the pieces you want from this complete outfit.</SheetDescription></div></div>
       </div>
       <div className="flex-1 space-y-4 overflow-y-auto px-5 py-5 md:px-7">
         {look?.description && <p className="text-sm leading-6 text-[#171717]/65">{look.description}</p>}
