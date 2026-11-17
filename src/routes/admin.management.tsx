@@ -78,10 +78,10 @@ function ManagementPage() {
 
   useEffect(() => { if (session) void refresh(); }, [session?.user.id, refresh]);
 
-  async function perform(action: () => Promise<unknown>, message: string): Promise<boolean> {
+  async function perform(action: () => Promise<unknown>, message: string) {
     setBusy(true); setError(""); setNotice("");
-    try { await action(); await refresh(); setNotice(message); return true; }
-    catch (e) { setError(e instanceof Error ? e.message : "The change could not be saved."); return false; }
+    try { await action(); await refresh(); setNotice(message); }
+    catch (e) { setError(e instanceof Error ? e.message : "The change could not be saved."); }
     finally { setBusy(false); }
   }
 
@@ -280,8 +280,7 @@ function LookbookPanel({ looks, products, session, busy, perform }: {
     if (!linked.length) throw new Error("Add at least one product to this look.");
     const look = { ...(selected ? { id: selected.id } : {}), ...draft, slug: slugify(draft.slug || draft.title), sort_order: Number(draft.sort_order), starts_at: draft.starts_at ? new Date(draft.starts_at).toISOString() : null, ends_at: draft.ends_at ? new Date(draft.ends_at).toISOString() : null };
     const associations = linked.map((item) => ({ product_id: item.product_id, default_size: item.default_size || null, default_color: item.default_color || null, default_quantity: Number(item.default_quantity) || 1 }));
-    const saved = await perform(() => adminRpc<string>("save_lookbook_look", session, { p_look: look, p_products: associations }), selected ? "Look updated and products synchronized." : "Look created and products linked.");
-    if (saved) reset();
+    await perform(() => adminRpc<string>("save_lookbook_look", session, { p_look: look, p_products: associations }), selected ? "Look updated and products synchronized." : "Look created and products linked.");
   }
   const visibleProducts = products.filter((product) => product.is_active && `${product.name} ${product.slug} ${product.sku ?? ""}`.toLowerCase().includes(query.toLowerCase()));
   return <>
