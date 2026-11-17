@@ -137,7 +137,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <CartProvider>
         {/* Site-wide bar + bag / search / menu overlays. */}
-        {!isAdminRoute && !isLookbookRoute && <SiteChrome />}
+        {!isAdminRoute && <SiteChrome hideHeader={isLookbookRoute} />}
         {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
         <div key={pathname} className="route-transition" data-route={pathname}>
           <Outlet />
