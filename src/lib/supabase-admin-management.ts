@@ -67,28 +67,44 @@ export async function uploadAdminMedia(file: File, session: AdminSession, folder
   return `${url}/storage/v1/object/public/${BUCKET}/${objectPath.split("/").map(encodeURIComponent).join("/")}`;
 }
 
+export async function uploadAdminVideoMedia(file: File, session: AdminSession, folder: string): Promise<string> {
+  const { url, key } = config();
+  const allowed = ["video/mp4", "video/webm", "video/quicktime"];
+  if (!allowed.includes(file.type)) throw new Error("Choose an MP4, WebM or MOV video.");
+  if (file.size > 100 * 1024 * 1024) throw new Error("Videos must be 100 MB or smaller.");
+  const extension = file.name.split(".").pop()?.toLowerCase().replace(/[^a-z0-9]/g, "") || "mp4";
+  const objectPath = `${folder}/videos/${crypto.randomUUID()}.${extension}`;
+  const response = await fetch(`${url}/storage/v1/object/${BUCKET}/${objectPath.split("/").map(encodeURIComponent).join("/")}`, {
+    method: "POST",
+    headers: { apikey: key, Authorization: `Bearer ${session.access_token}`, "Content-Type": file.type, "x-upsert": "false" },
+    body: file,
+  });
+  await parse(response);
+  return `${url}/storage/v1/object/public/${BUCKET}/${objectPath.split("/").map(encodeURIComponent).join("/")}`;
+}
+
 export type AdminBrand = {
   id: string; name: string; slug: string; description: string | null; sort_order: number; is_active: boolean;
-  logo_url: string | null; image_url: string | null; website_url: string | null; instagram_url: string | null;
+  logo_url: string | null; image_url: string | null; video_url: string | null; website_url: string | null; instagram_url: string | null;
   facebook_url: string | null; contact_email: string | null; contact_phone: string | null;
   contact_address: string | null; motto: string | null; social_links: Record<string, string>;
 };
 export type AdminProduct = {
   id: string; slug: string; name: string; brand_id: string; category: string; price: number;
-  image_url: string | null; image_urls: string[]; description: string | null; sizes: string[]; size_guide: { size: string; chest: string; length: string }[]; care_instructions: string | null;
+  image_url: string | null; image_urls: string[]; video_url: string | null; description: string | null; sizes: string[]; size_guide: { size: string; chest: string; length: string }[]; care_instructions: string | null;
   colors: { name: string; hex: string }[]; stock_quantity: number | null; sku: string | null; is_active: boolean; is_featured: boolean; is_out_of_stock: boolean; tags: string[];
 };
 export type HeroSlide = {
   id: string; title: string | null; subtitle: string | null; image_url: string; mobile_image_url: string | null;
-  link_url: string | null; sort_order: number; is_active: boolean; starts_at: string | null; ends_at: string | null;
+  link_url: string | null; video_url: string | null; mobile_video_url: string | null; sort_order: number; is_active: boolean; starts_at: string | null; ends_at: string | null;
 };
 export type AdminCollection = {
   id: string; slug: string; title: string; description: string | null; image_url: string | null;
-  campaign_label: string | null; show_homepage: boolean; is_active: boolean; starts_at: string | null;
+  campaign_label: string | null; video_url: string | null; show_homepage: boolean; is_active: boolean; starts_at: string | null;
   ends_at: string | null; sort_order: number; collection_products?: { product_id: string; sort_order: number }[];
 };
 export type AdminLook = {
-  id: string; slug: string; title: string; description: string | null; image_url: string;
+  id: string; slug: string; title: string; description: string | null; image_url: string; video_url: string | null;
   collection_id: string | null; alt_text: string | null; season: "spring" | "summer" | "festive" | "monsoon" | "winter" | null; sort_order: number; is_active: boolean; starts_at: string | null; ends_at: string | null;
   lookbook_look_products?: { product_id: string; sort_order: number; default_size: string | null; default_color: string | null; default_quantity: number }[];
 };
