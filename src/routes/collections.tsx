@@ -22,10 +22,10 @@ export const Route = createFileRoute("/collections")({
 
 const slides = [
   { title: "Spring '25", image: colSpring, url: "/lookbook", linkLabel: "Explore Spring" },
-  { title: "Summer Essentials '25", image: colSummer, url: "/shop", linkLabel: "Explore Summer" },
-  { title: "Festive Collection '25", image: colFestive, url: "/shop", linkLabel: "Explore Festive" },
-  { title: "Monsoon '25", image: colMonsoon, url: "/shop", linkLabel: "Explore Monsoon" },
-  { title: "Winter Collection", image: cardWinter, url: "/shop", linkLabel: "Explore Winter" },
+  { title: "Summer Essentials '25", image: colSummer, url: "/lookbook", linkLabel: "Explore Summer" },
+  { title: "Festive Collection '25", image: colFestive, url: "/lookbook", linkLabel: "Explore Festive" },
+  { title: "Monsoon '25", image: colMonsoon, url: "/lookbook", linkLabel: "Explore Monsoon" },
+  { title: "Winter Collection", image: cardWinter, url: "/lookbook", linkLabel: "Explore Winter" },
 ];
 
 function CollectionsPage() {
