@@ -418,7 +418,7 @@ function CollectionLookEditor({ collection, look, looksCount, products, session,
     await perform(() => adminRpc<string>("save_lookbook_look", session, { p_look: payload, p_products: associations }), look ? "Lookbook image and product set saved." : "Lookbook image created with its product set.");
   }
   const visibleProducts = products.filter((product) => product.is_active && \`\${product.name} \${product.slug} \${product.sku ?? ""}\`.toLowerCase().includes(query.toLowerCase()));
-  return <details className="border border-black/10 bg-white/55" open={!look}>
+  return <details className="group border border-black/10 bg-white/55" defaultOpen={!look}>
     <summary className="flex cursor-pointer list-none items-center gap-3 p-3 [&::-webkit-details-marker]:hidden">
       {look?.image_url ? <img src={look.image_url} alt="" className="h-16 w-12 shrink-0 object-cover" /> : <div className="grid h-16 w-12 shrink-0 place-items-center bg-[#E8E1D6]"><ImagePlus className="h-4 w-4 text-black/35" /></div>}
       <span className="min-w-0 flex-1"><span className="block truncate text-xs font-black">{look?.title || "Add a lookbook image"}</span><span className="mt-1 block text-[10px] text-black/45">{look ? \`\${look.slug} · \${linked.length} products · \${look.is_active ? "Published" : "Hidden"}\` : "New editorial image · add its own products"}</span></span>
