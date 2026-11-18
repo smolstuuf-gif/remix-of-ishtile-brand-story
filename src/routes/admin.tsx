@@ -230,7 +230,7 @@ function Dashboard({
     if (orderStatusFilter === "new" && status !== "new") return false;
     if (orderStatusFilter === "pending" && !["confirmed", "processing", "shipped"].includes(status)) return false;
     if (orderStatusFilter !== "all" && orderStatusFilter !== "new" && orderStatusFilter !== "pending" && status !== orderStatusFilter) return false;
-    const date = new Date(order.created_at).toISOString().slice(0, 10);
+    const date = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Dhaka" }).format(new Date(order.created_at));
     if (orderFilters.from && date < orderFilters.from) return false;
     if (orderFilters.to && date > orderFilters.to) return false;
     const total = amount(order.total);
@@ -249,6 +249,7 @@ function Dashboard({
     if (status === "pending") return ["confirmed", "processing", "shipped"].includes(order.fulfillment_status);
     return order.fulfillment_status === status;
   }).length;
+  const [orderActionSaving, setOrderActionSaving] = useState<string | null>(null);
   const changeOrderStatus = async (orderId: string, status: OrderRecord["fulfillment_status"]) => {
     setOrderActionError("");
     setOrderActionSaving(orderId);
@@ -261,7 +262,6 @@ function Dashboard({
       setOrderActionSaving(null);
     }
   };
-  const [orderActionSaving, setOrderActionSaving] = useState<string | null>(null);
 
   return (
     <main className="min-h-screen bg-[#F0EAE0] text-[#171717]">
