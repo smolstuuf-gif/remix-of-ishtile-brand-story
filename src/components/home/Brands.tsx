@@ -4,8 +4,8 @@ import brandOnen from "@/assets/brand-onen.jpg";
 import brandFarak from "@/assets/brand-farak.jpg";
 import brandMocha from "@/assets/brand-mocha.jpg";
 import { cn } from "@/lib/utils";
+import { fetchPublicBrands } from "@/lib/public-store";
 import { Hanger, Sparkle, ThinPlus } from "./icons";
-<video src={brand.video_url} autoPlay muted loop playsInline poster={brand.image_url || undefined} className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
 
 type Tile =
   | { kind: "name"; name: string; plus: "after" | "above" }
