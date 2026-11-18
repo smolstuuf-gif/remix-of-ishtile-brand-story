@@ -35,6 +35,7 @@ export type OrderItemRecord = {
   unit_price: number | string;
   quantity: number;
   line_total: number | string;
+  season: string | null;
 };
 
 export type OrderRecord = {
@@ -42,7 +43,10 @@ export type OrderRecord = {
   order_number: string;
   customer_name: string;
   customer_phone: string;
-  customer_email: string;
+  customer_email: string | null;
+  shipping_address: string;
+  shipping_city: string | null;
+  shipping_postal: string | null;
   payment_method: string;
   payment_status: "pending" | "paid" | "failed" | "refunded" | string;
   fulfillment_status: "new" | "confirmed" | "processing" | "shipped" | "delivered" | "cancelled" | "returned" | string;
@@ -244,7 +248,6 @@ async function getRows<T>(path: string, session: AdminSession): Promise<T[]> {
 }
 
 export async function getDashboardData(session: AdminSession, days: number): Promise<DashboardData> {
-  const from = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
   const [brands, products, orders] = await Promise.all([
     getRows<BrandRecord>(
       "/rest/v1/brands?select=id,name,slug,description,sort_order&order=sort_order.asc",
@@ -255,9 +258,33 @@ export async function getDashboardData(session: AdminSession, days: number): Pro
       session,
     ),
     getRows<OrderRecord>(
-      `/rest/v1/orders?select=id,order_number,customer_name,customer_phone,customer_email,payment_method,payment_status,fulfillment_status,subtotal,shipping_fee,total,created_at,order_items(product_id,product_name,brand_name,unit_price,quantity,line_total)&created_at=gte.${encodeURIComponent(from)}&order=created_at.desc&limit=1000`,
+      "/rest/v1/orders?select=id,order_number,customer_name,customer_phone,customer_email,shipping_address,shipping_city,shipping_postal,payment_method,payment_status,fulfillment_status,subtotal,shipping_fee,total,created_at,order_items(product_id,product_name,brand_name,season,unit_price,quantity,line_total)&order=created_at.desc&limit=5000",
       session,
     ),
   ]);
   return { brands, products, orders };
+}
+
+
+export async function updateOrderStatus(
+  session: AdminSession,
+  orderId: string,
+  fulfillmentStatus: OrderRecord["fulfillment_status"],
+): Promise<void> {
+  const { url, key } = config();
+  const current = await validSession(session);
+  const response = await fetch(
+    `${url}/rest/v1/orders?id=eq.${encodeURIComponent(orderId)}`,
+    {
+      method: "PATCH",
+      headers: {
+        apikey: key,
+        Authorization: `Bearer ${current.access_token}`,
+        "Content-Type": "application/json",
+        Prefer: "return=minimal",
+      },
+      body: JSON.stringify({ fulfillment_status: fulfillmentStatus, updated_at: new Date().toISOString() }),
+    },
+  );
+  await responseJson<unknown>(response);
 }
