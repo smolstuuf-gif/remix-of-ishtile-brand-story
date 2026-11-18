@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { useCart } from "@/lib/store";
 import { Logo } from "./Logo";
 import { fetchHeroContent } from "@/lib/public-store";
+import { AutoplayVideo } from "@/components/ui/autoplay-video";
 
 
 function Headline({ className }: { className?: string }) {
@@ -99,7 +100,7 @@ export function DesktopHero() {
           )}
           aria-hidden={i !== index}
         >
-          {item.video ? <video src={item.video} autoPlay={i === index} muted loop playsInline preload={i === 0 ? "auto" : "metadata"} poster={item.image || undefined} className="h-full w-full object-cover object-center" /> : item.image ? <img src={item.image} alt={item.alt} className="h-full w-full object-cover object-center" loading={i === 0 ? "eager" : "lazy"} /> : <div className="h-full w-full bg-ink" />}
+          {item.video ? <AutoplayVideo src={item.video} active={i === index} poster={item.image || undefined} className="h-full w-full object-cover object-center" /> : item.image ? <img src={item.image} alt={item.alt} className="h-full w-full object-cover object-center" loading={i === 0 ? "eager" : "lazy"} /> : <div className="h-full w-full bg-ink" />}
           <div className="absolute inset-0 bg-gradient-to-r from-black/65 via-black/15 to-transparent" />
         </div>
       ))}
@@ -197,7 +198,7 @@ export function MobileHero() {
             )}
             aria-hidden={i !== index}
           >
-            {s.video ? <video src={s.video} autoPlay={i === index} muted loop playsInline preload={i === 0 ? "auto" : "metadata"} poster={s.image || undefined} className="h-full w-full object-cover grayscale" /> : s.image ? <img src={s.image} alt={s.alt} className="h-full w-full object-cover grayscale" loading={i === 0 ? "eager" : "lazy"} /> : <div className="h-full w-full bg-ink" />}
+            {s.video ? <AutoplayVideo src={s.video} active={i === index} poster={s.image || undefined} className="h-full w-full object-cover grayscale" /> : s.image ? <img src={s.image} alt={s.alt} className="h-full w-full object-cover grayscale" loading={i === 0 ? "eager" : "lazy"} /> : <div className="h-full w-full bg-ink" />}
             <div className="absolute inset-0 bg-gradient-to-b from-ink/30 via-transparent to-ink/80" />
             <div className="absolute bottom-[12%] left-[7%] right-[6%] origin-bottom-left -rotate-[7deg]">
               <h2 className="font-headline text-[12.6vw] font-extrabold italic uppercase tracking-[-0.035em] [&>span]:leading-[0.88]">
