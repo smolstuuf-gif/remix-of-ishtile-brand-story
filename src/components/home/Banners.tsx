@@ -1,9 +1,15 @@
+import { useEffect, useState } from "react";
 import { ArrowRight } from "lucide-react";
 import editorialArt from "@/assets/editorial-art.jpg";
 import summerArt from "@/assets/summer-art.jpg";
 import { ThinPlus } from "./icons";
+import { fetchPublicBrandInfo, type PublicBrandInfo } from "@/lib/public-store";
 
 export function Banners() {
+  const [siteMedia, setSiteMedia] = useState<PublicBrandInfo | null>(null);
+  useEffect(() => { let live = true; fetchPublicBrandInfo().then((value) => { if (live) setSiteMedia(value); }).catch(() => undefined); return () => { live = false; }; }, []);
+  const editorialImage = siteMedia?.homepage_editorial_image_url || editorialArt;
+  const summerImage = siteMedia?.homepage_summer_image_url || summerArt;
   return (
     <section className="grid gap-3 md:grid-cols-[1.18fr_1fr]">
       <a
@@ -12,7 +18,7 @@ export function Banners() {
         className="group relative block min-h-[150px] overflow-hidden bg-ink max-md:-mx-3 max-md:rounded-r-2xl md:min-h-[200px] md:rounded-xl"
       >
         <img
-          src={editorialArt}
+          src={editorialImage}
           alt="Brutalist concrete building torn into a black paper collage"
           width={1920}
           height={640}
@@ -39,7 +45,7 @@ export function Banners() {
         className="group relative hidden min-h-[200px] overflow-hidden rounded-xl bg-lime md:block"
       >
         <img
-          src={summerArt}
+          src={summerImage}
           alt="Black ISHTILE tee on a lime grunge background with colour arcs"
           width={1280}
           height={512}
