@@ -10,7 +10,6 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as LookbookRouteImport } from './routes/lookbook'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -19,6 +18,7 @@ import { Route as CartRouteImport } from './routes/cart'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as CollectionsRouteImport } from './routes/collections'
 import { Route as EditorialRouteImport } from './routes/editorial'
+import { Route as LookbookRouteImport } from './routes/lookbook'
 import { Route as StoresRouteImport } from './routes/stores'
 import { Route as WishlistRouteImport } from './routes/wishlist'
 import { Route as AdminManagementRouteImport } from './routes/admin.management'
@@ -60,11 +60,6 @@ const CheckoutRoute = CheckoutRouteImport.update({
   path: '/checkout',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LookbookRoute = LookbookRouteImport.update({
-  id: '/lookbook',
-  path: '/lookbook',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const CollectionsRoute = CollectionsRouteImport.update({
   id: '/collections',
   path: '/collections',
@@ -73,6 +68,11 @@ const CollectionsRoute = CollectionsRouteImport.update({
 const EditorialRoute = EditorialRouteImport.update({
   id: '/editorial',
   path: '/editorial',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LookbookRoute = LookbookRouteImport.update({
+  id: '/lookbook',
+  path: '/lookbook',
   getParentRoute: () => rootRouteImport,
 } as any)
 const StoresRoute = StoresRouteImport.update({
@@ -110,8 +110,8 @@ export interface FileRoutesByFullPath {
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
   '/collections': typeof CollectionsRoute
-  '/lookbook': typeof LookbookRoute
   '/editorial': typeof EditorialRoute
+  '/lookbook': typeof LookbookRoute
   '/stores': typeof StoresRoute
   '/wishlist': typeof WishlistRoute
   '/admin/management': typeof AdminManagementRoute
@@ -127,8 +127,8 @@ export interface FileRoutesByTo {
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
   '/collections': typeof CollectionsRoute
-  '/lookbook': typeof LookbookRoute
   '/editorial': typeof EditorialRoute
+  '/lookbook': typeof LookbookRoute
   '/stores': typeof StoresRoute
   '/wishlist': typeof WishlistRoute
   '/admin/management': typeof AdminManagementRoute
@@ -145,8 +145,8 @@ export interface FileRoutesById {
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
   '/collections': typeof CollectionsRoute
-  '/lookbook': typeof LookbookRoute
   '/editorial': typeof EditorialRoute
+  '/lookbook': typeof LookbookRoute
   '/stores': typeof StoresRoute
   '/wishlist': typeof WishlistRoute
   '/admin/management': typeof AdminManagementRoute
@@ -164,11 +164,10 @@ export interface FileRouteTypes {
     | '/cart'
     | '/checkout'
     | '/collections'
-    | '/lookbook'
     | '/editorial'
+    | '/lookbook'
     | '/stores'
     | '/wishlist'
-    | '/lookbook'
     | '/admin/management'
     | '/shop/$productId'
     | '/shop/'
@@ -182,8 +181,8 @@ export interface FileRouteTypes {
     | '/cart'
     | '/checkout'
     | '/collections'
-    | '/lookbook'
     | '/editorial'
+    | '/lookbook'
     | '/stores'
     | '/wishlist'
     | '/admin/management'
@@ -200,6 +199,7 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/collections'
     | '/editorial'
+    | '/lookbook'
     | '/stores'
     | '/wishlist'
     | '/admin/management'
@@ -216,8 +216,8 @@ export interface RootRouteChildren {
   CartRoute: typeof CartRoute
   CheckoutRoute: typeof CheckoutRoute
   CollectionsRoute: typeof CollectionsRoute
-  LookbookRoute: typeof LookbookRoute
   EditorialRoute: typeof EditorialRoute
+  LookbookRoute: typeof LookbookRoute
   StoresRoute: typeof StoresRoute
   WishlistRoute: typeof WishlistRoute
   ShopProductIdRoute: typeof ShopProductIdRoute
@@ -275,13 +275,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CheckoutRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/lookbook': {
-      id: '/lookbook'
-      path: '/lookbook'
-      fullPath: '/lookbook'
-      preLoaderRoute: typeof LookbookRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/collections': {
       id: '/collections'
       path: '/collections'
@@ -294,6 +287,13 @@ declare module '@tanstack/react-router' {
       path: '/editorial'
       fullPath: '/editorial'
       preLoaderRoute: typeof EditorialRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lookbook': {
+      id: '/lookbook'
+      path: '/lookbook'
+      fullPath: '/lookbook'
+      preLoaderRoute: typeof LookbookRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/stores': {
@@ -353,8 +353,8 @@ const rootRouteChildren: RootRouteChildren = {
   CartRoute: CartRoute,
   CheckoutRoute: CheckoutRoute,
   CollectionsRoute: CollectionsRoute,
-  LookbookRoute: LookbookRoute,
   EditorialRoute: EditorialRoute,
+  LookbookRoute: LookbookRoute,
   StoresRoute: StoresRoute,
   WishlistRoute: WishlistRoute,
   ShopProductIdRoute: ShopProductIdRoute,
