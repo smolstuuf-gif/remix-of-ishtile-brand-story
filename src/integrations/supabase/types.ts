@@ -48,6 +48,7 @@ export type Database = {
           social_links: Json
           sort_order: number
           updated_at: string
+          video_url: string | null
           website_url: string | null
         }
         Insert: {
@@ -68,6 +69,7 @@ export type Database = {
           social_links?: Json
           sort_order?: number
           updated_at?: string
+          video_url?: string | null
           website_url?: string | null
         }
         Update: {
@@ -88,6 +90,7 @@ export type Database = {
           social_links?: Json
           sort_order?: number
           updated_at?: string
+          video_url?: string | null
           website_url?: string | null
         }
         Relationships: []
@@ -140,6 +143,7 @@ export type Database = {
           starts_at: string | null
           title: string
           updated_at: string
+          video_url: string | null
         }
         Insert: {
           campaign_label?: string | null
@@ -155,6 +159,7 @@ export type Database = {
           starts_at?: string | null
           title: string
           updated_at?: string
+          video_url?: string | null
         }
         Update: {
           campaign_label?: string | null
@@ -170,6 +175,7 @@ export type Database = {
           starts_at?: string | null
           title?: string
           updated_at?: string
+          video_url?: string | null
         }
         Relationships: []
       }
@@ -214,45 +220,158 @@ export type Database = {
           created_at: string
           ends_at: string | null
           id: string
-          image_url: string
+          image_url: string | null
           is_active: boolean
           link_url: string | null
           mobile_image_url: string | null
+          mobile_video_url: string | null
           sort_order: number
           starts_at: string | null
           subtitle: string | null
           title: string | null
           updated_at: string
+          video_url: string | null
         }
         Insert: {
           created_at?: string
           ends_at?: string | null
           id?: string
-          image_url: string
+          image_url?: string | null
           is_active?: boolean
           link_url?: string | null
           mobile_image_url?: string | null
+          mobile_video_url?: string | null
           sort_order?: number
           starts_at?: string | null
           subtitle?: string | null
           title?: string | null
           updated_at?: string
+          video_url?: string | null
         }
         Update: {
           created_at?: string
           ends_at?: string | null
           id?: string
-          image_url?: string
+          image_url?: string | null
           is_active?: boolean
           link_url?: string | null
           mobile_image_url?: string | null
+          mobile_video_url?: string | null
           sort_order?: number
           starts_at?: string | null
           subtitle?: string | null
           title?: string | null
           updated_at?: string
+          video_url?: string | null
         }
         Relationships: []
+      }
+      lookbook_look_products: {
+        Row: {
+          created_at: string
+          default_color: string | null
+          default_quantity: number
+          default_size: string | null
+          look_id: string
+          product_id: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          default_color?: string | null
+          default_quantity?: number
+          default_size?: string | null
+          look_id: string
+          product_id: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          default_color?: string | null
+          default_quantity?: number
+          default_size?: string | null
+          look_id?: string
+          product_id?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lookbook_look_products_look_id_fkey"
+            columns: ["look_id"]
+            isOneToOne: false
+            referencedRelation: "lookbook_looks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lookbook_look_products_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lookbook_looks: {
+        Row: {
+          alt_text: string | null
+          collection_id: string | null
+          created_at: string
+          description: string | null
+          ends_at: string | null
+          id: string
+          image_url: string
+          is_active: boolean
+          season: string | null
+          slug: string
+          sort_order: number
+          starts_at: string | null
+          title: string
+          updated_at: string
+          video_url: string | null
+        }
+        Insert: {
+          alt_text?: string | null
+          collection_id?: string | null
+          created_at?: string
+          description?: string | null
+          ends_at?: string | null
+          id?: string
+          image_url: string
+          is_active?: boolean
+          season?: string | null
+          slug: string
+          sort_order?: number
+          starts_at?: string | null
+          title: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Update: {
+          alt_text?: string | null
+          collection_id?: string | null
+          created_at?: string
+          description?: string | null
+          ends_at?: string | null
+          id?: string
+          image_url?: string
+          is_active?: boolean
+          season?: string | null
+          slug?: string
+          sort_order?: number
+          starts_at?: string | null
+          title?: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lookbook_looks_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "collections"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       order_items: {
         Row: {
@@ -371,6 +490,7 @@ export type Database = {
       products: {
         Row: {
           brand_id: string
+          care_instructions: string | null
           category: string
           colors: Json
           created_at: string
@@ -381,17 +501,20 @@ export type Database = {
           is_active: boolean
           is_featured: boolean
           is_out_of_stock: boolean
-          tags: string[]
           name: string
           price: number
+          size_guide: Json
           sizes: string[]
           sku: string | null
           slug: string
           stock_quantity: number | null
+          tags: string[]
           updated_at: string
+          video_url: string | null
         }
         Insert: {
           brand_id: string
+          care_instructions?: string | null
           category: string
           colors?: Json
           created_at?: string
@@ -402,17 +525,20 @@ export type Database = {
           is_active?: boolean
           is_featured?: boolean
           is_out_of_stock?: boolean
-          tags?: string[]
           name: string
           price: number
+          size_guide?: Json
           sizes?: string[]
           sku?: string | null
           slug: string
           stock_quantity?: number | null
+          tags?: string[]
           updated_at?: string
+          video_url?: string | null
         }
         Update: {
           brand_id?: string
+          care_instructions?: string | null
           category?: string
           colors?: Json
           created_at?: string
@@ -423,14 +549,16 @@ export type Database = {
           is_active?: boolean
           is_featured?: boolean
           is_out_of_stock?: boolean
-          tags?: string[]
           name?: string
           price?: number
+          size_guide?: Json
           sizes?: string[]
           sku?: string | null
           slug?: string
           stock_quantity?: number | null
+          tags?: string[]
           updated_at?: string
+          video_url?: string | null
         }
         Relationships: [
           {
@@ -486,7 +614,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      save_lookbook_look: {
+        Args: { p_look: Json; p_products: Json }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never
