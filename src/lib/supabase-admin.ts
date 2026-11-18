@@ -247,7 +247,7 @@ async function getRows<T>(path: string, session: AdminSession): Promise<T[]> {
   return authRequest<T[]>(path, session);
 }
 
-export async function getDashboardData(session: AdminSession, days: number): Promise<DashboardData> {
+export async function getDashboardData(session: AdminSession, _days: number): Promise<DashboardData> {
   const [brands, products, orders] = await Promise.all([
     getRows<BrandRecord>(
       "/rest/v1/brands?select=id,name,slug,description,sort_order&order=sort_order.asc",
