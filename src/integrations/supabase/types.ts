@@ -576,6 +576,13 @@ export type Database = {
           address: string | null
           contact_numbers: string[]
           hero_autoplay_ms: number
+          homepage_editorial_image_url: string | null
+          homepage_summer_image_url: string | null
+          editorial_fashion_image_url: string | null
+          editorial_art_image_url: string | null
+          stores_image_url: string | null
+          footer_building_image_url: string | null
+          footer_band_image_url: string | null
           id: number
           logo_url: string | null
           motto: string | null
@@ -588,6 +595,13 @@ export type Database = {
           address?: string | null
           contact_numbers?: string[]
           hero_autoplay_ms?: number
+          homepage_editorial_image_url?: string | null
+          homepage_summer_image_url?: string | null
+          editorial_fashion_image_url?: string | null
+          editorial_art_image_url?: string | null
+          stores_image_url?: string | null
+          footer_building_image_url?: string | null
+          footer_band_image_url?: string | null
           id?: number
           logo_url?: string | null
           motto?: string | null
@@ -600,6 +614,13 @@ export type Database = {
           address?: string | null
           contact_numbers?: string[]
           hero_autoplay_ms?: number
+          homepage_editorial_image_url?: string | null
+          homepage_summer_image_url?: string | null
+          editorial_fashion_image_url?: string | null
+          editorial_art_image_url?: string | null
+          stores_image_url?: string | null
+          footer_building_image_url?: string | null
+          footer_band_image_url?: string | null
           id?: number
           logo_url?: string | null
           motto?: string | null
