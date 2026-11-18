@@ -69,8 +69,8 @@ export async function uploadAdminMedia(file: File, session: AdminSession, folder
 
 export async function uploadAdminVideoMedia(file: File, session: AdminSession, folder: string): Promise<string> {
   const { url, key } = config();
-  const allowed = ["video/mp4", "video/webm", "video/quicktime"];
-  if (!allowed.includes(file.type)) throw new Error("Choose an MP4, WebM or MOV video.");
+  const allowed = ["video/mp4", "video/webm"];
+  if (!allowed.includes(file.type)) throw new Error("Choose an MP4 (H.264) or WebM video. MOV files must be converted to MP4 before uploading.");
   if (file.size > 100 * 1024 * 1024) throw new Error("Videos must be 100 MB or smaller.");
   const extension = file.name.split(".").pop()?.toLowerCase().replace(/[^a-z0-9]/g, "") || "mp4";
   const objectPath = `${folder}/videos/${crypto.randomUUID()}.${extension}`;
