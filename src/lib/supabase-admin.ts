@@ -36,6 +36,8 @@ export type OrderItemRecord = {
   quantity: number;
   line_total: number | string;
   season: string | null;
+  size: string | null;
+  color: string | null;
 };
 
 export type OrderRecord = {
@@ -258,7 +260,7 @@ export async function getDashboardData(session: AdminSession, _days: number): Pr
       session,
     ),
     getRows<OrderRecord>(
-      "/rest/v1/orders?select=id,order_number,customer_name,customer_phone,customer_email,shipping_address,shipping_city,shipping_postal,payment_method,payment_status,fulfillment_status,subtotal,shipping_fee,total,created_at,order_items(product_id,product_name,brand_name,season,unit_price,quantity,line_total)&order=created_at.desc&limit=5000",
+      "/rest/v1/orders?select=id,order_number,customer_name,customer_phone,customer_email,shipping_address,shipping_city,shipping_postal,payment_method,payment_status,fulfillment_status,subtotal,shipping_fee,total,created_at,order_items(product_id,product_name,brand_name,season,size,color,unit_price,quantity,line_total)&order=created_at.desc&limit=5000",
       session,
     ),
   ]);
