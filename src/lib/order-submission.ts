@@ -21,7 +21,7 @@ export async function submitStoreOrder(
     throw new Error("Checkout is temporarily unavailable. Please try again in a moment.");
   }
 
-  const headers: HeadersInit = {
+  const headers: Record<string, string> = {
     apikey: SUPABASE_KEY,
     "Content-Type": "application/json",
   };
@@ -29,7 +29,7 @@ export async function submitStoreOrder(
     headers["Authorization"] = `Bearer ${SUPABASE_KEY}`;
   }
 
-  const response = await fetch(`${SUPABASE_URL.replace(/\\/$/, "")}/rest/v1/rpc/submit_store_order`, {
+  const response = await fetch(`${SUPABASE_URL.replace(/\/$/, "")}/rest/v1/rpc/submit_store_order`, {
     method: "POST",
     headers,
     body: JSON.stringify({
