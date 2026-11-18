@@ -19,11 +19,12 @@ export const Route = createFileRoute("/admin/management")({
   component: ManagementPage,
 });
 
-type Tab = "products" | "hero" | "collections" | "brands" | "accounts" | "brand-info";
+type Tab = "products" | "hero" | "collections" | "site-media" | "brands" | "accounts" | "brand-info";
 const tabs: { id: Tab; label: string; hint: string }[] = [
   { id: "products", label: "Products", hint: "Catalogue and inventory" },
   { id: "hero", label: "Hero controls", hint: "Slides and scheduling" },
-  { id: "collections", label: "Collections", hint: "Homepage campaigns" },
+  { id: "collections", label: "Collections", hint: "Homepage campaigns and lookbook" },
+  { id: "site-media", label: "Site imagery", hint: "Editorial, store and footer images" },
   { id: "brands", label: "Brands", hint: "Brand workspaces" },
   { id: "accounts", label: "Accounts", hint: "Administrators and customers" },
   { id: "brand-info", label: "Brand info", hint: "Main ISHTILE identity" },
@@ -128,6 +129,7 @@ function ManagementPage() {
                 {tab === "products" && <ProductsPanel products={workspace.products} brands={workspace.brands} initialBrandFilter={brandFilterRequest} session={session} busy={busy} perform={perform} />}
                 {tab === "hero" && <HeroPanel slides={workspace.slides} settings={workspace.settings} session={session} busy={busy} perform={perform} />}
                 {tab === "collections" && <CollectionsPanel collections={workspace.collections} looks={workspace.looks} products={workspace.products} session={session} busy={busy} perform={perform} />}
+                {tab === "site-media" && <SiteMediaPanel settings={workspace.settings} session={session} busy={busy} perform={perform} />}
                 {tab === "brands" && <BrandsPanel brands={workspace.brands} products={workspace.products} orders={workspace.orders} onManageProducts={(brandId) => { setBrandFilterRequest(brandId); setTab("products"); }} session={session} busy={busy} perform={perform} />}
                 {tab === "accounts" && <AccountsPanel admins={workspace.admins} customers={workspace.customers} orders={workspace.orders} session={session} busy={busy} perform={perform} />}
                 {tab === "brand-info" && <BrandInfoPanel settings={workspace.settings} session={session} busy={busy} perform={perform} />}
@@ -602,6 +604,62 @@ function AccountsPanel({ admins, customers, orders, session, busy, perform }: { 
   return <><PanelHeading eyebrow="People and access" title="Accounts" detail="Administrator access and customer records are shown separately. Admin access can be granted to an existing Supabase Auth user by their Auth user UUID." />
     <div className="grid gap-5 xl:grid-cols-2"><section className="border border-black/10 bg-[#F7F3EC] p-4"><div className="mb-4 flex items-center justify-between"><div><h3 className="text-sm font-black">Admin accounts</h3><p className="mt-1 text-[10px] text-black/45">{admins.length} authorised administrators</p></div></div><form onSubmit={(e) => { e.preventDefault(); void perform(() => adminWrite("admin_users", session, "POST", { user_id: userId.trim() }), "Administrator access granted."); setUserId(""); }} className="mb-4 flex flex-wrap gap-2"><input className="min-w-0 flex-1 border border-black/15 bg-white/60 px-3 py-2 text-xs" placeholder="Existing Auth user UUID" value={userId} onChange={(e) => setUserId(e.target.value)} /><button className={buttonClass} disabled={busy || !/^[0-9a-f-]{36}$/i.test(userId.trim())}><Plus className="h-4 w-4" /> Add admin</button></form><div className="divide-y divide-black/10">{admins.map((a) => <div key={a.user_id} className="flex items-center justify-between gap-3 py-3"><div className="min-w-0"><p className="break-all text-xs font-bold">{a.user_id}</p><p className="mt-1 text-[10px] text-black/45">Added {new Date(a.created_at).toLocaleDateString()}</p></div><button className={secondaryClass} disabled={busy || a.user_id === session.user.id || admins.length < 2} title={a.user_id === session.user.id ? "You cannot remove your own active administrator access." : admins.length < 2 ? "At least one admin must remain." : "Remove admin"} onClick={() => { if (confirm("Remove administrator access for this user?")) void perform(() => adminWrite(`admin_users?user_id=eq.${a.user_id}`, session, "DELETE"), "Administrator access removed."); }}><Trash2 className="h-4 w-4" /></button></div>)}</div><p className="mt-3 text-[10px] leading-5 text-black/45">Create the user in Supabase Authentication first, then paste their Auth user UUID here. This avoids exposing privileged Auth APIs or service keys in the browser.</p></section>
       <section className="border border-black/10 bg-[#F7F3EC] p-4"><div className="mb-4"><h3 className="text-sm font-black">Customer accounts</h3><p className="mt-1 text-[10px] text-black/45">{customers.length} customer records · latest 500</p></div><div className="max-h-[620px] divide-y divide-black/10 overflow-y-auto">{customers.map((c) => <div key={c.id} className="py-3"><div className="flex items-start justify-between gap-3"><div><p className="text-xs font-bold">{c.full_name}</p><p className="mt-1 text-xs">{c.mobile_number}</p><p className="mt-1 whitespace-pre-wrap text-[10px] leading-4 text-black/50">{c.delivery_address}</p><p className="mt-1 text-[10px] text-black/35">Registered {new Date(c.created_at).toLocaleDateString()}</p><p className="mt-1 text-[10px] font-semibold text-black/55">{orders.filter((o) => o.customer_phone.replace(/\D/g, "").slice(-10) === c.mobile_number.replace(/\D/g, "").slice(-10)).length} linked orders</p></div><button className={secondaryClass} disabled={busy} aria-label="Delete customer account" onClick={() => { if (confirm(`Delete customer record for ${c.full_name}?`)) void perform(() => adminWrite(`customer_profiles?id=eq.${c.id}`, session, "DELETE"), "Customer record deleted."); }}><Trash2 className="h-4 w-4" /></button></div></div>)}{!customers.length && <Empty title="No customer accounts yet" detail="Customer registrations will appear here." />}</div><p className="mt-3 text-[10px] leading-5 text-black/45">These are customer profile records, not verified Auth accounts. Phone ownership is not verified and this panel does not create private customer login sessions.</p></section></div>
+  </>;
+}
+
+type SiteMediaKey =
+  | "homepage_editorial_image_url" | "homepage_summer_image_url"
+  | "editorial_fashion_image_url" | "editorial_art_image_url"
+  | "stores_image_url" | "footer_building_image_url" | "footer_band_image_url";
+
+const siteMediaFields: { key: SiteMediaKey; label: string; help: string }[] = [
+  { key: "homepage_editorial_image_url", label: "Homepage editorial banner", help: "The large Editorial card beside the homepage collections." },
+  { key: "homepage_summer_image_url", label: "Homepage summer banner", help: "The Summer Essentials promotional card." },
+  { key: "editorial_fashion_image_url", label: "Editorial — fashion story", help: "The first image on the Editorial page." },
+  { key: "editorial_art_image_url", label: "Editorial — culture story", help: "The second image on the Editorial page." },
+  { key: "stores_image_url", label: "Dhaka store photograph", help: "The image shown on the Stores page." },
+  { key: "footer_building_image_url", label: "Footer background artwork", help: "The large background image behind the footer content." },
+  { key: "footer_band_image_url", label: "Footer closing artwork", help: "The full-width artwork at the bottom of the footer." },
+];
+
+function SiteMediaPanel({ settings, session, busy, perform }: {
+  settings?: SiteBrandInfo | undefined; session: AdminSession; busy: boolean;
+  perform: (action: () => Promise<unknown>, message: string) => Promise<void>;
+}) {
+  const [draft, setDraft] = useState<Record<SiteMediaKey, string>>({
+    homepage_editorial_image_url: settings?.homepage_editorial_image_url ?? "",
+    homepage_summer_image_url: settings?.homepage_summer_image_url ?? "",
+    editorial_fashion_image_url: settings?.editorial_fashion_image_url ?? "",
+    editorial_art_image_url: settings?.editorial_art_image_url ?? "",
+    stores_image_url: settings?.stores_image_url ?? "",
+    footer_building_image_url: settings?.footer_building_image_url ?? "",
+    footer_band_image_url: settings?.footer_band_image_url ?? "",
+  });
+  useEffect(() => {
+    setDraft({
+      homepage_editorial_image_url: settings?.homepage_editorial_image_url ?? "",
+      homepage_summer_image_url: settings?.homepage_summer_image_url ?? "",
+      editorial_fashion_image_url: settings?.editorial_fashion_image_url ?? "",
+      editorial_art_image_url: settings?.editorial_art_image_url ?? "",
+      stores_image_url: settings?.stores_image_url ?? "",
+      footer_building_image_url: settings?.footer_building_image_url ?? "",
+      footer_band_image_url: settings?.footer_band_image_url ?? "",
+    });
+  }, [settings]);
+  async function save(e: FormEvent) {
+    e.preventDefault();
+    await perform(() => adminWrite("site_brand_info?id=eq.1", session, "PATCH", draft), "Site imagery saved.");
+  }
+  return <>
+    <PanelHeading eyebrow="Website artwork" title="Site imagery" detail="Manage the remaining fixed artwork used across the homepage, Editorial, Stores and footer. Existing artwork is prefilled; upload a replacement or paste another image URL." />
+    <form onSubmit={save} className="grid gap-4 border border-black/10 bg-[#F7F3EC] p-4 md:grid-cols-2 md:p-6">
+      {siteMediaFields.map((field) => <section key={field.key} className="min-w-0 space-y-2 border border-black/10 bg-white/45 p-3">
+        <div><p className="text-[10px] font-black uppercase tracking-[0.12em]">{field.label}</p><p className="mt-1 text-[10px] leading-relaxed text-black/45">{field.help}</p></div>
+        <ImageUrlField label="Image URL" name={field.key} value={draft[field.key]} onChange={(value) => setDraft((current) => ({ ...current, [field.key]: value }))} />
+        <UploadField label="Upload replacement" session={session} folder="site" busy={busy} onUploaded={(url) => setDraft((current) => ({ ...current, [field.key]: url }))} />
+      </section>)}
+      <div className="md:col-span-2"><button className={buttonClass} disabled={busy}><Save className="h-4 w-4" /> Save site imagery</button></div>
+    </form>
   </>;
 }
 
