@@ -223,7 +223,11 @@ create table if not exists public.collection_products (
 create table if not exists public.site_brand_info (
   id integer primary key default 1 check (id = 1), social_links jsonb not null default '{}'::jsonb,
   contact_numbers text[] not null default '{}', address text, motto text, about_text text,
-  logo_url text, symbol_url text, hero_autoplay_ms integer not null default 5000
+  logo_url text, symbol_url text,
+  homepage_editorial_image_url text, homepage_summer_image_url text,
+  editorial_fashion_image_url text, editorial_art_image_url text, stores_image_url text,
+  footer_building_image_url text, footer_band_image_url text,
+  hero_autoplay_ms integer not null default 5000
     check (hero_autoplay_ms between 1000 and 15000),
   updated_at timestamptz not null default now()
 );
