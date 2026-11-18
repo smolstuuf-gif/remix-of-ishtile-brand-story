@@ -175,7 +175,7 @@ function VideoUploadField({ label, session, folder, onUploaded, busy }: { label:
     catch (e) { setMessage(e instanceof Error ? e.message : "Upload failed"); }
     finally { setUploading(false); }
   }
-  return <label className="flex cursor-pointer items-center gap-3 border border-dashed border-black/25 bg-white/35 px-3 py-3 text-xs font-semibold hover:bg-white/70"><Upload className="h-4 w-4" />{label}<span className="ml-auto text-[10px] text-black/45">{uploading || busy ? "Uploading…" : message || "Choose video · MP4/WebM/MOV · max 100 MB"}</span><input type="file" accept="video/mp4,video/webm,video/quicktime" className="hidden" disabled={uploading || busy} onChange={(e) => { void upload(e.target.files?.[0]); e.currentTarget.value = ""; }} /></label>;
+  return <label className="flex cursor-pointer items-center gap-3 border border-dashed border-black/25 bg-white/35 px-3 py-3 text-xs font-semibold hover:bg-white/70"><Upload className="h-4 w-4" />{label}<span className="ml-auto text-[10px] text-black/45">{uploading || busy ? "Uploading…" : message || "Choose MP4 (H.264) or WebM · max 100 MB"}</span><input type="file" accept="video/mp4,video/webm,.mp4,.webm" className="hidden" disabled={uploading || busy} onChange={(e) => { void upload(e.target.files?.[0]); e.currentTarget.value = ""; }} /></label>;
 }
 function ImageUrlPreview({ urls, alt = "Image preview", compact = false }: { urls: string[]; alt?: string; compact?: boolean }) {
   const validUrls = [...new Set(urls.map((url) => url.trim()).filter((url) => /^https?:\/\//i.test(url)))];
