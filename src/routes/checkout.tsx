@@ -60,9 +60,11 @@ function Field({
   autoComplete,
   inputMode,
   className,
+  required = false,
 }: {
   id: string;
   label: string;
+  required?: boolean;
   value: string;
   onChange: (v: string) => void;
   error?: string | undefined;
@@ -76,6 +78,9 @@ function Field({
     <div className={className}>
       <label htmlFor={id} className="text-sm font-medium">
         {label}
+        {required && (
+          <span aria-hidden="true" className="ml-1 inline-block animate-pulse text-sm font-bold leading-none text-red-600">*</span>
+        )}
       </label>
       <input
         id={id}
@@ -85,6 +90,8 @@ function Field({
         autoComplete={autoComplete}
         inputMode={inputMode}
         aria-invalid={!!error}
+        aria-required={required}
+        required={required}
         aria-describedby={error ? `${id}-error` : undefined}
         onChange={(e) => onChange(e.target.value)}
         className={cn(
@@ -188,10 +195,10 @@ function CheckoutPage() {
     const next: FieldErrors = {};
     if (info.name.trim().length < 2) next.name = "Tell us who to address the parcel to.";
     if (!isBdPhone(info.phone)) next.phone = "Use a Bangladeshi mobile, e.g. 01712345678.";
-    if (!isEmail(info.email)) next.email = "That email doesn't look right.";
+    if (info.email.trim() && !isEmail(info.email)) next.email = "That email doesn't look right.";
     if (info.address.trim().length < 6) next.address = "Add the house, road and area.";
-    if (info.city.trim().length < 2) next.city = "Which city?";
-    if (!isPostalCode(info.postal)) next.postal = "Postal code is 4 digits.";
+    if (info.city.trim() && info.city.trim().length < 2) next.city = "Enter a valid city name.";
+    if (info.postal.trim() && !isPostalCode(info.postal)) next.postal = "Postal code is 4 digits.";
     setErrors(next);
     if (Object.keys(next).length === 0) setStep(2);
   };
@@ -273,15 +280,16 @@ function CheckoutPage() {
           <form onSubmit={submitInfo} noValidate className="mt-8 grid gap-8 lg:grid-cols-[1fr_360px]">
             <div>
               <h2 className="font-display text-xl font-semibold tracking-[-0.02em]">Contact</h2>
+              <p className="mt-1 text-xs text-muted-foreground"><span className="font-bold text-red-600">*</span> Required fields · All other details are optional</p>
               <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                <Field id="name" label="Full name" value={info.name} onChange={set("name")} error={errors.name} autoComplete="name" placeholder="Shahid Rahman" />
-                <Field id="phone" label="Phone" value={info.phone} onChange={set("phone")} error={errors.phone} type="tel" autoComplete="tel" placeholder="01712345678" />
+                <Field id="name" label="Full name" required value={info.name} onChange={set("name")} error={errors.name} autoComplete="name" placeholder="Shahid Rahman" />
+                <Field id="phone" label="Mobile number" required value={info.phone} onChange={set("phone")} error={errors.phone} type="tel" autoComplete="tel" placeholder="01712345678" />
                 <Field id="email" label="Email" value={info.email} onChange={set("email")} error={errors.email} type="email" autoComplete="email" placeholder="you@example.com" className="sm:col-span-2" />
               </div>
 
               <h2 className="mt-8 font-display text-xl font-semibold tracking-[-0.02em]">Delivery Address</h2>
               <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                <Field id="address" label="Address" value={info.address} onChange={set("address")} error={errors.address} autoComplete="street-address" placeholder="House 42, Road 11, Banani" className="sm:col-span-2" />
+                <Field id="address" label="Address" required value={info.address} onChange={set("address")} error={errors.address} autoComplete="street-address" placeholder="House 42, Road 11, Banani" className="sm:col-span-2" />
                 <Field id="city" label="City" value={info.city} onChange={set("city")} error={errors.city} autoComplete="address-level2" placeholder="Dhaka" />
                 <Field id="postal" label="Postal code" value={info.postal} onChange={set("postal")} error={errors.postal} autoComplete="postal-code" placeholder="1213" />
               </div>
@@ -415,8 +423,8 @@ function CheckoutPage() {
                 Order placed.
               </h2>
               <p className="mt-2 text-[15px] text-muted-foreground">
-                Thanks {order.name.split(" ")[0]} — we've got it. A confirmation is on its way to{" "}
-                {order.email}.
+                Thanks {order.name.split(" ")[0]} — we've got it.
+                {order.email ? <> A confirmation is on its way to {order.email}.</> : " Your order details are confirmed."}
               </p>
 
               <p className="mt-6 inline-flex items-center gap-2 rounded-full border border-border bg-background px-4 py-2 text-sm">
@@ -432,8 +440,8 @@ function CheckoutPage() {
                     <br />
                     {order.address}
                     <br />
-                    {order.city} {order.postal}
-                    <br />
+                    {[order.city, order.postal].filter(Boolean).join(" ")}
+                    {(order.city || order.postal) && <br />}
                     {order.phone}
                   </p>
                 </div>
