@@ -433,6 +433,7 @@ export type Database = {
           },
         ]
       }
+      orders: {
         Row: {
           created_at: string
           customer_email: string | null
