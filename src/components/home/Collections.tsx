@@ -10,6 +10,7 @@ import cardSummer from "@/assets/card-summer.jpg";
 import cardWinter from "@/assets/card-winter.jpg";
 import { Logo } from "./Logo";
 import { fetchHomepageCollections } from "@/lib/public-store";
+import { AutoplayVideo } from "@/components/ui/autoplay-video";
 
 const desktopCollections = [
   { image: colSpring, alt: "Spring '25 — Fresh Fits. New Vibes.", w: 751, h: 370 },
@@ -32,7 +33,7 @@ export function DesktopCollections() {
           aria-label={`Explore ${c.alt}`}
           className="group block overflow-hidden rounded-xl bg-ink shadow-[0_1px_0_0_var(--border)]"
         >
-          {c.video ? <video src={c.video} autoPlay muted loop playsInline preload="metadata" poster={c.image} className="aspect-[2.03/1] w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" /> : <img src={c.image} alt={c.alt} width={c.w} height={c.h} loading="lazy" className="aspect-[2.03/1] w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" />}
+          {c.video ? <AutoplayVideo src={c.video} poster={c.image} className="aspect-[2.03/1] w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" /> : <img src={c.image} alt={c.alt} width={c.w} height={c.h} loading="lazy" className="aspect-[2.03/1] w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" />}
         </Link>
       ))}
     </section>
@@ -63,7 +64,7 @@ export function MobileCollections() {
   const [liveCollections, setLiveCollections] = useState<{ id: string; image: string; video?: string; title: string }[] | null>(null);
   useEffect(() => { let live = true; fetchHomepageCollections().then((items) => { if (live && items.length) setLiveCollections(items.filter((item) => item.show_homepage && item.image_url).map((item) => ({ id: item.id, image: item.image_url || "", video: item.video_url || undefined, title: item.title }))); }).catch(() => undefined); return () => { live = false; }; }, []);
   if (liveCollections?.length) return (
-    <section aria-label="Collections" className="md:hidden"><div className="no-scrollbar -mr-3 flex snap-x snap-mandatory gap-3 overflow-x-auto pr-3">{liveCollections.map((item) => <Link key={item.id} to="/collections" aria-label={`Explore ${item.title}`} className="relative block aspect-[6/7] w-[42%] shrink-0 snap-start overflow-hidden rounded-2xl">{item.video ? <video src={item.video} autoPlay muted loop playsInline preload="metadata" poster={item.image} className="absolute inset-0 h-full w-full object-cover" /> : <img src={item.image} alt={item.title} loading="lazy" className="absolute inset-0 h-full w-full object-cover" />}<div className="absolute inset-x-[10%] bottom-[12%] text-white"><p className="text-[6vw] font-bold leading-tight">{item.title}</p><ArrowRight className="mt-3 h-6 w-6" /></div></Link>)}</div></section>
+    <section aria-label="Collections" className="md:hidden"><div className="no-scrollbar -mr-3 flex snap-x snap-mandatory gap-3 overflow-x-auto pr-3">{liveCollections.map((item) => <Link key={item.id} to="/collections" aria-label={`Explore ${item.title}`} className="relative block aspect-[6/7] w-[42%] shrink-0 snap-start overflow-hidden rounded-2xl">{item.video ? <AutoplayVideo src={item.video} poster={item.image} className="absolute inset-0 h-full w-full object-cover" /> : <img src={item.image} alt={item.title} loading="lazy" className="absolute inset-0 h-full w-full object-cover" />}<div className="absolute inset-x-[10%] bottom-[12%] text-white"><p className="text-[6vw] font-bold leading-tight">{item.title}</p><ArrowRight className="mt-3 h-6 w-6" /></div></Link>)}</div></section>
   );
   if (liveCollections && !liveCollections.length) return null;
   return (
