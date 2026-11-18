@@ -111,9 +111,12 @@ export type PublicBrandInfo = {
   about_text: string | null;
   logo_url: string | null;
   symbol_url: string | null;
+  homepage_editorial_image_url: string | null; homepage_summer_image_url: string | null;
+  editorial_fashion_image_url: string | null; editorial_art_image_url: string | null;
+  stores_image_url: string | null; footer_building_image_url: string | null; footer_band_image_url: string | null;
 };
 export async function fetchPublicBrandInfo() {
-  const rows = await publicRows<PublicBrandInfo>("site_brand_info?select=social_links,contact_numbers,address,motto,about_text,logo_url,symbol_url&id=eq.1&limit=1");
+  const rows = await publicRows<PublicBrandInfo>("site_brand_info?select=social_links,contact_numbers,address,motto,about_text,logo_url,symbol_url,homepage_editorial_image_url,homepage_summer_image_url,editorial_fashion_image_url,editorial_art_image_url,stores_image_url,footer_building_image_url,footer_band_image_url&id=eq.1&limit=1");
   return rows[0] ?? null;
 }
 
