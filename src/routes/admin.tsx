@@ -107,18 +107,18 @@ function AdminPage() {
     };
   }, [session, days, refreshKey]);
 
-  const initialHashHandled = useRef(false);
-
+  const lastHashTarget = useRef("");
   useEffect(() => {
-    if (!data || initialHashHandled.current) return;
+    if (!data) return;
     const targetId = window.location.hash.slice(1);
-    if (!targetId) return;
-    initialHashHandled.current = true;
+    const targetKey = `${pathname}#${targetId}`;
+    if (!targetId || lastHashTarget.current === targetKey) return;
+    lastHashTarget.current = targetKey;
     const frame = window.requestAnimationFrame(() => {
       document.getElementById(targetId)?.scrollIntoView({ behavior: "smooth", block: "start" });
     });
     return () => window.cancelAnimationFrame(frame);
-  }, [data]);
+  }, [data, pathname]);
 
   async function handleSignOut() {
     if (session) await signOutAdmin(session);
