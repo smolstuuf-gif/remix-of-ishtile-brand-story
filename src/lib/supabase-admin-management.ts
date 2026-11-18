@@ -112,6 +112,9 @@ export type SiteBrandInfo = {
   id: number; social_links: Record<string, string>; contact_numbers: string[]; address: string | null;
   motto: string | null; about_text: string | null; logo_url: string | null; symbol_url: string | null;
   hero_autoplay_ms: number;
+  homepage_editorial_image_url: string | null; homepage_summer_image_url: string | null;
+  editorial_fashion_image_url: string | null; editorial_art_image_url: string | null;
+  stores_image_url: string | null; footer_building_image_url: string | null; footer_band_image_url: string | null;
 };
 export type CustomerProfile = {
   id: string; full_name: string; mobile_number: string; delivery_address: string; created_at: string;
