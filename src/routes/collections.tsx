@@ -7,6 +7,21 @@ import colFestive from "@/assets/col-festive.jpg";
 import colMonsoon from "@/assets/col-monsoon.jpg";
 import cardWinter from "@/assets/card-winter.jpg";
 
+/**
+ * Keep this editorial sequence stable for the lifetime of the page.
+ * Replacing it asynchronously with the homepage collection query caused
+ * ScrollTrigger to tear down and rebuild its pinned section after first paint;
+ * depending on the returned homepage rows, it could also collapse the gallery
+ * to a single slide and remove the scroll experience altogether.
+ */
+const collectionSlides = [
+  { title: "Spring '25", image: colSpring, url: "/lookbook?season=spring", linkLabel: "Explore Spring" },
+  { title: "Summer Essentials '25", image: colSummer, url: "/lookbook?season=summer", linkLabel: "Explore Summer" },
+  { title: "Festive Collection '25", image: colFestive, url: "/lookbook?season=festive", linkLabel: "Explore Festive" },
+  { title: "Monsoon '25", image: colMonsoon, url: "/lookbook?season=monsoon", linkLabel: "Explore Monsoon" },
+  { title: "Winter Collection", image: cardWinter, url: "/lookbook?season=winter", linkLabel: "Explore Winter" },
+];
+
 export const Route = createFileRoute("/collections")({
   head: () => ({
     meta: [
@@ -17,6 +32,7 @@ export const Route = createFileRoute("/collections")({
       { property: "og:type", content: "website" },
     ],
   }),
+  // Resolve live collection art before ScrollGallery mounts so its pinned GSAP setup stays stable.
   loader: async () => {
     const items = await fetchHomepageCollections().catch(() => []);
     const liveSlides = items
@@ -36,20 +52,6 @@ export const Route = createFileRoute("/collections")({
   component: CollectionsPage,
 });
 
-/**
- * Keep this editorial sequence stable for the lifetime of the page.
- * Replacing it asynchronously with the homepage collection query caused
- * ScrollTrigger to tear down and rebuild its pinned section after first paint;
- * depending on the returned homepage rows, it could also collapse the gallery
- * to a single slide and remove the scroll experience altogether.
- */
-const collectionSlides = [
-  { title: "Spring '25", image: colSpring, url: "/lookbook?season=spring", linkLabel: "Explore Spring" },
-  { title: "Summer Essentials '25", image: colSummer, url: "/lookbook?season=summer", linkLabel: "Explore Summer" },
-  { title: "Festive Collection '25", image: colFestive, url: "/lookbook?season=festive", linkLabel: "Explore Festive" },
-  { title: "Monsoon '25", image: colMonsoon, url: "/lookbook?season=monsoon", linkLabel: "Explore Monsoon" },
-  { title: "Winter Collection", image: cardWinter, url: "/lookbook?season=winter", linkLabel: "Explore Winter" },
-];
 
 function CollectionsPage() {
   const slides = Route.useLoaderData();
