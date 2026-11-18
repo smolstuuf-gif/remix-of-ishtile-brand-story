@@ -1,4 +1,4 @@
-<AutoplayVideo src={product.videoUrl} poster={product.image} className="aspect-[1.75/1] w-full object-cover object-[50%_25%] transition-transform duration-500 group-hover:scale-[1.04] md:aspect-[2.3/1]" /> Link } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { Plus, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatTaka, type Product } from "@/lib/catalog";
