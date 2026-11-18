@@ -384,6 +384,7 @@ export type Database = {
           product_id: string | null
           product_name: string
           quantity: number
+          season: string | null
           size: string | null
           unit_price: number
         }
@@ -397,6 +398,7 @@ export type Database = {
           product_id?: string | null
           product_name: string
           quantity: number
+          season?: string | null
           size?: string | null
           unit_price: number
         }
@@ -410,6 +412,7 @@ export type Database = {
           product_id?: string | null
           product_name?: string
           quantity?: number
+          season?: string | null
           size?: string | null
           unit_price?: number
         }
@@ -433,7 +436,7 @@ export type Database = {
       orders: {
         Row: {
           created_at: string
-          customer_email: string
+          customer_email: string | null
           customer_name: string
           customer_phone: string
           fulfillment_status: string
@@ -442,16 +445,16 @@ export type Database = {
           payment_method: string
           payment_status: string
           shipping_address: string
-          shipping_city: string
+          shipping_city: string | null
           shipping_fee: number
-          shipping_postal: string
+          shipping_postal: string | null
           subtotal: number
           total: number
           updated_at: string
         }
         Insert: {
           created_at?: string
-          customer_email: string
+          customer_email: string | null
           customer_name: string
           customer_phone: string
           fulfillment_status?: string
@@ -460,9 +463,9 @@ export type Database = {
           payment_method: string
           payment_status?: string
           shipping_address: string
-          shipping_city: string
+          shipping_city?: string | null
           shipping_fee?: number
-          shipping_postal: string
+          shipping_postal?: string | null
           subtotal: number
           total: number
           updated_at?: string
@@ -638,6 +641,10 @@ export type Database = {
       save_lookbook_look: {
         Args: { p_look: Json; p_products: Json }
         Returns: string
+      }
+      submit_store_order: {
+        Args: { p_customer: Json; p_items: Json; p_payment_method: string }
+        Returns: Json
       }
     }
     Enums: {
