@@ -1,7 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { ScrollGallery, type ScrollGallerySlide } from "@/components/ui/scroll-gallery";
-import { fetchHomepageCollections } from "@/lib/public-store";
+import { ScrollGallery } from "@/components/ui/scroll-gallery";
 import colSpring from "@/assets/col-spring.jpg";
 import colSummer from "@/assets/col-summer.jpg";
 import colFestive from "@/assets/col-festive.jpg";
@@ -21,7 +19,14 @@ export const Route = createFileRoute("/collections")({
   component: CollectionsPage,
 });
 
-const slides = [
+/**
+ * Keep this editorial sequence stable for the lifetime of the page.
+ * Replacing it asynchronously with the homepage collection query caused
+ * ScrollTrigger to tear down and rebuild its pinned section after first paint;
+ * depending on the returned homepage rows, it could also collapse the gallery
+ * to a single slide and remove the scroll experience altogether.
+ */
+const collectionSlides = [
   { title: "Spring '25", image: colSpring, url: "/lookbook?season=spring", linkLabel: "Explore Spring" },
   { title: "Summer Essentials '25", image: colSummer, url: "/lookbook?season=summer", linkLabel: "Explore Summer" },
   { title: "Festive Collection '25", image: colFestive, url: "/lookbook?season=festive", linkLabel: "Explore Festive" },
@@ -30,26 +35,15 @@ const slides = [
 ];
 
 function CollectionsPage() {
-  const [liveSlides, setLiveSlides] = useState<ScrollGallerySlide[] | null>(null);
-  useEffect(() => {
-    let live = true;
-    fetchHomepageCollections().then((items) => {
-      if (!live || !items.length) return;
-      const mapped = items.filter((item) => item.video_url || item.image_url).map((item) => {
-        const slug = item.slug.toLowerCase();
-        const season = ["spring", "summer", "festive", "monsoon", "winter"].find((value) => slug.includes(value));
-        return { title: item.title, image: item.image_url || "", video: item.video_url || undefined, url: season ? `/lookbook?season=${season}` : `/lookbook`, linkLabel: `Explore ${item.title}` };
-      });
-      if (mapped.length) setLiveSlides(mapped);
-    }).catch(() => undefined);
-    return () => { live = false; };
-  }, []);
   return (
     <div className="min-h-screen bg-[#F0EAE0] text-[#171717]">
       <main>
         <ScrollGallery
-          slides={liveSlides ?? slides}
+          slides={collectionSlides}
           variant="studio"
+          stripsCount={20}
+          scrollPerTransition={120}
+          timing={{ initialDelay: 70, finalDelay: 70 }}
           prefixLabel="ISHTILE+ / COLLECTIONS"
           linkLabel="Explore"
         />
