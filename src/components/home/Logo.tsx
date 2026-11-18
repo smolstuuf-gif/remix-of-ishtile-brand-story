@@ -16,6 +16,7 @@ export function Logo({ className, tagline = false }: { className?: string; spark
         <path d={STAR_PATH} />
         {tagline && TAGLINE_PATHS.map((d, i) => <path key={`t${i}`} d={d} />)}
       </svg>
+      {brandAssets?.symbol_url && <img src={brandAssets.symbol_url} alt="" className="ml-[0.2em] h-[0.9em] w-[0.9em] object-contain" />}
     </span>
   );
 }
