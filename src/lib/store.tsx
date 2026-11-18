@@ -54,7 +54,7 @@ type Store = {
   clearCart: () => void;
   toggleWish: (productId: string) => void;
   isWished: (productId: string) => boolean;
-  placeOrder: (details: OrderDetails) => Order;
+  placeOrder: (details: OrderDetails, saved?: { number: string; placedAt: string; subtotal: number; shipping: number; total: number }) => Order;
 };
 
 const CartContext = createContext<Store | null>(null);
@@ -136,17 +136,17 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const placeOrder = useCallback<Store["placeOrder"]>(
-    (details) => {
-      const placedAt = new Date();
-      const subtotal = cartSubtotal(lines);
-      const shipping = shippingFor(subtotal);
+    (details, saved) => {
+      const placedAt = saved ? new Date(saved.placedAt) : new Date();
+      const subtotal = saved?.subtotal ?? cartSubtotal(lines);
+      const shipping = saved?.shipping ?? shippingFor(subtotal);
       const order: Order = {
-        number: makeOrderNumber(placedAt, seq.current++),
+        number: saved?.number ?? makeOrderNumber(placedAt, seq.current++),
         placedAt: placedAt.toISOString(),
         lines,
         subtotal,
         shipping,
-        total: subtotal + shipping,
+        total: saved?.total ?? subtotal + shipping,
         ...details,
       };
       setOrders((prev) => [order, ...prev]);
