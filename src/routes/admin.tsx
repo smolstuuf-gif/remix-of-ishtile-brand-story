@@ -30,6 +30,7 @@ import {
   getDashboardData,
   restoreAdminSession,
   signOutAdmin,
+  updateOrderStatus,
   type AdminSession,
   type DashboardData,
   type OrderRecord,
@@ -160,13 +161,17 @@ function Dashboard({
   onRefresh: () => void;
   onSignOut: () => void;
 }) {
+  const periodOrders = useMemo(
+    () => (data?.orders ?? []).filter((order) => new Date(order.created_at).getTime() >= Date.now() - days * 24 * 60 * 60 * 1000),
+    [data, days],
+  );
   const paidOrders = useMemo(
-    () => (data?.orders ?? []).filter((order) => order.payment_status === "paid" && order.fulfillment_status !== "cancelled"),
-    [data],
+    () => periodOrders.filter((order) => order.payment_status === "paid" && order.fulfillment_status !== "cancelled"),
+    [periodOrders],
   );
   const validOrders = useMemo(
-    () => (data?.orders ?? []).filter((order) => order.fulfillment_status !== "cancelled" && order.fulfillment_status !== "returned"),
-    [data],
+    () => periodOrders.filter((order) => order.fulfillment_status !== "cancelled" && order.fulfillment_status !== "returned"),
+    [periodOrders],
   );
   const revenue = paidOrders.reduce((sum, order) => sum + amount(order.total), 0);
   const units = paidOrders.reduce((sum, order) => sum + (order.order_items ?? []).reduce((n, item) => n + item.quantity, 0), 0);
@@ -208,6 +213,55 @@ function Dashboard({
   const pendingOrders = validOrders.filter((order) => order.fulfillment_status === "new" || order.fulfillment_status === "confirmed" || order.fulfillment_status === "processing").length;
   const rankedBrands = [...brandStats].sort((a, b) => b.revenue - a.revenue);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [orderStatusFilter, setOrderStatusFilter] = useState("new");
+  const [orderPage, setOrderPage] = useState(1);
+  const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
+  const [orderActionError, setOrderActionError] = useState("");
+  const [orderFilters, setOrderFilters] = useState({ from: "", to: "", minAmount: "", maxAmount: "", product: "", season: "", brand: "" });
+  const updateOrderFilter = (key: keyof typeof orderFilters, value: string) => {
+    setOrderFilters((current) => ({ ...current, [key]: value }));
+    setOrderPage(1);
+  };
+  const allOrders = data?.orders ?? [];
+  const seasonOptions = [...new Set(allOrders.flatMap((order) => (order.order_items ?? []).map((item) => item.season).filter((season): season is string => Boolean(season))))].sort();
+  const brandOptions = [...new Set(allOrders.flatMap((order) => (order.order_items ?? []).map((item) => item.brand_name).filter(Boolean)))].sort();
+  const filteredOrders = useMemo(() => allOrders.filter((order) => {
+    const status = order.fulfillment_status;
+    if (orderStatusFilter === "new" && status !== "new") return false;
+    if (orderStatusFilter === "pending" && !["confirmed", "processing", "shipped"].includes(status)) return false;
+    if (orderStatusFilter !== "all" && orderStatusFilter !== "new" && orderStatusFilter !== "pending" && status !== orderStatusFilter) return false;
+    const date = new Date(order.created_at).toISOString().slice(0, 10);
+    if (orderFilters.from && date < orderFilters.from) return false;
+    if (orderFilters.to && date > orderFilters.to) return false;
+    const total = amount(order.total);
+    if (orderFilters.minAmount && total < Number(orderFilters.minAmount)) return false;
+    if (orderFilters.maxAmount && total > Number(orderFilters.maxAmount)) return false;
+    if (orderFilters.product && !(order.order_items ?? []).some((item) => item.product_name.toLowerCase().includes(orderFilters.product.toLowerCase()))) return false;
+    if (orderFilters.season && !(order.order_items ?? []).some((item) => item.season === orderFilters.season)) return false;
+    if (orderFilters.brand && !(order.order_items ?? []).some((item) => item.brand_name === orderFilters.brand)) return false;
+    return true;
+  }), [allOrders, orderStatusFilter, orderFilters]);
+  const orderPageSize = 10;
+  const orderPageCount = Math.max(1, Math.ceil(filteredOrders.length / orderPageSize));
+  const visibleOrders = filteredOrders.slice((orderPage - 1) * orderPageSize, orderPage * orderPageSize);
+  const orderCountFor = (status: string) => allOrders.filter((order) => {
+    if (status === "all") return true;
+    if (status === "pending") return ["confirmed", "processing", "shipped"].includes(order.fulfillment_status);
+    return order.fulfillment_status === status;
+  }).length;
+  const changeOrderStatus = async (orderId: string, status: OrderRecord["fulfillment_status"]) => {
+    setOrderActionError("");
+    setOrderActionSaving(orderId);
+    try {
+      await updateOrderStatus(session, orderId, status);
+      onRefresh();
+    } catch (error) {
+      setOrderActionError(error instanceof Error ? error.message : "Could not update this order.");
+    } finally {
+      setOrderActionSaving(null);
+    }
+  };
+  const [orderActionSaving, setOrderActionSaving] = useState<string | null>(null);
 
   return (
     <main className="min-h-screen bg-[#F0EAE0] text-[#171717]">
@@ -218,6 +272,7 @@ function Dashboard({
           <p className="mb-3 mt-12 text-[9px] font-bold uppercase tracking-[0.2em] text-white/35">Store management</p>
           <nav className="space-y-1.5" aria-label="Store management controls">
             {[
+              ["orders", "00", "Orders", "Incoming orders and fulfilment"],
               ["products", "01", "Products", "Catalogue, pricing and stock"],
               ["hero", "02", "Hero controls", "Homepage slides and schedule"],
               ["collections", "03", "Collections", "Campaigns and featured edits"],
@@ -351,15 +406,43 @@ function Dashboard({
                 </section>
 
                 <section id="orders" className="scroll-mt-24 border border-black/10 bg-[#F7F3EC]">
-                  <div className="flex items-center justify-between border-b border-black/10 px-4 py-4 md:px-6"><div><p className="text-[10px] font-bold uppercase tracking-[0.2em] text-black/45">Latest activity</p><h2 className="mt-1 text-lg font-bold">Recent orders</h2></div><span className="text-[10px] text-black/45">{number(validOrders.length)} in range</span></div>
-                  {data.orders.length ? (
-                    <div className="overflow-x-auto">
-                      <table className="w-full min-w-[760px] text-left text-xs">
-                        <thead className="bg-black/[0.035] text-[9px] uppercase tracking-[0.14em] text-black/45"><tr><th className="px-5 py-3 font-bold">Order</th><th className="px-5 py-3 font-bold">Customer</th><th className="px-5 py-3 font-bold">Date</th><th className="px-5 py-3 font-bold">Payment</th><th className="px-5 py-3 font-bold">Fulfilment</th><th className="px-5 py-3 text-right font-bold">Total</th></tr></thead>
-                        <tbody className="divide-y divide-black/10">{data.orders.slice(0, 8).map((order) => <OrderRow key={order.id} order={order} />)}</tbody>
-                      </table>
-                    </div>
-                  ) : <EmptyState title="No orders in this period" detail="Orders will appear here when checkout is connected to Supabase and records are created." />}
+                  <div className="flex flex-wrap items-end justify-between gap-4 border-b border-black/10 px-4 py-5 md:px-6">
+                    <div><p className="text-[10px] font-bold uppercase tracking-[0.2em] text-black/45">Order desk</p><h2 className="mt-1 text-xl font-black tracking-tight">Order management<span className="text-black/30">.</span></h2><p className="mt-1 text-xs text-black/45">Review incoming orders, update fulfilment and search the complete order history.</p></div>
+                    <span className="bg-[#D5FE00] px-3 py-2 text-[10px] font-black uppercase tracking-wide">{number(allOrders.length)} total orders</span>
+                  </div>
+                  <div className="flex gap-1 overflow-x-auto border-b border-black/10 px-3 py-3 md:px-5">
+                    {[
+                      ["new", "New orders"], ["pending", "Pending orders"], ["cancelled", "Cancelled"],
+                      ["delivered", "Delivered"], ["returned", "Returned"], ["all", "All orders"],
+                    ].map(([key, label]) => (
+                      <button key={key} type="button" onClick={() => { setOrderStatusFilter(key); setOrderPage(1); }} className={`shrink-0 border px-3 py-2 text-[10px] font-bold uppercase tracking-wide transition ${orderStatusFilter === key ? "border-[#171717] bg-[#171717] text-[#F0EAE0]" : "border-black/10 text-black/55 hover:border-black/40"}`}>
+                        {label}<span className={`ml-2 ${orderStatusFilter === key ? "text-[#D5FE00]" : "text-black/35"}`}>{number(orderCountFor(key))}</span>
+                      </button>
+                    ))}
+                  </div>
+                  <div className="grid gap-3 border-b border-black/10 p-4 md:grid-cols-3 md:p-5 xl:grid-cols-7">
+                    <label className="text-[9px] font-bold uppercase tracking-[0.12em] text-black/45">From date<input type="date" value={orderFilters.from} onChange={(event) => updateOrderFilter("from", event.target.value)} className="mt-1.5 h-10 w-full border border-black/15 bg-transparent px-2 text-xs font-medium text-[#171717] outline-none focus:border-black" /></label>
+                    <label className="text-[9px] font-bold uppercase tracking-[0.12em] text-black/45">To date<input type="date" value={orderFilters.to} onChange={(event) => updateOrderFilter("to", event.target.value)} className="mt-1.5 h-10 w-full border border-black/15 bg-transparent px-2 text-xs font-medium text-[#171717] outline-none focus:border-black" /></label>
+                    <label className="text-[9px] font-bold uppercase tracking-[0.12em] text-black/45">Min amount<input type="number" min="0" value={orderFilters.minAmount} onChange={(event) => updateOrderFilter("minAmount", event.target.value)} placeholder="৳ Min" className="mt-1.5 h-10 w-full border border-black/15 bg-transparent px-3 text-xs font-medium outline-none focus:border-black" /></label>
+                    <label className="text-[9px] font-bold uppercase tracking-[0.12em] text-black/45">Max amount<input type="number" min="0" value={orderFilters.maxAmount} onChange={(event) => updateOrderFilter("maxAmount", event.target.value)} placeholder="৳ Max" className="mt-1.5 h-10 w-full border border-black/15 bg-transparent px-3 text-xs font-medium outline-none focus:border-black" /></label>
+                    <label className="text-[9px] font-bold uppercase tracking-[0.12em] text-black/45">Product<input type="search" value={orderFilters.product} onChange={(event) => updateOrderFilter("product", event.target.value)} placeholder="Search product" className="mt-1.5 h-10 w-full border border-black/15 bg-transparent px-3 text-xs font-medium outline-none focus:border-black" /></label>
+                    <label className="text-[9px] font-bold uppercase tracking-[0.12em] text-black/45">Season<select value={orderFilters.season} onChange={(event) => updateOrderFilter("season", event.target.value)} className="mt-1.5 h-10 w-full border border-black/15 bg-[#F7F3EC] px-2 text-xs font-medium outline-none focus:border-black"><option value="">All seasons</option>{seasonOptions.map((season) => <option key={season} value={season}>{season[0].toUpperCase() + season.slice(1)}</option>)}</select></label>
+                    <label className="text-[9px] font-bold uppercase tracking-[0.12em] text-black/45">Brand<select value={orderFilters.brand} onChange={(event) => updateOrderFilter("brand", event.target.value)} className="mt-1.5 h-10 w-full border border-black/15 bg-[#F7F3EC] px-2 text-xs font-medium outline-none focus:border-black"><option value="">All brands</option>{brandOptions.map((brand) => <option key={brand} value={brand}>{brand}</option>)}</select></label>
+                    <div className="flex items-end xl:col-span-7"><button type="button" onClick={() => { setOrderFilters({ from: "", to: "", minAmount: "", maxAmount: "", product: "", season: "", brand: "" }); setOrderPage(1); }} className="text-[10px] font-bold uppercase tracking-wide text-black/50 underline underline-offset-4 hover:text-black">Clear all filters</button></div>
+                  </div>
+                  {orderActionError && <p role="alert" className="mx-4 mt-4 border border-red-300 bg-red-50 px-3 py-2 text-xs text-red-800 md:mx-5">{orderActionError}</p>}
+                  {visibleOrders.length ? <div className="overflow-x-auto">
+                    <table className="w-full min-w-[980px] text-left text-xs">
+                      <thead className="bg-black/[0.035] text-[9px] uppercase tracking-[0.14em] text-black/45"><tr><th className="px-4 py-3 font-bold">Order / Customer</th><th className="px-4 py-3 font-bold">Date</th><th className="px-4 py-3 font-bold">Products</th><th className="px-4 py-3 font-bold">Brand / Season</th><th className="px-4 py-3 font-bold">Payment</th><th className="px-4 py-3 font-bold">Fulfilment</th><th className="px-4 py-3 text-right font-bold">Amount</th></tr></thead>
+                      <tbody className="divide-y divide-black/10">
+                        {visibleOrders.map((order) => <FragmentOrderRow key={order.id} order={order} expanded={expandedOrderId === order.id} saving={orderActionSaving === order.id} onToggle={() => setExpandedOrderId((current) => current === order.id ? null : order.id)} onStatusChange={(status) => void changeOrderStatus(order.id, status)} />)}
+                      </tbody>
+                    </table>
+                  </div> : <EmptyState title="No matching orders" detail={allOrders.length ? "Try another status view or clear one or more filters." : "New checkout submissions will appear here as soon as customers place orders."} />}
+                  <div className="flex flex-wrap items-center justify-between gap-3 border-t border-black/10 px-4 py-4 md:px-6">
+                    <p className="text-[10px] text-black/45">Showing {filteredOrders.length ? (orderPage - 1) * orderPageSize + 1 : 0}–{Math.min(orderPage * orderPageSize, filteredOrders.length)} of {number(filteredOrders.length)} orders</p>
+                    <div className="flex items-center gap-2"><button type="button" disabled={orderPage <= 1} onClick={() => setOrderPage((page) => Math.max(1, page - 1))} className="border border-black/15 px-3 py-2 text-[10px] font-bold uppercase disabled:opacity-30">Previous</button><span className="min-w-14 text-center text-[10px] font-bold tabular-nums">{orderPage} / {orderPageCount}</span><button type="button" disabled={orderPage >= orderPageCount} onClick={() => setOrderPage((page) => Math.min(orderPageCount, page + 1))} className="border border-black/15 px-3 py-2 text-[10px] font-bold uppercase disabled:opacity-30">Next</button></div>
+                  </div>
                 </section>
               </>
             )}
@@ -371,16 +454,40 @@ function Dashboard({
   );
 }
 
+function FragmentOrderRow({ order, expanded, saving, onToggle, onStatusChange }: {
+  order: OrderRecord;
+  expanded: boolean;
+  saving: boolean;
+  onToggle: () => void;
+  onStatusChange: (status: OrderRecord["fulfillment_status"]) => void;
+}) {
+  const items = order.order_items ?? [];
+  const products = [...new Set(items.map((item) => item.product_name))];
+  const brands = [...new Set(items.map((item) => item.brand_name))];
+  const seasons = [...new Set(items.map((item) => item.season).filter(Boolean))];
+  return <>
+    <tr className="transition hover:bg-black/[0.025]">
+      <td className="px-4 py-3"><button type="button" onClick={onToggle} className="text-left"><span className="block font-black underline decoration-black/20 underline-offset-4">{order.order_number}</span><span className="mt-1 block font-semibold">{order.customer_name}</span><span className="mt-0.5 block text-[10px] text-black/45">{order.customer_phone}</span></button></td>
+      <td className="px-4 py-3 whitespace-nowrap text-black/60">{dateTime(order.created_at)}</td>
+      <td className="px-4 py-3"><span className="block max-w-[190px] truncate font-semibold">{products.join(", ") || "—"}</span><span className="mt-1 text-[10px] text-black/45">{items.reduce((sum, item) => sum + item.quantity, 0)} units</span></td>
+      <td className="px-4 py-3"><span className="block max-w-[150px] truncate">{brands.join(", ") || "—"}</span><span className="mt-1 block text-[10px] text-black/45">{seasons.join(", ") || "Season unassigned"}</span></td>
+      <td className="px-4 py-3"><StatusPill value={order.payment_status} /><span className="mt-1 block text-[10px] text-black/45">{order.payment_method}</span></td>
+      <td className="px-4 py-3"><select aria-label={`Fulfilment status for ${order.order_number}`} value={order.fulfillment_status} disabled={saving} onChange={(event) => onStatusChange(event.target.value as OrderRecord["fulfillment_status"])} className="h-8 max-w-[140px] border border-black/15 bg-[#F7F3EC] px-2 text-[10px] font-bold uppercase outline-none focus:border-black disabled:opacity-50"><option value="new">New</option><option value="confirmed">Pending · Confirmed</option><option value="processing">Pending · Processing</option><option value="shipped">Pending · Shipped</option><option value="delivered">Delivered</option><option value="cancelled">Cancelled</option><option value="returned">Returned</option></select></td>
+      <td className="px-4 py-3 text-right font-black tabular-nums">{money(amount(order.total))}<button type="button" onClick={onToggle} className="mt-1 block w-full text-right text-[9px] font-bold uppercase tracking-wide text-black/40 underline underline-offset-2">{expanded ? "Hide details" : "View details"}</button></td>
+    </tr>
+    {expanded && <tr className="bg-black/[0.025]"><td colSpan={7} className="px-5 py-5"><div className="grid gap-6 md:grid-cols-[1fr_1.4fr]">
+      <div><p className="text-[9px] font-bold uppercase tracking-[0.15em] text-black/40">Delivery details</p><p className="mt-2 text-xs font-bold">{order.customer_name}</p><p className="mt-1 text-xs">{order.shipping_address}</p><p className="mt-1 text-xs text-black/60">{[order.shipping_city, order.shipping_postal].filter(Boolean).join(" · ") || "City / postal not provided"}</p><p className="mt-1 text-xs text-black/60">{order.customer_phone}</p>{order.customer_email && <p className="mt-1 text-xs text-black/60">{order.customer_email}</p>}<p className="mt-3 text-[10px] text-black/45">Payment: {order.payment_method} · {order.payment_status}</p></div>
+      <div><p className="text-[9px] font-bold uppercase tracking-[0.15em] text-black/40">Order items</p><div className="mt-2 divide-y divide-black/10">{items.map((item, index) => <div key={item.product_id ?? item.product_name + index} className="flex flex-wrap items-center justify-between gap-2 py-2 text-xs"><div><p className="font-bold">{item.product_name}</p><p className="mt-0.5 text-[10px] text-black/45">{item.brand_name}{item.season ? ` · ${item.season}` : ""} · {[item.size, item.color].filter(Boolean).join(" / ")}</p></div><p className="font-semibold tabular-nums">{item.quantity} × {money(amount(item.unit_price))} <span className="ml-2">{money(amount(item.line_total))}</span></p></div>)}</div><div className="mt-3 flex justify-end gap-8 border-t border-black/10 pt-3 text-xs"><span>Subtotal {money(amount(order.subtotal))}</span><span>Delivery {money(amount(order.shipping_fee))}</span><b>Total {money(amount(order.total))}</b></div></div>
+    </div></td></tr>}
+  </>;
+}
+
 function Metric({ icon: Icon, label, value, detail }: { icon: typeof CircleDollarSign; label: string; value: string; detail: string }) {
   return <div className="border border-black/10 bg-[#F7F3EC] p-4 md:p-5"><div className="flex items-center justify-between"><p className="text-[9px] font-bold uppercase tracking-[0.16em] text-black/45">{label}</p><Icon className="h-4 w-4 text-black/55" /></div><p className="mt-4 break-words font-display text-2xl font-black tracking-[-0.055em] md:text-[1.7rem]">{value}</p><p className="mt-1 text-[10px] text-black/45">{detail}</p></div>;
 }
 
 function EmptyState({ title, detail }: { title: string; detail: string }) {
   return <div className="flex min-h-[150px] flex-col items-center justify-center px-5 py-8 text-center"><div className="grid h-10 w-10 place-items-center border border-black/10"><Clock3 className="h-4 w-4 text-black/45" /></div><p className="mt-3 text-sm font-bold">{title}</p><p className="mt-1 max-w-sm text-xs leading-5 text-black/45">{detail}</p></div>;
-}
-
-function OrderRow({ order }: { order: OrderRecord }) {
-  return <tr className="hover:bg-black/[0.025]"><td className="px-5 py-3 font-bold">{order.order_number}</td><td className="px-5 py-3"><p className="font-semibold">{order.customer_name}</p><p className="mt-0.5 text-[10px] text-black/45">{order.customer_phone}</p></td><td className="px-5 py-3 text-black/60">{dateTime(order.created_at)}</td><td className="px-5 py-3"><StatusPill value={order.payment_status} /></td><td className="px-5 py-3"><StatusPill value={order.fulfillment_status} /></td><td className="px-5 py-3 text-right font-bold tabular-nums">{money(amount(order.total))}</td></tr>;
 }
 
 function StatusPill({ value }: { value: string }) {
