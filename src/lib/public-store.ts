@@ -52,6 +52,7 @@ type DatabaseProduct = {
 function toCatalogProduct(row: DatabaseProduct): Product {
   const fallback = productById(row.slug);
   const allowed = ["Men", "Women", "Accessories", "Traditional"] as const;
+  const galleryImages = [row.image_url, ...(row.image_urls ?? [])].filter((image): image is string => Boolean(image));
   return {
     ...(fallback ?? {
       id: row.slug, name: row.name, price: Number(row.price), image: "", alt: row.name,
@@ -63,7 +64,7 @@ function toCatalogProduct(row: DatabaseProduct): Product {
     name: row.name,
     price: Number(row.price),
     image: row.image_url || row.image_urls?.[0] || fallback?.image || "",
-    ...(row.image_urls && row.image_urls.length > 1 ? { galleryImages: row.image_urls } : {}),
+    ...(galleryImages.length > 1 ? { galleryImages } : {}),
     ...(row.video_url ? { videoUrl: row.video_url } : {}),
     alt: row.name,
     category: allowed.includes(row.category as (typeof allowed)[number]) ? row.category as Product["category"] : fallback?.category ?? "Men",
