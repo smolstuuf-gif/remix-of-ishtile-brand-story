@@ -67,7 +67,7 @@ export const SCROLL_GALLERY_STUDIO_CLASSES = {
 
 export interface ScrollGallerySlide {
   image: string;
-  video?: string;
+  video?: string | undefined;
   /** Per-slide CTA label. Falls back to `linkLabel`. */
   linkLabel?: string;
   title: string;
@@ -302,10 +302,11 @@ function mergeIntervals(intervals: { top: number; bottom: number }[]) {
     return [];
   }
   intervals.sort((a, b) => a.top - b.top);
-  const merged = [{ ...intervals[0] }];
-  for (let i = 1; i < intervals.length; i++) {
+  const first = intervals[0];
+  if (!first) return [];
+  const merged = [{ ...first }];
+  for (const next of intervals.slice(1)) {
     const last = merged.at(-1);
-    const next = intervals[i];
     if (!last) {
       break;
     }
@@ -323,8 +324,7 @@ function buildStripMask(
   getAdj: (j: number, bounds: (typeof stripBounds)[number]) => number,
 ) {
   const intervals: { top: number; bottom: number }[] = [];
-  for (let j = 0; j < stripBounds.length; j++) {
-    const bounds = stripBounds[j];
+  for (const [j, bounds] of stripBounds.entries()) {
     const adj = Math.max(0, Math.min(1, getAdj(j, bounds)));
     if (adj <= 0) {
       continue;
@@ -382,9 +382,9 @@ function applyBrandTextContrast(image: HTMLImageElement, section: HTMLElement) {
     let luminance = 0;
     let count = 0;
     for (let i = 0; i < pixels.length; i += 4) {
-      const r = pixels[i] / 255;
-      const g = pixels[i + 1] / 255;
-      const b = pixels[i + 2] / 255;
+      const r = (pixels[i] ?? 0) / 255;
+      const g = (pixels[i + 1] ?? 0) / 255;
+      const b = (pixels[i + 2] ?? 0) / 255;
       luminance += 0.2126 * r + 0.7152 * g + 0.0722 * b;
       count++;
     }
@@ -487,7 +487,7 @@ export function ScrollGallery({
       }
 
       if (embedded && scrollerProp === undefined) {
-        if (process.env.NODE_ENV !== "production") {
+        if (process.env["NODE_ENV"] !== "production") {
           console.warn(
             "[ScrollGallery] embedded=true requires a `scroller` prop — animation will not mount without it.",
           );
@@ -564,23 +564,25 @@ export function ScrollGallery({
         const slideLayers: SlideLayer[] = [];
 
         for (let i = 1; i < totalSlides; i++) {
+          const slide = slides[i];
+          if (!slide) continue;
           const imgContainer = document.createElement("div");
           imgContainer.style.cssText = IMAGE_CONTAINER_STYLE;
 
-          const media: HTMLImageElement | HTMLVideoElement = slides[i].video
+          const media: HTMLImageElement | HTMLVideoElement = slide.video
             ? document.createElement("video")
             : document.createElement("img");
           media.style.cssText = MASKED_IMAGE_STYLE;
           if (media instanceof HTMLVideoElement) {
-            media.src = slides[i].video!;
+            media.src = slide.video ?? slide.image;
             media.muted = true;
             media.loop = true;
             media.autoplay = true;
             media.playsInline = true;
             media.preload = "metadata";
           } else {
-            media.src = slides[i].image;
-            media.alt = slides[i].title;
+            media.src = slide.image;
+            media.alt = slide.title;
             media.decoding = "async";
           }
           setMaskImage(media, MASK_HIDDEN);
@@ -629,7 +631,9 @@ export function ScrollGallery({
             return transitionRanges.length;
           }
           for (let i = 0; i < transitionRanges.length; i++) {
-            const { startPercent, endPercent } = transitionRanges[i];
+            const range = transitionRanges[i];
+            if (!range) continue;
+            const { startPercent, endPercent } = range;
             if (
               scrollProgress >= startPercent &&
               scrollProgress <= endPercent
@@ -667,8 +671,10 @@ export function ScrollGallery({
           if (!(displayLink && exploreLinkEl)) {
             return;
           }
-          exploreLinkEl.href = slides[index].url ?? "#";
-          const label = slides[index].linkLabel ?? linkLabel;
+          const slide = slides[index];
+          if (!slide) return;
+          exploreLinkEl.href = slide.url ?? "#";
+          const label = slide.linkLabel ?? linkLabel;
           if (label) {
             exploreLinkEl.textContent = label;
           }
@@ -684,6 +690,8 @@ export function ScrollGallery({
           if (index < 0 || index >= slides.length) {
             return;
           }
+          const slide = slides[index];
+          if (!slide) return;
           if (isAnimating) {
             queuedTitleIndex = index;
             return;
@@ -701,7 +709,7 @@ export function ScrollGallery({
             duration: titleDuration,
             ease: titleEase,
             onComplete: () => {
-              titleEl.textContent = slides[index].title;
+              titleEl.textContent = slide.title;
               gsap.set(titleEl, { y: inY });
               gsap.to(titleEl, {
                 y: "0%",

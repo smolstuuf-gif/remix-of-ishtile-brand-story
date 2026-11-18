@@ -23,7 +23,7 @@ export type Product = {
   price: number;
   image: string;
   galleryImages?: string[];
-  videoUrl?: string;
+  videoUrl?: string | undefined;
   alt: string;
   category: "Men" | "Women" | "Accessories" | "Traditional";
   brand: "ISHTILE" | "ONEN+" | "FARAK" | "MOCHA+" | "PILGRIM";

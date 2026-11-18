@@ -11,7 +11,7 @@ export function waitForScrollerReady(scroller: Element | Window): Promise<void> 
           resolve();
           return;
         }
-      } else if (scroller.isConnected && scroller.getBoundingClientRect().height > 0) {
+      } else if (scroller instanceof Element && scroller.isConnected && scroller.getBoundingClientRect().height > 0) {
         resolve();
         return;
       }

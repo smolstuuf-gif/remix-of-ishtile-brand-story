@@ -3,7 +3,7 @@
 import { useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent, type MouseEvent, type ReactNode, type TouchEvent } from "react";
 import gsap from "gsap";
 
-export type PortalCarouselImage = { src: string; video?: string; alt?: string; title?: string };
+export type PortalCarouselImage = { src: string; video?: string | undefined; alt?: string; title?: string };
 type Rect = { left: number; top: number; width: number; height: number };
 type Layer = { id: number; index: number; origin: Rect };
 const useIsoLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
@@ -60,7 +60,7 @@ export default function PortalCarousel({ images, label = "NEXT", thumbWidth = 19
   const [layers, setLayers] = useState<Layer[]>([]);
   const count = images.length;
   const wrap = (index: number) => count ? ((index % count) + count) % count : 0;
-  const head = layers.length ? layers[layers.length - 1].index : current;
+  const head = layers.at(-1)?.index ?? current;
   const thumbIndex = wrap(head + 1);
 
   useEffect(() => { images.forEach(({ src }) => { const image = new Image(); image.src = src; }); }, [images]);
@@ -132,10 +132,12 @@ export default function PortalCarousel({ images, label = "NEXT", thumbWidth = 19
   if (!count) return null;
   const currentImage = images[wrap(current)];
   const thumbImage = images[thumbIndex];
-  const headTitle = images[wrap(head)].title;
+  const headImage = images[wrap(head)];
+  if (!currentImage || !thumbImage || !headImage) return null;
+  const headTitle = headImage.title;
   return <div ref={rootRef} role="region" aria-roledescription="carousel" aria-label="ISHTILE lookbook" tabIndex={0} onKeyDown={onKeyDown} onClick={onRootClick} onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} className={`relative isolate h-svh min-h-[560px] w-full cursor-pointer select-none overflow-hidden bg-[#171717] touch-pan-y outline-none ${className}`}>
     {currentImage.video ? <video src={currentImage.video} autoPlay muted loop playsInline poster={currentImage.src} className="absolute inset-0 h-full w-full object-cover" /> : <img src={currentImage.src} alt={currentImage.alt ?? currentImage.title ?? ""} draggable={false} className="absolute inset-0 h-full w-full object-cover" />}
-    <div className="absolute inset-0 z-[1]">{layers.map((layer) => <ExpandingLayer key={layer.id} layer={layer} image={images[layer.index]} duration={duration} onDone={onLayerDone} />)}</div>
+    <div className="absolute inset-0 z-[1]">{layers.map((layer) => { const image = images[layer.index]; return image ? <ExpandingLayer key={layer.id} layer={layer} image={image} duration={duration} onDone={onLayerDone} /> : null; })}</div>
     {children && <div className="pointer-events-none absolute inset-0 z-40">{children}</div>}
     {count > 1 && <>
       <div ref={followerRef} className="pointer-events-none absolute left-0 top-0 z-30 aspect-square max-md:!w-[76px] will-change-transform" style={{ width: `min(${thumbWidth}px, 38vw)` }}>

@@ -27,7 +27,7 @@ function Headline({ className }: { className?: string }) {
   );
 }
 
-const desktopSlides: { image?: string; video?: string; alt: string; lines: string[]; accent: string; tagline: string; link: string; href: string }[] = [
+const desktopSlides: { image?: string | undefined; video?: string | undefined; alt: string; lines: string[]; accent: string; tagline: string; link: string; href: string }[] = [
   {
     image: heroDesktop,
     alt: "Model in sunglasses with a lime crown sketch, lotus and colour arcs collage",
@@ -153,7 +153,7 @@ export function DesktopHero() {
   );
 }
 
-const slides: { image?: string; video?: string; alt: string; lines: string[]; accent: string; href: string }[] = [
+const slides: { image?: string | undefined; video?: string | undefined; alt: string; lines: string[]; accent: string; href: string }[] = [
   { image: heroMobile, alt: "Model in sunglasses looking up, black and white", lines: ["More", "Fashion."], accent: "More You.", href: "#shop" },
   { image: cardNewArrivals, alt: "Model with dreadlocks on a beige wall", lines: ["New", "Arrivals."], accent: "Just Dropped.", href: "#shop" },
   { image: brandFarak, alt: "Model in a black dress against a lilac wall", lines: ["Different", "Brands."], accent: "One Universe.", href: "#shop" },

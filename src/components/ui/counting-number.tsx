@@ -18,7 +18,7 @@ export function CountingNumber({ target, duration = 1800 }: CountingNumberProps)
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
+        if (entry?.isIntersecting) {
           setStarted(true);
           observer.disconnect();
         }

@@ -12,7 +12,9 @@ import { Logo } from "./Logo";
 import { fetchHomepageCollections } from "@/lib/public-store";
 import { AutoplayVideo } from "@/components/ui/autoplay-video";
 
-const desktopCollections = [
+type DesktopCollection = { image: string; video?: string | undefined; alt: string; w: number; h: number };
+
+const desktopCollections: DesktopCollection[] = [
   { image: colSpring, alt: "Spring '25 — Fresh Fits. New Vibes.", w: 751, h: 370 },
   { image: colSummer, alt: "Summer Essentials '25 — Lightweight. Breathable. Effortless.", w: 751, h: 370 },
   { image: colFestive, alt: "Festive Collection '25 — Celebrate in Style.", w: 503, h: 247 },
@@ -61,7 +63,7 @@ function TextCard({ image, alt, title }: { image: string; alt: string; title: [s
 }
 
 export function MobileCollections() {
-  const [liveCollections, setLiveCollections] = useState<{ id: string; image: string; video?: string; title: string }[] | null>(null);
+  const [liveCollections, setLiveCollections] = useState<{ id: string; image: string; video?: string | undefined; title: string }[] | null>(null);
   useEffect(() => { let live = true; fetchHomepageCollections().then((items) => { if (live && items.length) setLiveCollections(items.filter((item) => item.show_homepage && item.image_url).map((item) => ({ id: item.id, image: item.image_url || "", video: item.video_url || undefined, title: item.title }))); }).catch(() => undefined); return () => { live = false; }; }, []);
   if (liveCollections?.length) return (
     <section aria-label="Collections" className="md:hidden"><div className="no-scrollbar -mr-3 flex snap-x snap-mandatory gap-3 overflow-x-auto pr-3">{liveCollections.map((item) => <Link key={item.id} to="/collections" aria-label={`Explore ${item.title}`} className="relative block aspect-[6/7] w-[42%] shrink-0 snap-start overflow-hidden rounded-2xl">{item.video ? <AutoplayVideo src={item.video} poster={item.image} className="absolute inset-0 h-full w-full object-cover" /> : <img src={item.image} alt={item.title} loading="lazy" className="absolute inset-0 h-full w-full object-cover" />}<div className="absolute inset-x-[10%] bottom-[12%] text-white"><p className="text-[6vw] font-bold leading-tight">{item.title}</p><ArrowRight className="mt-3 h-6 w-6" /></div></Link>)}</div></section>

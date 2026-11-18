@@ -32,7 +32,15 @@ export function LookProductsDrawer({ look, open, onOpenChange }: { look: PublicL
   }, 0);
   const selectedCount = available.filter(({ product }) => selection[product.id]?.selected).length;
   function patch(product: Product, value: Partial<Selection>) {
-    setSelection((current) => ({ ...current, [product.id]: { ...current[product.id], ...value } }));
+    setSelection((current) => {
+      const existing = current[product.id] ?? {
+        selected: true,
+        size: product.sizes[0] ?? "One Size",
+        color: product.colors[0]?.name ?? "Default",
+        qty: 1,
+      };
+      return { ...current, [product.id]: { ...existing, ...value } };
+    });
   }
   async function addLook() {
     if (!look || adding) return;

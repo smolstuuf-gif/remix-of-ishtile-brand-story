@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 
 type AutoplayVideoProps = {
   src: string;
-  poster?: string;
+  poster?: string | undefined;
   active?: boolean;
   className?: string;
   fallbackClassName?: string;

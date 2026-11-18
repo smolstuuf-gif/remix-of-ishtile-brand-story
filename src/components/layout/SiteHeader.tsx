@@ -129,10 +129,8 @@ export function SiteHeader() {
       <div className="site-header__content mx-auto flex h-16 max-w-[1600px] items-center justify-between gap-4 px-4 md:h-[72px] md:px-6">
         <Link to="/" aria-label="ISHTILE+ home" className="text-[1.35rem]"><Logo /></Link>
         <nav className="hidden items-center gap-9 md:flex">
-          {nav.map((item) => "to" in item ? (
+          {nav.map((item) => (
             <Link key={item.label} to={item.to} activeProps={{ className: "opacity-100" }} className="text-[15px] font-medium opacity-85 transition-colors hover:text-lime hover:opacity-100">{item.label}</Link>
-          ) : (
-            <a key={item.label} href={item.href} className="text-[15px] font-medium opacity-85 transition-colors hover:text-lime hover:opacity-100">{item.label}</a>
           ))}
         </nav>
         <div className="flex items-center gap-5">

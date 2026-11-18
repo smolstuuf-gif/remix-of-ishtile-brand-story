@@ -1,7 +1,7 @@
 import { productById, type Product } from "@/lib/catalog";
 
-const url = (import.meta.env.VITE_SUPABASE_URL as string | undefined)?.replace(/\/$/, "");
-const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined;
+const url = (import.meta.env["VITE_SUPABASE_URL"] as string | undefined)?.replace(/\/$/, "");
+const key = import.meta.env["VITE_SUPABASE_PUBLISHABLE_KEY"] as string | undefined;
 
 function publicApiHeaders(): HeadersInit {
   // Supabase publishable keys (sb_publishable_...) are API keys, not JWTs.
@@ -63,8 +63,8 @@ function toCatalogProduct(row: DatabaseProduct): Product {
     name: row.name,
     price: Number(row.price),
     image: row.image_url || row.image_urls?.[0] || fallback?.image || "",
-    videoUrl: row.video_url || undefined,
     ...(row.image_urls && row.image_urls.length > 1 ? { galleryImages: row.image_urls } : {}),
+    ...(row.video_url ? { videoUrl: row.video_url } : {}),
     alt: row.name,
     category: allowed.includes(row.category as (typeof allowed)[number]) ? row.category as Product["category"] : fallback?.category ?? "Men",
     brand: (row.brands?.name || fallback?.brand || "ISHTILE") as Product["brand"],
@@ -78,7 +78,10 @@ function toCatalogProduct(row: DatabaseProduct): Product {
     care: row.care_instructions || fallback?.care || "",
     added: row.created_at || fallback?.added || "",
     isFeatured: row.is_featured, isOutOfStock: row.is_out_of_stock, stockQuantity: row.stock_quantity ?? null, tags: row.tags ?? [],
-    badge: (row.tags ?? []).find((tag) => ["Best Seller", "Customer Favorite", "New Arrival", "Limited Edition", "Trending", "Staff Pick", "Exclusive"].includes(tag)) || undefined,
+    ...(() => {
+      const badge = (row.tags ?? []).find((tag) => ["Best Seller", "Customer Favorite", "New Arrival", "Limited Edition", "Trending", "Staff Pick", "Exclusive"].includes(tag));
+      return badge ? { badge } : {};
+    })(),
   };
 }
 export async function fetchPublicProducts(): Promise<Product[] | null> {
@@ -110,7 +113,7 @@ export type PublicBrandInfo = {
   symbol_url: string | null;
 };
 export async function fetchPublicBrandInfo() {
-  const rows = await publicRows<PublicBrandInfo[]>("site_brand_info?select=social_links,contact_numbers,address,motto,about_text,logo_url,symbol_url&id=eq.1&limit=1");
+  const rows = await publicRows<PublicBrandInfo>("site_brand_info?select=social_links,contact_numbers,address,motto,about_text,logo_url,symbol_url&id=eq.1&limit=1");
   return rows[0] ?? null;
 }
 

@@ -224,7 +224,7 @@ function Dashboard({
               ["accounts", "05", "Accounts", "Admins and customers"],
               ["brand-info", "06", "Brand info", "Store identity and contact details"],
             ].map(([tab, number, label, hint]) => (
-              <Link key={tab} to={`/admin/management#${tab}`} onClick={() => setDrawerOpen(false)} className="group flex items-center gap-3 px-3 py-3 text-white/70 transition-all duration-200 hover:translate-x-1 hover:bg-white/10 hover:text-white">
+              <Link key={tab} to="/admin/management" hash={tab ?? ""} onClick={() => setDrawerOpen(false)} className="group flex items-center gap-3 px-3 py-3 text-white/70 transition-all duration-200 hover:translate-x-1 hover:bg-white/10 hover:text-white">
                 <span className="grid h-8 w-8 shrink-0 place-items-center bg-white/10 text-[10px] font-black text-[#D5FE00]">{number}</span>
                 <span className="min-w-0 flex-1"><span className="block text-xs font-black uppercase tracking-[0.07em]">{label}</span><span className="mt-1 block text-[10px] text-white/35">{hint}</span></span>
                 <ArrowUpRight className="h-4 w-4 opacity-35 transition group-hover:opacity-100" />

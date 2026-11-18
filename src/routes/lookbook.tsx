@@ -19,7 +19,7 @@ type Season = "spring" | "summer" | "festive" | "monsoon" | "winter";
 const seasonNames: Record<Season, string> = {
   spring: "Spring", summer: "Summer", festive: "Festive", monsoon: "Monsoon", winter: "Winter",
 };
-const demoLooks: PublicLook[] = [
+const demoLooks: PublicLook[] = ([
   {
     id: "demo-look-spring", slug: "spring-city-uniform", title: "The City Uniform",
     description: "A considered everyday uniform. Clean layers, quiet details, and room to move.",
@@ -70,7 +70,7 @@ const demoLooks: PublicLook[] = [
       defaultQuantity: 1, sortOrder: index,
     })),
   },
-].filter((look) => look.products.every((item) => !!item.product));
+] as Omit<PublicLook, "video_url" | "collection_id">[]).map((look) => ({ ...look, video_url: null, collection_id: null })).filter((look) => look.products.every((item) => !!item.product));
 
 function LookbookPage() {
   const [looks, setLooks] = useState<PublicLook[]>([]);
