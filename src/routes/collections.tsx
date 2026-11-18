@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ScrollGallery } from "@/components/ui/scroll-gallery";
+import { fetchHomepageCollections } from "@/lib/public-store";
 import colSpring from "@/assets/col-spring.jpg";
 import colSummer from "@/assets/col-summer.jpg";
 import colFestive from "@/assets/col-festive.jpg";
@@ -16,6 +17,22 @@ export const Route = createFileRoute("/collections")({
       { property: "og:type", content: "website" },
     ],
   }),
+  loader: async () => {
+    const items = await fetchHomepageCollections().catch(() => []);
+    const liveSlides = items
+      .filter((item) => item.image_url || item.video_url)
+      .map((item) => {
+        const season = ["spring", "summer", "festive", "monsoon", "winter"].find((value) => item.slug.toLowerCase().includes(value));
+        return {
+          title: item.title,
+          image: item.image_url || "",
+          video: item.video_url || undefined,
+          url: season ? `/lookbook?season=${season}` : "/lookbook",
+          linkLabel: `Explore ${item.title}`,
+        };
+      });
+    return liveSlides.length ? liveSlides : collectionSlides;
+  },
   component: CollectionsPage,
 });
 
@@ -35,11 +52,12 @@ const collectionSlides = [
 ];
 
 function CollectionsPage() {
+  const slides = Route.useLoaderData();
   return (
     <div className="min-h-screen bg-[#F0EAE0] text-[#171717]">
       <main>
         <ScrollGallery
-          slides={collectionSlides}
+          slides={slides}
           variant="studio"
           stripsCount={20}
           scrollPerTransition={120}
