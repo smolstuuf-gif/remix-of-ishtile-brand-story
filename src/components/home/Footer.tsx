@@ -139,7 +139,7 @@ export function Footer() {
     <footer id="about" data-header-theme="dark" className="relative overflow-hidden bg-ink text-ink-foreground">
       <div className="absolute inset-x-0 top-0">
         <img
-          src={footerBuilding}
+          src={brandInfo?.footer_building_image_url || footerBuilding}
           alt=""
           aria-hidden="true"
           width={1536}
@@ -231,7 +231,7 @@ export function Footer() {
       </div>
 
       <img
-        src={footerBand}
+        src={brandInfo?.footer_band_image_url || footerBand}
         alt="ISHTILE"
         width={1536}
         height={264}
