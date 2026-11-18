@@ -6,6 +6,7 @@ import { Sparkle } from "@/components/home/icons";
 import { formatTaka } from "@/lib/catalog";
 import { isBdPhone, isEmail, isPostalCode, type Order } from "@/lib/commerce";
 import { useCart } from "@/lib/store";
+import { submitStoreOrder } from "@/lib/order-submission";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/checkout")({
@@ -184,6 +185,8 @@ function CheckoutPage() {
   const [payNumber, setPayNumber] = useState("");
   const [card, setCard] = useState({ name: "", number: "", expiry: "", cvc: "" });
   const [order, setOrder] = useState<Order | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
 
   const set = (key: keyof typeof info) => (v: string) => {
     setInfo((prev) => ({ ...prev, [key]: v }));
@@ -203,7 +206,7 @@ function CheckoutPage() {
     if (Object.keys(next).length === 0) setStep(2);
   };
 
-  const submitPayment = (e: React.FormEvent) => {
+  const submitPayment = async (e: React.FormEvent) => {
     e.preventDefault();
     const next: FieldErrors = {};
     if (method === "bkash" || method === "nagad") {
@@ -220,8 +223,24 @@ function CheckoutPage() {
     if (Object.keys(next).length > 0) return;
 
     const label = methods.find((m) => m.id === method)!.label;
-    setOrder(placeOrder({ ...info, method: label }));
-    setStep(3);
+    setSubmitting(true);
+    setSubmitError("");
+    try {
+      const saved = await submitStoreOrder(info, lines, label);
+      const placed = placeOrder({ ...info, method: label }, {
+        number: saved.order_number,
+        placedAt: saved.created_at,
+        subtotal: Number(saved.subtotal),
+        shipping: Number(saved.shipping_fee),
+        total: Number(saved.total),
+      });
+      setOrder(placed);
+      setStep(3);
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : "We couldn't submit your order. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (lines.length === 0 && step !== 3) {
@@ -390,12 +409,14 @@ function CheckoutPage() {
                 </p>
               )}
 
+              {submitError && <p role="alert" className="mt-5 rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800">{submitError}</p>}
               <div className="mt-8 flex flex-wrap gap-3">
                 <button
                   type="submit"
-                  className="rounded-full bg-lime px-8 py-3.5 text-sm font-semibold text-primary-foreground transition-transform hover:scale-[1.01]"
+                  disabled={submitting}
+                  className="rounded-full bg-lime px-8 py-3.5 text-sm font-semibold text-primary-foreground transition-transform hover:scale-[1.01] disabled:cursor-wait disabled:opacity-60"
                 >
-                  Place Order · {formatTaka(total)}
+                  {submitting ? "Saving order…" : `Place Order · ${formatTaka(total)}`}
                 </button>
                 <button
                   type="button"
