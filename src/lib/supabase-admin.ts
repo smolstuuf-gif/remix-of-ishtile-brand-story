@@ -249,6 +249,16 @@ async function getRows<T>(path: string, session: AdminSession): Promise<T[]> {
   return authRequest<T[]>(path, session);
 }
 
+async function getAllRows<T>(path: string, session: AdminSession): Promise<T[]> {
+  const pageSize = 1000;
+  const rows: T[] = [];
+  for (let offset = 0; ; offset += pageSize) {
+    const page = await getRows<T>(`${path}&limit=${pageSize}&offset=${offset}`, session);
+    rows.push(...page);
+    if (page.length < pageSize) return rows;
+  }
+}
+
 export async function getDashboardData(session: AdminSession, _days: number): Promise<DashboardData> {
   const [brands, products, orders] = await Promise.all([
     getRows<BrandRecord>(
@@ -259,8 +269,8 @@ export async function getDashboardData(session: AdminSession, _days: number): Pr
       "/rest/v1/products?select=id,name,slug,brand_id,category,price,stock_quantity,is_active&order=name.asc",
       session,
     ),
-    getRows<OrderRecord>(
-      "/rest/v1/orders?select=id,order_number,customer_name,customer_phone,customer_email,shipping_address,shipping_city,shipping_postal,payment_method,payment_status,fulfillment_status,subtotal,shipping_fee,total,created_at,order_items(product_id,product_name,brand_name,season,size,color,unit_price,quantity,line_total)&order=created_at.desc&limit=5000",
+    getAllRows<OrderRecord>(
+      "/rest/v1/orders?select=id,order_number,customer_name,customer_phone,customer_email,shipping_address,shipping_city,shipping_postal,payment_method,payment_status,fulfillment_status,subtotal,shipping_fee,total,created_at,order_items(product_id,product_name,brand_name,season,size,color,unit_price,quantity,line_total)&order=created_at.desc",
       session,
     ),
   ]);
