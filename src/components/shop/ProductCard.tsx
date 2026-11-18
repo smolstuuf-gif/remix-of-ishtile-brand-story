@@ -1,9 +1,10 @@
-<video src={product.videoUrl} autoPlay muted loop playsInline poster={product.image} className="aspect-[1.75/1] w-full object-cover object-[50%_25%] transition-transform duration-500 group-hover:scale-[1.04] md:aspect-[2.3/1]" /> Link } from "@tanstack/react-router";
+<AutoplayVideo src={product.videoUrl} poster={product.image} className="aspect-[1.75/1] w-full object-cover object-[50%_25%] transition-transform duration-500 group-hover:scale-[1.04] md:aspect-[2.3/1]" /> Link } from "@tanstack/react-router";
 import { Plus, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatTaka, type Product } from "@/lib/catalog";
 import { useCart } from "@/lib/store";
 import { FavoriteButton } from "@/components/ui/favorite-button";
+import { AutoplayVideo } from "@/components/ui/autoplay-video";
 
 /** Product tile used on the catalog, the bag page and the product page's related row. */
 export function ProductCard({ product, className }: { product: Product; className?: string }) {
