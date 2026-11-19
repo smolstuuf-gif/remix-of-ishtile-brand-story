@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { AccountAccess } from "@/components/account/AccountAccess";
+import { CreateOrderForm } from "@/components/admin/CreateOrderForm";
 import { MenuToggleIcon } from "@/components/ui/menu-toggle-icon";
 import {
   Activity,
@@ -254,6 +255,8 @@ function Dashboard({
     return order.fulfillment_status === status;
   }).length;
   const [orderActionSaving, setOrderActionSaving] = useState<string | null>(null);
+  const [createOrderOpen, setCreateOrderOpen] = useState(false);
+  const [orderActionNotice, setOrderActionNotice] = useState("");
   const changeOrderStatus = async (orderId: string, status: OrderRecord["fulfillment_status"]) => {
     setOrderActionError("");
     setOrderActionSaving(orderId);
@@ -412,7 +415,7 @@ function Dashboard({
                 <section id="orders" className="scroll-mt-24 border border-black/10 bg-[#F7F3EC]">
                   <div className="flex flex-wrap items-end justify-between gap-4 border-b border-black/10 px-4 py-5 md:px-6">
                     <div><p className="text-[10px] font-bold uppercase tracking-[0.2em] text-black/45">Order desk</p><h2 className="mt-1 text-xl font-black tracking-tight">Order management<span className="text-black/30">.</span></h2><p className="mt-1 text-xs text-black/45">Review incoming orders, update fulfilment and search the complete order history.</p></div>
-                    <span className="bg-[#D5FE00] px-3 py-2 text-[10px] font-black uppercase tracking-wide">{number(allOrders.length)} total orders</span>
+                    <div className="flex items-center gap-2"><span className="bg-[#D5FE00] px-3 py-2 text-[10px] font-black uppercase tracking-wide">{number(allOrders.length)} total orders</span><button type="button" onClick={() => setCreateOrderOpen(true)} className="bg-[#171717] px-4 py-2.5 text-[10px] font-black uppercase tracking-wide text-[#F0EAE0] transition hover:bg-black/80">+ Create order</button></div>
                   </div>
                   <div className="flex gap-1 overflow-x-auto border-b border-black/10 px-3 py-3 md:px-5">
                     {([
@@ -434,7 +437,7 @@ function Dashboard({
                     <label className="text-[9px] font-bold uppercase tracking-[0.12em] text-black/45">Brand<select value={orderFilters.brand} onChange={(event) => updateOrderFilter("brand", event.target.value)} className="mt-1.5 h-10 w-full border border-black/15 bg-[#F7F3EC] px-2 text-xs font-medium outline-none focus:border-black"><option value="">All brands</option>{brandOptions.map((brand) => <option key={brand} value={brand}>{brand}</option>)}</select></label>
                     <div className="flex items-end xl:col-span-7"><button type="button" onClick={() => { setOrderFilters({ from: "", to: "", minAmount: "", maxAmount: "", product: "", season: "", brand: "" }); setOrderPage(1); }} className="text-[10px] font-bold uppercase tracking-wide text-black/50 underline underline-offset-4 hover:text-black">Clear all filters</button></div>
                   </div>
-                  {orderActionError && <p role="alert" className="mx-4 mt-4 border border-red-300 bg-red-50 px-3 py-2 text-xs text-red-800 md:mx-5">{orderActionError}</p>}
+                  {orderActionError && <p role="alert" className="mx-4 mt-4 border border-red-300 bg-red-50 px-3 py-2 text-xs text-red-800 md:mx-5">{orderActionError}</p>}{orderActionNotice && <p role="status" className="mx-4 mt-4 border border-green-300 bg-green-50 px-3 py-2 text-xs text-green-800 md:mx-5">{orderActionNotice}</p>}{createOrderOpen && <CreateOrderForm products={data?.products ?? []} session={session} onCancel={() => setCreateOrderOpen(false)} onCreated={(orderNumber) => { setCreateOrderOpen(false); setOrderActionNotice("Order " + orderNumber + " created successfully."); setOrderStatusFilter("new"); setOrderPage(1); onRefresh(); }} />}
                   {visibleOrders.length ? <div className="overflow-x-auto">
                     <table className="w-full min-w-[980px] text-left text-xs">
                       <thead className="bg-black/[0.035] text-[9px] uppercase tracking-[0.14em] text-black/45"><tr><th className="px-4 py-3 font-bold">Order / Customer</th><th className="px-4 py-3 font-bold">Date</th><th className="px-4 py-3 font-bold">Products</th><th className="px-4 py-3 font-bold">Brand / Season</th><th className="px-4 py-3 font-bold">Payment</th><th className="px-4 py-3 font-bold">Fulfilment</th><th className="px-4 py-3 text-right font-bold">Amount</th></tr></thead>
@@ -478,6 +481,7 @@ function FragmentOrderRow({ order, products, session, expanded, saving, onToggle
   const [savingEdit, setSavingEdit] = useState(false);
   const [saveError, setSaveError] = useState("");
   const [newProductId, setNewProductId] = useState("");
+  const [newProductQuery, setNewProductQuery] = useState("");
   const [draft, setDraft] = useState<EditableOrder>({
     customer_name: order.customer_name,
     customer_phone: order.customer_phone,
@@ -525,10 +529,12 @@ function FragmentOrderRow({ order, products, session, expanded, saving, onToggle
   };
   const updateDraft = (key: keyof EditableOrder, value: string | number | null) => setDraft((current) => ({ ...current, [key]: value }));
   const updateItem = (index: number, patch: Partial<OrderEditorItem>) => setDraftItems((current) => current.map((item, i) => i === index ? { ...item, ...patch } : item));
+  const matchingProducts = products.filter((product) => product.is_active && (product.name + " " + (product.sku ?? "") + " " + product.slug).toLowerCase().includes(newProductQuery.toLowerCase()));
   const addProduct = () => {
     if (!newProductId) return;
     setDraftItems((current) => [...current, { product_id: newProductId, quantity: 1, unit_price: amount(products.find((product) => product.id === newProductId)?.price), size: "", color: "" }]);
     setNewProductId("");
+    setNewProductQuery("");
   };
   const save = async () => {
     if (!draftItems.length) {
@@ -576,7 +582,7 @@ function FragmentOrderRow({ order, products, session, expanded, saving, onToggle
         </div>
         <div><div className="flex flex-wrap items-center justify-between gap-2"><p className="text-[9px] font-bold uppercase tracking-[0.15em] text-black/40">Products in this order</p><span className="text-[10px] text-black/40">Prices update to current catalogue price</span></div>
           <div className="mt-2 divide-y divide-black/10">{draftItems.map((item, index) => { const product = products.find((entry) => entry.id === item.product_id); const original = items[index]; return <div key={`${item.product_id}-${index}`} className="flex gap-3 py-3"><div className="h-16 w-14 shrink-0 overflow-hidden bg-[#E8E1D6]">{product?.image_url || original?.product?.image_url ? <img src={product?.image_url ?? original?.product?.image_url ?? ""} alt={product?.name ?? original?.product_name ?? "Order item"} className="h-full w-full object-cover" /> : <div className="grid h-full place-items-center text-[8px] text-black/30">No image</div>}</div><div className="min-w-0 flex-1"><p className="truncate text-xs font-bold">{product?.name ?? original?.product_name ?? "Unlinked product"}</p><div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4"><label className={labelClass}>Qty<input type="number" min="1" max="99" className="mt-1 h-9 w-full border border-black/15 bg-[#F7F3EC] px-2 text-xs" value={item.quantity} onChange={(e) => updateItem(index, { quantity: Math.max(1, Math.min(99, Number(e.target.value) || 1)) })} /></label><label className={labelClass}>Unit price<input type="number" min="0" className="mt-1 h-9 w-full border border-black/15 bg-[#F7F3EC] px-2 text-xs" value={item.unit_price} onChange={(e) => updateItem(index, { unit_price: Math.max(0, Number(e.target.value) || 0) })} /></label><label className={labelClass}>Size<input className="mt-1 h-9 w-full border border-black/15 bg-[#F7F3EC] px-2 text-xs" value={item.size} onChange={(e) => updateItem(index, { size: e.target.value })} /></label><label className={labelClass}>Colour<input className="mt-1 h-9 w-full border border-black/15 bg-[#F7F3EC] px-2 text-xs" value={item.color} onChange={(e) => updateItem(index, { color: e.target.value })} /></label></div></div><button type="button" onClick={() => setDraftItems((current) => current.filter((_, i) => i !== index))} className="self-start px-2 py-1 text-[9px] font-bold uppercase text-red-700 underline underline-offset-2">Remove</button></div>; })}</div>
-          <div className="mt-4 flex flex-wrap gap-2 border border-dashed border-black/20 p-3"><select value={newProductId} onChange={(e) => setNewProductId(e.target.value)} className="h-10 min-w-0 flex-1 border border-black/15 bg-[#F7F3EC] px-3 text-xs"><option value="">Choose a product to add…</option>{products.filter((product) => product.is_active).map((product) => <option key={product.id} value={product.id}>{product.name} · {money(amount(product.price))}</option>)}</select><button type="button" disabled={!newProductId} onClick={addProduct} className="bg-[#171717] px-4 py-2 text-[10px] font-bold uppercase text-[#F0EAE0] disabled:opacity-40">Add product</button></div>
+          <div className="mt-4 grid gap-2 border border-dashed border-black/20 p-3 sm:grid-cols-[1fr_1fr_auto]"><input type="search" value={newProductQuery} onChange={(e) => { setNewProductQuery(e.target.value); setNewProductId(""); }} placeholder="Find by product code or name…" className="h-10 min-w-0 border border-black/15 bg-[#F7F3EC] px-3 text-xs outline-none focus:border-black" /><select value={newProductId} onChange={(e) => setNewProductId(e.target.value)} className="h-10 min-w-0 border border-black/15 bg-[#F7F3EC] px-3 text-xs"><option value="">Select match ({matchingProducts.length})</option>{matchingProducts.map((product) => <option key={product.id} value={product.id}>{product.sku ? product.sku + " · " : ""}{product.name} · {money(amount(product.price))}</option>)}</select><button type="button" disabled={!newProductId} onClick={addProduct} className="bg-[#171717] px-4 py-2 text-[10px] font-bold uppercase text-[#F0EAE0] disabled:opacity-40">Add product</button></div>
           {draftItems.some((item) => !item.product_id) && <p className="mt-2 text-[10px] text-amber-800">This order contains an older item without a catalogue link. Remove it and add the correct product before saving.</p>}
           <div className="mt-4 flex flex-wrap justify-end gap-2 border-t border-black/10 pt-4"><button type="button" disabled={savingEdit} onClick={() => { setEditing(false); setSaveError(""); }} className="border border-black/20 px-4 py-2.5 text-[10px] font-bold uppercase">Discard</button><button type="button" disabled={savingEdit} onClick={() => void save()} className="bg-[#D5FE00] px-5 py-2.5 text-[10px] font-black uppercase disabled:opacity-50">{savingEdit ? "Saving order…" : "Save all changes"}</button></div>
           {saveError && <p role="alert" className="mt-3 border border-red-300 bg-red-50 px-3 py-2 text-xs text-red-800">{saveError}</p>}
