@@ -213,6 +213,54 @@ function ProductSelectionCard({ product, checked, onChange, children }: { produc
 }
 
 
+
+function ProductColourMedia({ images, videos, session, busy, onImagesChange, onVideosChange, onGalleryImageUploaded }: {
+  images: string[]; videos: string[]; session: AdminSession; busy: boolean;
+  onImagesChange: (urls: string[]) => void; onVideosChange: (urls: string[]) => void;
+  onGalleryImageUploaded: (url: string) => void;
+}) {
+  const [imageBusy, setImageBusy] = useState(false);
+  const [videoBusy, setVideoBusy] = useState(false);
+  const [message, setMessage] = useState("");
+  async function uploadImages(files: FileList | null) {
+    if (!files?.length) return;
+    setImageBusy(true); setMessage("");
+    try {
+      const urls = await Promise.all(Array.from(files).map((file) => uploadAdminMedia(file, session, "products")));
+      onImagesChange([...images, ...urls]); urls.forEach(onGalleryImageUploaded);
+      setMessage(`${urls.length} colour image(s) uploaded`);
+    } catch (error) { setMessage(error instanceof Error ? error.message : "Image upload failed"); }
+    finally { setImageBusy(false); }
+  }
+  async function uploadVideos(files: FileList | null) {
+    if (!files?.length) return;
+    setVideoBusy(true); setMessage("");
+    try {
+      const urls = await Promise.all(Array.from(files).map((file) => uploadAdminVideoMedia(file, session, "products")));
+      onVideosChange([...videos, ...urls]); setMessage(`${urls.length} colour video(s) uploaded`);
+    } catch (error) { setMessage(error instanceof Error ? error.message : "Video upload failed"); }
+    finally { setVideoBusy(false); }
+  }
+  return <div className="w-full space-y-3 border-t border-black/10 pt-3">
+    <div><p className="text-[9px] font-bold uppercase tracking-wider text-black/55">Media assigned to this colour</p><p className="text-[9px] text-black/40">Upload colour-specific images and videos, or assign images already in the product gallery.</p></div>
+    <div className="flex flex-wrap gap-2">
+      <label className={`${secondaryClass} cursor-pointer`}><ImagePlus className="h-3.5 w-3.5" /> Upload colour images<input type="file" accept="image/*" multiple className="hidden" disabled={imageBusy || busy} onChange={(event) => { void uploadImages(event.currentTarget.files); event.currentTarget.value = ""; }} /></label>
+      <label className={`${secondaryClass} cursor-pointer`}><Upload className="h-3.5 w-3.5" /> Upload colour videos<input type="file" accept="video/mp4,video/webm,.mp4,.webm" multiple className="hidden" disabled={videoBusy || busy} onChange={(event) => { void uploadVideos(event.currentTarget.files); event.currentTarget.value = ""; }} /></label>
+      {(imageBusy || videoBusy || busy) && <span className="self-center text-[9px] text-black/45">Uploading…</span>}
+      {message && <span className="self-center text-[9px] text-black/45">{message}</span>}
+    </div>
+    {!!images.length && <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">{images.map((url) => <div key={url} className="min-w-0 border border-black/10 bg-white p-1">
+      <img src={url} alt="Assigned colour image" className="aspect-[4/5] w-full object-cover" />
+      <button type="button" className="mt-1 flex w-full items-center justify-center gap-1 py-1 text-[8px] font-bold uppercase text-red-700 hover:bg-red-50" onClick={() => onImagesChange(images.filter((item) => item !== url))}><Trash2 className="h-3 w-3" /> Remove</button>
+    </div>)}</div>}
+    {!!videos.length && <div className="space-y-2">{videos.map((url) => <div key={url} className="flex items-center gap-2 border border-black/10 bg-white p-2">
+      <video src={url} controls muted playsInline preload="metadata" className="h-14 w-20 bg-black object-contain" />
+      <span className="min-w-0 flex-1 truncate text-[9px] text-black/45">Colour video</span>
+      <button type="button" aria-label="Remove colour video" className="grid h-7 w-7 shrink-0 place-items-center text-red-700 hover:bg-red-50" onClick={() => onVideosChange(videos.filter((item) => item !== url))}><Trash2 className="h-3.5 w-3.5" /></button>
+    </div>)}</div>}
+  </div>;
+}
+
 function ProductMediaManager({ imageUrl, imageUrls, videoUrl, session, busy, onPrimaryChange, onGalleryChange, onVideoChange, onRemoveImage }: {
   imageUrl: string; imageUrls: string; videoUrl: string; session: AdminSession; busy: boolean;
   onPrimaryChange: (url: string) => void; onGalleryChange: (urls: string) => void;
@@ -279,12 +327,12 @@ function ProductsPanel({ products, brands, initialBrandFilter, session, busy, pe
   const [query, setQuery] = useState("");
   const [brandFilter, setBrandFilter] = useState(initialBrandFilter);
   const [listWidth, setListWidth] = useState(38);
-  const [draft, setDraft] = useState({ name: "", slug: "", sku: "", brand_id: brands[0]?.id ?? "", category: "Men", price: "0", stock_quantity: "", image_url: "", image_urls: "", video_url: "", description: "", sizes: "S, M, L, XL, XXL", colors: [{ name: "Black", hex: "#000000", images: [] as string[] }] as { name: string; hex: string; images: string[] }[], size_guide: [] as { size: string; chest: string; length: string }[], care_instructions: "", is_active: true, is_featured: false, is_out_of_stock: false, tags: "" });
-  useEffect(() => { if (selected) setDraft({ name: selected.name, slug: selected.slug, sku: selected.sku ?? "", brand_id: selected.brand_id, category: selected.category, price: String(selected.price), stock_quantity: selected.stock_quantity === null ? "" : String(selected.stock_quantity), image_url: selected.image_url ?? "", image_urls: (selected.image_urls ?? []).join(", "), video_url: selected.video_url ?? "", description: selected.description ?? "", sizes: selected.sizes.join(", "), colors: (selected.colors ?? []).map((color) => ({ name: color.name ?? "", hex: /^#[0-9a-fA-F]{6}$/.test(color.hex ?? "") ? color.hex : "#000000", images: color.images ?? [] })), is_active: selected.is_active, is_featured: selected.is_featured, is_out_of_stock: selected.is_out_of_stock, tags: selected.tags.join(", "), size_guide: selected.size_guide ?? [], care_instructions: selected.care_instructions ?? "" }); }, [selected]);
+  const [draft, setDraft] = useState({ name: "", slug: "", sku: "", brand_id: brands[0]?.id ?? "", category: "Men", price: "0", stock_quantity: "", image_url: "", image_urls: "", video_url: "", description: "", sizes: "S, M, L, XL, XXL", colors: [{ name: "Black", hex: "#000000", images: [] as string[], videos: [] as string[] }] as { name: string; hex: string; images: string[]; videos: string[] }[], size_guide: [] as { size: string; chest: string; length: string }[], care_instructions: "", is_active: true, is_featured: false, is_out_of_stock: false, tags: "" });
+  useEffect(() => { if (selected) setDraft({ name: selected.name, slug: selected.slug, sku: selected.sku ?? "", brand_id: selected.brand_id, category: selected.category, price: String(selected.price), stock_quantity: selected.stock_quantity === null ? "" : String(selected.stock_quantity), image_url: selected.image_url ?? "", image_urls: (selected.image_urls ?? []).join(", "), video_url: selected.video_url ?? "", description: selected.description ?? "", sizes: selected.sizes.join(", "), colors: (selected.colors ?? []).map((color) => ({ name: color.name ?? "", hex: /^#[0-9a-fA-F]{6}$/.test(color.hex ?? "") ? color.hex : "#000000", images: color.images ?? [], videos: color.videos ?? [] })), is_active: selected.is_active, is_featured: selected.is_featured, is_out_of_stock: selected.is_out_of_stock, tags: selected.tags.join(", "), size_guide: selected.size_guide ?? [], care_instructions: selected.care_instructions ?? "" }); }, [selected]);
   const tagOptions = ["Best Seller", "Customer Favorite", "New Arrival", "Limited Edition", "Trending", "Staff Pick", "Exclusive", "Back in Stock"];
   const filtered = products.filter((p) => (brandFilter === "all" || p.brand_id === brandFilter) && `${p.name} ${p.sku ?? ""} ${p.slug} ${(p.tags ?? []).join(" ")}`.toLowerCase().includes(query.toLowerCase()));
   function reset() { setSelected(null); setDraft({ name: "", slug: "", sku: "", brand_id: brands[0]?.id ?? "", category: "Men", price: "0", stock_quantity: "", image_url: "", image_urls: "", video_url: "", description: "", sizes: "S, M, L, XL, XXL", colors: [{ name: "Black", hex: "#000000", images: [] }], size_guide: [], care_instructions: "", is_active: true, is_featured: false, is_out_of_stock: false, tags: "" }); }
-  async function save(e: FormEvent) { e.preventDefault(); const payload = { ...draft, tags: draft.tags.split(",").map((tag) => tag.trim()).filter(Boolean), slug: slugify(draft.slug || draft.name), price: Number(draft.price), stock_quantity: draft.stock_quantity === "" ? null : Number(draft.stock_quantity), sizes: draft.sizes.split(",").map((v) => v.trim()).filter(Boolean), colors: draft.colors.map((color) => ({ name: color.name.trim(), hex: /^#[0-9a-fA-F]{6}$/.test(color.hex) ? color.hex : "#000000", images: color.images.filter((url) => [d.image_url, ...d.image_urls.split(",").map((v) => v.trim())].includes(url)) })).filter((color) => color.name), image_urls: draft.image_urls.split(",").map((v) => v.trim()).filter(Boolean), size_guide: draft.size_guide.filter((row) => row.size.trim()).map((row) => ({ size: row.size.trim(), chest: row.chest.trim(), length: row.length.trim() })), care_instructions: draft.care_instructions.trim() || null }; await perform(() => selected ? adminWrite(`products?id=eq.${selected.id}`, session, "PATCH", payload) : adminWrite("products", session, "POST", payload), selected ? "Product updated." : "Product added."); if (!busy) reset(); }
+  async function save(e: FormEvent) { e.preventDefault(); const payload = { ...draft, tags: draft.tags.split(",").map((tag) => tag.trim()).filter(Boolean), slug: slugify(draft.slug || draft.name), price: Number(draft.price), stock_quantity: draft.stock_quantity === "" ? null : Number(draft.stock_quantity), sizes: draft.sizes.split(",").map((v) => v.trim()).filter(Boolean), colors: draft.colors.map((color) => ({ name: color.name.trim(), hex: /^#[0-9a-fA-F]{6}$/.test(color.hex) ? color.hex : "#000000", images: color.images.filter((url) => [d.image_url, ...d.image_urls.split(",").map((v) => v.trim())].includes(url)), videos: color.videos })).filter((color) => color.name), image_urls: draft.image_urls.split(",").map((v) => v.trim()).filter(Boolean), size_guide: draft.size_guide.filter((row) => row.size.trim()).map((row) => ({ size: row.size.trim(), chest: row.chest.trim(), length: row.length.trim() })), care_instructions: draft.care_instructions.trim() || null }; await perform(() => selected ? adminWrite(`products?id=eq.${selected.id}`, session, "PATCH", payload) : adminWrite("products", session, "POST", payload), selected ? "Product updated." : "Product added."); if (!busy) reset(); }
   return <div className="flex h-full min-h-0 flex-col gap-3"><div className="shrink-0"><PanelHeading eyebrow="Catalogue" title="Product management" detail="Select a product to edit. Each side scrolls independently while the workspace stays fixed." action={<span className="text-xs text-black/45">{products.length} products</span>} /></div>
     <div className="flex shrink-0 items-center gap-3 border border-black/10 bg-[#F7F3EC] px-3 py-2"><span className="shrink-0 text-[9px] font-black uppercase tracking-wider text-black/55">List</span><input aria-label="Resize product list and details panels" type="range" min="24" max="68" step="1" value={listWidth} onChange={(e) => setListWidth(Number(e.target.value))} className="min-w-0 flex-1 accent-[#171717]" /><span className="shrink-0 text-[9px] font-black uppercase tracking-wider text-black/55">Details</span><span className="w-12 text-right text-[10px] tabular-nums text-black/45">{listWidth}/{100-listWidth}</span><button type="button" className="text-[10px] font-bold underline" onClick={() => setListWidth(38)}>Reset</button></div>
     <div className="grid min-h-0 flex-1 gap-3 overflow-hidden xl:grid-cols-[minmax(0,var(--product-list-width))_minmax(340px,1fr)]" style={{ "--product-list-width": `${listWidth}%` } as React.CSSProperties}>
@@ -315,7 +363,7 @@ function ProductsPanel({ products, brands, initialBrandFilter, session, busy, pe
         <section className="space-y-3 border border-black/10 bg-white/45 p-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div><p className="text-[10px] font-black uppercase tracking-[0.14em] text-black/55">Product colours</p><p className="mt-1 text-[10px] text-black/40">Add each available colour separately. The circle previews its selected shade.</p></div>
-            <button type="button" className={secondaryClass} onClick={() => setDraft((d) => ({ ...d, colors: [...d.colors, { name: "", hex: "#000000", images: [] }] }))}><Plus className="h-3.5 w-3.5" /> Add colour</button>
+            <button type="button" className={secondaryClass} onClick={() => setDraft((d) => ({ ...d, colors: [...d.colors, { name: "", hex: "#000000", images: [], videos: [] }] }))}><Plus className="h-3.5 w-3.5" /> Add colour</button>
           </div>
           {draft.colors.length ? <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             {draft.colors.map((color, index) => <div key={index} className="relative flex flex-col items-center gap-2 border border-black/10 bg-white/70 p-3">
@@ -330,19 +378,22 @@ function ProductsPanel({ products, brands, initialBrandFilter, session, busy, pe
                 </div>
               </label>
               <div className="w-full space-y-2">
-                <p className="text-[9px] font-bold uppercase tracking-wider text-black/50">Images for this colour</p>
-                <p className="text-[9px] text-black/40">Select one or more product images. Storefront and order previews switch to these images when this colour is selected.</p>
+                <p className="text-[9px] font-bold uppercase tracking-wider text-black/50">Product gallery images</p>
                 <div className="grid grid-cols-3 gap-2">
                   {[draft.image_url, ...draft.image_urls.split(",").map((url) => url.trim())].map((url) => url.trim()).filter((url, i, all) => url && all.indexOf(url) === i).map((url, imageIndex) => (
                     <label key={url} className={`cursor-pointer border p-1.5 ${color.images.includes(url) ? "border-black bg-[#D5FE00]/25" : "border-black/10 bg-white/60"}`}>
                       <img src={url} alt={(color.name || "Colour") + " image " + (imageIndex + 1)} className="aspect-[4/5] w-full object-cover" />
-                      <span className="mt-1 flex items-center gap-1 text-[8px] font-bold uppercase"><input type="checkbox" checked={color.images.includes(url)} onChange={(e) => setDraft((d) => ({ ...d, colors: d.colors.map((item, i) => i === index ? { ...item, images: e.target.checked ? [...item.images, url] : item.images.filter((image) => image !== url) } : item) }))} /> Image {imageIndex + 1}</span>
+                      <span className="mt-1 flex items-center gap-1 text-[8px] font-bold uppercase"><input type="checkbox" checked={color.images.includes(url)} onChange={(e) => setDraft((d) => ({ ...d, colors: d.colors.map((item, i) => i === index ? { ...item, images: e.target.checked ? [...item.images, url] : item.images.filter((image) => image !== url) } : item) }))} /> Assign image</span>
                     </label>
                   ))}
                 </div>
-                {!draft.image_url && !draft.image_urls.trim() && <p className="text-[9px] text-amber-700">Add product images above before assigning images to this colour.</p>}
               </div>
-              <button type="button" aria-label={`Remove colour ${index + 1}`} onClick={() => setDraft((d) => ({ ...d, colors: d.colors.filter((_, i) => i !== index) }))} className="absolute right-1 top-1 grid h-7 w-7 place-items-center text-black/35 transition hover:text-red-700"><X className="h-3.5 w-3.5" /></button>
+              <ProductColourMedia images={color.images} videos={color.videos ?? []} session={session} busy={busy}
+                onImagesChange={(urls) => setDraft((d) => ({ ...d, colors: d.colors.map((item, i) => i === index ? { ...item, images: urls } : item) }))}
+                onVideosChange={(urls) => setDraft((d) => ({ ...d, colors: d.colors.map((item, i) => i === index ? { ...item, videos: urls } : item) }))}
+                onGalleryImageUploaded={(url) => setDraft((d) => ({ ...d, image_urls: [...new Set([...d.image_urls.split(",").map((item) => item.trim()).filter(Boolean), url])].join(", ") }))}
+              />
+<button type="button" aria-label={`Remove colour ${index + 1}`} onClick={() => setDraft((d) => ({ ...d, colors: d.colors.filter((_, i) => i !== index) }))} className="absolute right-1 top-1 grid h-7 w-7 place-items-center text-black/35 transition hover:text-red-700"><X className="h-3.5 w-3.5" /></button>
             </div>)}
           </div> : <p className="py-2 text-xs text-black/40">No colours added. Add a colour to make it available on the product.</p>}
         </section>
