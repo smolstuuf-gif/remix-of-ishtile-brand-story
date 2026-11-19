@@ -214,24 +214,12 @@ function ProductSelectionCard({ product, checked, onChange, children }: { produc
 
 
 
-function ProductColourMedia({ images, videos, session, busy, onImagesChange, onVideosChange, onGalleryImageUploaded }: {
-  images: string[]; videos: string[]; session: AdminSession; busy: boolean;
-  onImagesChange: (urls: string[]) => void; onVideosChange: (urls: string[]) => void;
-  onGalleryImageUploaded: (url: string) => void;
+function ProductColourMedia({ videos, session, busy, onVideosChange }: {
+  videos: string[]; session: AdminSession; busy: boolean;
+  onVideosChange: (urls: string[]) => void;
 }) {
-  const [imageBusy, setImageBusy] = useState(false);
   const [videoBusy, setVideoBusy] = useState(false);
   const [message, setMessage] = useState("");
-  async function uploadImages(files: FileList | null) {
-    if (!files?.length) return;
-    setImageBusy(true); setMessage("");
-    try {
-      const urls = await Promise.all(Array.from(files).map((file) => uploadAdminMedia(file, session, "products")));
-      onImagesChange([...images, ...urls]); urls.forEach(onGalleryImageUploaded);
-      setMessage(`${urls.length} colour image(s) uploaded`);
-    } catch (error) { setMessage(error instanceof Error ? error.message : "Image upload failed"); }
-    finally { setImageBusy(false); }
-  }
   async function uploadVideos(files: FileList | null) {
     if (!files?.length) return;
     setVideoBusy(true); setMessage("");
@@ -242,17 +230,12 @@ function ProductColourMedia({ images, videos, session, busy, onImagesChange, onV
     finally { setVideoBusy(false); }
   }
   return <div className="w-full space-y-3 border-t border-black/10 pt-3">
-    <div><p className="text-[9px] font-bold uppercase tracking-wider text-black/55">Media assigned to this colour</p><p className="text-[9px] text-black/40">Upload colour-specific images and videos, or assign images already in the product gallery.</p></div>
-    <div className="flex flex-wrap gap-2">
-      <label className={`${secondaryClass} cursor-pointer`}><ImagePlus className="h-3.5 w-3.5" /> Upload colour images<input type="file" accept="image/*" multiple className="hidden" disabled={imageBusy || busy} onChange={(event) => { void uploadImages(event.currentTarget.files); event.currentTarget.value = ""; }} /></label>
+    <div><p className="text-[9px] font-bold uppercase tracking-wider text-black/55">Videos for this colour</p><p className="text-[9px] text-black/40">Upload videos that should appear when this colour is selected.</p></div>
+    <div className="flex flex-wrap items-center gap-2">
       <label className={`${secondaryClass} cursor-pointer`}><Upload className="h-3.5 w-3.5" /> Upload colour videos<input type="file" accept="video/mp4,video/webm,.mp4,.webm" multiple className="hidden" disabled={videoBusy || busy} onChange={(event) => { void uploadVideos(event.currentTarget.files); event.currentTarget.value = ""; }} /></label>
-      {(imageBusy || videoBusy || busy) && <span className="self-center text-[9px] text-black/45">Uploading…</span>}
+      {(videoBusy || busy) && <span className="self-center text-[9px] text-black/45">Uploading…</span>}
       {message && <span className="self-center text-[9px] text-black/45">{message}</span>}
     </div>
-    {!!images.length && <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">{images.map((url) => <div key={url} className="min-w-0 border border-black/10 bg-white p-1">
-      <img src={url} alt="Assigned colour image" className="aspect-[4/5] w-full object-cover" />
-      <button type="button" className="mt-1 flex w-full items-center justify-center gap-1 py-1 text-[8px] font-bold uppercase text-red-700 hover:bg-red-50" onClick={() => onImagesChange(images.filter((item) => item !== url))}><Trash2 className="h-3 w-3" /> Remove</button>
-    </div>)}</div>}
     {!!videos.length && <div className="space-y-2">{videos.map((url) => <div key={url} className="flex items-center gap-2 border border-black/10 bg-white p-2">
       <video src={url} controls muted playsInline preload="metadata" className="h-14 w-20 bg-black object-contain" />
       <span className="min-w-0 flex-1 truncate text-[9px] text-black/45">Colour video</span>
@@ -261,10 +244,13 @@ function ProductColourMedia({ images, videos, session, busy, onImagesChange, onV
   </div>;
 }
 
-function ProductMediaManager({ imageUrl, imageUrls, videoUrl, session, busy, onPrimaryChange, onGalleryChange, onVideoChange, onRemoveImage }: {
-  imageUrl: string; imageUrls: string; videoUrl: string; session: AdminSession; busy: boolean;
+function ProductMediaManager({ imageUrl, imageUrls, videoUrl, colors, session, busy, onPrimaryChange, onGalleryChange, onVideoChange, onRemoveImage, onColorsChange }: {
+  imageUrl: string; imageUrls: string; videoUrl: string;
+  colors: { name: string; hex: string; images: string[]; videos: string[] }[];
+  session: AdminSession; busy: boolean;
   onPrimaryChange: (url: string) => void; onGalleryChange: (urls: string) => void;
   onVideoChange: (url: string) => void; onRemoveImage: (url: string) => void;
+  onColorsChange: (colors: { name: string; hex: string; images: string[]; videos: string[] }[]) => void;
 }) {
   const [uploading, setUploading] = useState(false);
   const [uploadMessage, setUploadMessage] = useState("");
@@ -306,6 +292,21 @@ function ProductMediaManager({ imageUrl, imageUrls, videoUrl, session, busy, onP
             {!primary && <button type="button" className="min-w-0 flex-1 border border-black/15 px-1 py-1 text-[8px] font-bold" onClick={() => { onPrimaryChange(url); onGalleryChange([imageUrl, ...gallery.filter((item) => item !== url)].filter(Boolean).join(", ")); }}>Set primary</button>}
             <button type="button" aria-label="Remove image from product" title="Remove image from product" className="grid h-6 w-7 shrink-0 place-items-center border border-red-200 text-red-700 hover:bg-red-50" onClick={() => onRemoveImage(url)}><Trash2 className="h-3 w-3" /></button>
           </div>
+          <details className="group mt-2 text-left">
+            <summary className="cursor-pointer list-none border border-black/15 bg-[#F0EAE0] px-2 py-1.5 text-[8px] font-bold uppercase tracking-wide hover:border-black">
+              Assign colours · {colors.filter((color) => color.images.includes(url)).length}
+              <span className="float-right text-[10px]">⌄</span>
+            </summary>
+            <div className="mt-1 max-h-36 space-y-1 overflow-y-auto border border-black/10 bg-white p-2">
+              {colors.length ? colors.map((color, colorIndex) => (
+                <label key={`${color.name}-${colorIndex}`} className="flex cursor-pointer items-center gap-2 py-1 text-[9px] font-semibold">
+                  <input type="checkbox" checked={color.images.includes(url)} onChange={(event) => onColorsChange(colors.map((item, index) => index === colorIndex ? { ...item, images: event.target.checked ? [...new Set([...item.images, url])] : item.images.filter((image) => image !== url) } : item))} />
+                  <span className="h-3 w-3 shrink-0 rounded-full border border-black/15" style={{ backgroundColor: /^#[0-9a-fA-F]{6}$/.test(color.hex) ? color.hex : "#000000" }} />
+                  <span className="min-w-0 truncate">{color.name || `Colour ${colorIndex + 1}`}</span>
+                </label>
+              )) : <p className="text-[9px] text-black/40">Add product colours first.</p>}
+            </div>
+          </details>
         </div>;
       })}
     </div> : <p className="border border-dashed border-black/15 px-3 py-6 text-center text-xs text-black/40">No product images added yet.</p>}
@@ -348,6 +349,7 @@ function ProductsPanel({ products, brands, initialBrandFilter, session, busy, pe
         <div className="grid grid-cols-2 gap-3"><Field label="Price (BDT)" name="price" type="number" value={draft.price} onChange={(v) => setDraft({ ...draft, price: v })} /><Field label="Stock quantity (blank = untracked)" name="stock_quantity" type="number" value={draft.stock_quantity} onChange={(v) => setDraft({ ...draft, stock_quantity: v })} /></div>
         <ProductMediaManager
           imageUrl={draft.image_url} imageUrls={draft.image_urls} videoUrl={draft.video_url}
+          colors={draft.colors} onColorsChange={(colors) => setDraft((d) => ({ ...d, colors }))}
           session={session} busy={busy}
           onPrimaryChange={(url) => setDraft((d) => ({ ...d, image_url: url }))}
           onGalleryChange={(urls) => setDraft((d) => ({ ...d, image_urls: urls }))}
@@ -377,21 +379,8 @@ function ProductsPanel({ products, brands, initialBrandFilter, session, busy, pe
                   <input className="min-w-0 flex-1 border border-black/15 bg-white px-2 py-2 text-[10px] uppercase outline-none focus:border-black" value={color.hex} onChange={(e) => setDraft((d) => ({ ...d, colors: d.colors.map((item, i) => i === index ? { ...item, hex: e.target.value } : item) }))} placeholder="#000000" />
                 </div>
               </label>
-              <div className="w-full space-y-2">
-                <p className="text-[9px] font-bold uppercase tracking-wider text-black/50">Product gallery images</p>
-                <div className="grid grid-cols-3 gap-2">
-                  {[draft.image_url, ...draft.image_urls.split(",").map((url) => url.trim())].map((url) => url.trim()).filter((url, i, all) => url && all.indexOf(url) === i).map((url, imageIndex) => (
-                    <label key={url} className={`cursor-pointer border p-1.5 ${color.images.includes(url) ? "border-black bg-[#D5FE00]/25" : "border-black/10 bg-white/60"}`}>
-                      <img src={url} alt={(color.name || "Colour") + " image " + (imageIndex + 1)} className="aspect-[4/5] w-full object-cover" />
-                      <span className="mt-1 flex items-center gap-1 text-[8px] font-bold uppercase"><input type="checkbox" checked={color.images.includes(url)} onChange={(e) => setDraft((d) => ({ ...d, colors: d.colors.map((item, i) => i === index ? { ...item, images: e.target.checked ? [...item.images, url] : item.images.filter((image) => image !== url) } : item) }))} /> Assign image</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-              <ProductColourMedia images={color.images} videos={color.videos ?? []} session={session} busy={busy}
-                onImagesChange={(urls) => setDraft((d) => ({ ...d, colors: d.colors.map((item, i) => i === index ? { ...item, images: urls } : item) }))}
+              <ProductColourMedia videos={color.videos ?? []} session={session} busy={busy}
                 onVideosChange={(urls) => setDraft((d) => ({ ...d, colors: d.colors.map((item, i) => i === index ? { ...item, videos: urls } : item) }))}
-                onGalleryImageUploaded={(url) => setDraft((d) => ({ ...d, image_urls: [...new Set([...d.image_urls.split(",").map((item) => item.trim()).filter(Boolean), url])].join(", ") }))}
               />
 <button type="button" aria-label={`Remove colour ${index + 1}`} onClick={() => setDraft((d) => ({ ...d, colors: d.colors.filter((_, i) => i !== index) }))} className="absolute right-1 top-1 grid h-7 w-7 place-items-center text-black/35 transition hover:text-red-700"><X className="h-3.5 w-3.5" /></button>
             </div>)}
