@@ -307,6 +307,7 @@ export async function updateOrderStatus(
 export type EditableOrderItem = {
   product_id: string;
   quantity: number;
+  unit_price: number;
   size: string;
   color: string;
 };
