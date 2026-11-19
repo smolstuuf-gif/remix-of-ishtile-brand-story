@@ -26,6 +26,7 @@ export type ProductRecord = {
   price: number | string;
   stock_quantity: number | null;
   is_active: boolean;
+  image_url: string | null;
 };
 
 export type OrderItemRecord = {
@@ -38,6 +39,7 @@ export type OrderItemRecord = {
   season: string | null;
   size: string | null;
   color: string | null;
+  product?: { image_url: string | null } | null;
 };
 
 export type OrderRecord = {
@@ -56,6 +58,7 @@ export type OrderRecord = {
   shipping_fee: number | string;
   total: number | string;
   created_at: string;
+  special_note: string | null;
   order_items: OrderItemRecord[];
 };
 
@@ -266,11 +269,11 @@ export async function getDashboardData(session: AdminSession, _days: number): Pr
       session,
     ),
     getRows<ProductRecord>(
-      "/rest/v1/products?select=id,name,slug,brand_id,category,price,stock_quantity,is_active&order=name.asc",
+      "/rest/v1/products?select=id,name,slug,brand_id,category,price,stock_quantity,is_active,image_url&order=name.asc",
       session,
     ),
     getAllRows<OrderRecord>(
-      "/rest/v1/orders?select=id,order_number,customer_name,customer_phone,customer_email,shipping_address,shipping_city,shipping_postal,payment_method,payment_status,fulfillment_status,subtotal,shipping_fee,total,created_at,order_items(product_id,product_name,brand_name,season,size,color,unit_price,quantity,line_total)&order=created_at.desc",
+      "/rest/v1/orders?select=id,order_number,customer_name,customer_phone,customer_email,shipping_address,shipping_city,shipping_postal,special_note,payment_method,payment_status,fulfillment_status,subtotal,shipping_fee,total,created_at,order_items(product_id,product_name,brand_name,season,size,color,unit_price,quantity,line_total,product:products(image_url))&order=created_at.desc",
       session,
     ),
   ]);
@@ -298,5 +301,42 @@ export async function updateOrderStatus(
       body: JSON.stringify({ fulfillment_status: fulfillmentStatus, updated_at: new Date().toISOString() }),
     },
   );
+  await responseJson<unknown>(response);
+}
+
+export type EditableOrderItem = {
+  product_id: string;
+  quantity: number;
+  size: string;
+  color: string;
+};
+
+export type EditableOrder = Pick<OrderRecord,
+  "customer_name" | "customer_phone" | "customer_email" | "shipping_address" |
+  "shipping_city" | "shipping_postal" | "payment_method" | "payment_status" |
+  "fulfillment_status" | "shipping_fee" | "special_note"
+>;
+
+export async function saveOrderEdits(
+  session: AdminSession,
+  orderId: string,
+  order: EditableOrder,
+  items: EditableOrderItem[],
+): Promise<void> {
+  const { url, key } = config();
+  const current = await validSession(session);
+  const response = await fetch(`${url}/rest/v1/rpc/admin_update_store_order`, {
+    method: "POST",
+    headers: {
+      apikey: key,
+      Authorization: `Bearer ${current.access_token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      p_order_id: orderId,
+      p_order: { ...order, shipping_fee: Number(order.shipping_fee) },
+      p_items: items,
+    }),
+  });
   await responseJson<unknown>(response);
 }
