@@ -93,8 +93,9 @@ export function CreateOrderForm({ products, session, onCancel, onCreated }: Prop
               return <div key={item.product_id + "-" + index} className="flex gap-3 py-3">
                 <div className="h-14 w-12 shrink-0 bg-[#E8E1D6]">{product?.image_url && <img src={product.image_url} alt={product.name} className="h-full w-full object-cover" />}</div>
                 <div className="min-w-0 flex-1"><p className="truncate text-xs font-bold">{product?.name}</p><p className="text-[9px] text-black/45">{product?.sku} · {money(item.unit_price)}</p>
-                  <div className="mt-2 grid grid-cols-3 gap-2">
+                  <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
                     <label className={label}>Qty<input type="number" min="1" max="99" className={field} value={item.quantity} onChange={(e) => setItems((current) => current.map((v, i) => i === index ? { ...v, quantity: Math.max(1, Math.min(99, Number(e.target.value) || 1)) } : v))} /></label>
+                    <label className={label}>Unit price<input type="number" min="0" className={field} value={item.unit_price} onChange={(e) => setItems((current) => current.map((v, i) => i === index ? { ...v, unit_price: Math.max(0, Number(e.target.value) || 0) } : v))} /></label>
                     <label className={label}>Size<input className={field} value={item.size} onChange={(e) => setItems((current) => current.map((v, i) => i === index ? { ...v, size: e.target.value } : v))} /></label>
                     <label className={label}>Colour<input className={field} value={item.color} onChange={(e) => setItems((current) => current.map((v, i) => i === index ? { ...v, color: e.target.value } : v))} /></label>
                   </div>
