@@ -516,6 +516,7 @@ function FragmentOrderRow({ order, products, session, expanded, saving, onToggle
     setDraftItems(items.map((item) => ({
       product_id: item.product_id ?? "",
       quantity: item.quantity,
+      unit_price: amount(item.unit_price),
       size: item.size ?? "",
       color: item.color ?? "",
     })));
