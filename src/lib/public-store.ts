@@ -46,7 +46,7 @@ export async function fetchPublicBrands() {
 
 type DatabaseProduct = {
   slug: string; name: string; price: number | string; image_url: string | null; image_urls: string[] | null; video_url: string | null;
-  category: string; sizes: string[] | null; size_guide: { size: string; chest: string; length: string }[] | null; care_instructions: string | null; colors: { name: string; hex: string; images?: string[] }[] | null;
+  category: string; sizes: string[] | null; size_guide: { size: string; chest: string; length: string }[] | null; care_instructions: string | null; colors: { name: string; hex: string; images?: string[]; videos?: string[] }[] | null;
   description: string | null; created_at: string; is_featured: boolean; is_out_of_stock: boolean; stock_quantity: number | null; tags: string[]; brands?: { name: string } | null;
 };
 function toCatalogProduct(row: DatabaseProduct): Product {
