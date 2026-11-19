@@ -117,7 +117,7 @@ function ProductPage() {
   const [size, setSize] = useState<string | null>(null);
   const [color, setColor] = useState(product.colors[0]?.name ?? "");
   const assignedColourImages = product.colors.find((item) => item.name === color)?.images ?? [];
-  const views = assignedColourImages.length ? allViews.filter((item) => assignedColourImages.includes(item.src)) : allViews;
+  const views = assignedColourImages.length ? allViews.filter((item) => ("video" in item && item.video) || assignedColourImages.includes(item.src)) : allViews;
   const [view, setView] = useState(0);
   const [qty, setQty] = useState(1);
   const [sizeError, setSizeError] = useState(false);
