@@ -113,15 +113,12 @@ const sizeGuide = [
 function ProductPage() {
   const product = Route.useLoaderData();
   const { addItem, openCart, toggleWish, isWished } = useCart();
-  const views = galleryViews(product);
-
-  const [view, setView] = useState(() => {
-    const firstColourImage = product.colors[0]?.images?.[0];
-    const assignedIndex = firstColourImage ? views.findIndex((item) => item.src === firstColourImage) : -1;
-    return assignedIndex >= 0 ? assignedIndex : 0;
-  });
+  const allViews = galleryViews(product);
   const [size, setSize] = useState<string | null>(null);
   const [color, setColor] = useState(product.colors[0]?.name ?? "");
+  const assignedColourImages = product.colors.find((item) => item.name === color)?.images ?? [];
+  const views = assignedColourImages.length ? allViews.filter((item) => assignedColourImages.includes(item.src)) : allViews;
+  const [view, setView] = useState(0);
   const [qty, setQty] = useState(1);
   const [sizeError, setSizeError] = useState(false);
 
@@ -259,11 +256,7 @@ function ProductPage() {
                       type="button"
                       onClick={() => {
                         setColor(c.name);
-                        const assignedImage = c.images?.[0];
-                        if (assignedImage) {
-                          const assignedIndex = views.findIndex((item) => item.src === assignedImage);
-                          if (assignedIndex >= 0) setView(assignedIndex);
-                        }
+                        setView(0);
                       }}
                       aria-label={c.name}
                       aria-pressed={color === c.name}
