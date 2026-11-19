@@ -448,6 +448,7 @@ export type Database = {
           shipping_city: string | null
           shipping_fee: number
           shipping_postal: string | null
+          special_note: string | null
           subtotal: number
           total: number
           updated_at: string
@@ -466,6 +467,7 @@ export type Database = {
           shipping_city?: string | null
           shipping_fee?: number
           shipping_postal?: string | null
+          special_note?: string | null
           subtotal: number
           total: number
           updated_at?: string
@@ -645,6 +647,10 @@ export type Database = {
       submit_store_order: {
         Args: { p_customer: Json; p_items: Json; p_payment_method: string }
         Returns: Json
+      }
+      admin_update_store_order: {
+        Args: { p_order_id: string; p_order: Json; p_items: Json }
+        Returns: undefined
       }
     }
     Enums: {
