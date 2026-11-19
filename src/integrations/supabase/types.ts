@@ -486,6 +486,7 @@ export type Database = {
           shipping_city?: string | null
           shipping_fee?: number
           shipping_postal?: string | null
+          special_note?: string | null
           subtotal?: number
           total?: number
           updated_at?: string
