@@ -4,6 +4,7 @@ import editorialArt from "@/assets/editorial-art.jpg";
 import summerArt from "@/assets/summer-art.jpg";
 import { ThinPlus } from "./icons";
 import { fetchPublicBrandInfo, type PublicBrandInfo } from "@/lib/public-store";
+import { AnimatedImage } from "@/components/ui/animated-image";
 
 export function Banners() {
   const [siteMedia, setSiteMedia] = useState<PublicBrandInfo | null>(null);
@@ -17,7 +18,7 @@ export function Banners() {
         href="#editorial"
         className="group relative block min-h-[150px] overflow-hidden bg-ink max-md:-mx-3 max-md:rounded-r-2xl md:min-h-[200px] md:rounded-xl"
       >
-        <img
+        <AnimatedImage
           src={editorialImage}
           alt="Brutalist concrete building torn into a black paper collage"
           width={1920}
@@ -44,7 +45,7 @@ export function Banners() {
         href="#shop"
         className="group relative hidden min-h-[200px] overflow-hidden rounded-xl bg-lime md:block"
       >
-        <img
+        <AnimatedImage
           src={summerImage}
           alt="Black ISHTILE tee on a lime grunge background with colour arcs"
           width={1280}
