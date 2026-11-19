@@ -213,6 +213,67 @@ function ProductSelectionCard({ product, checked, onChange, children }: { produc
 }
 
 
+function ProductMediaManager({ imageUrl, imageUrls, videoUrl, session, busy, onPrimaryChange, onGalleryChange, onVideoChange, onRemoveImage }: {
+  imageUrl: string; imageUrls: string; videoUrl: string; session: AdminSession; busy: boolean;
+  onPrimaryChange: (url: string) => void; onGalleryChange: (urls: string) => void;
+  onVideoChange: (url: string) => void; onRemoveImage: (url: string) => void;
+}) {
+  const [uploading, setUploading] = useState(false);
+  const [uploadMessage, setUploadMessage] = useState("");
+  const gallery = imageUrls.split(",").map((url) => url.trim()).filter(Boolean);
+  const images = [...new Set([imageUrl.trim(), ...gallery].filter(Boolean))];
+
+  async function uploadImages(files: FileList | null) {
+    if (!files?.length) return;
+    const selectedFiles = Array.from(files);
+    setUploading(true); setUploadMessage("");
+    try {
+      const uploaded = await Promise.all(selectedFiles.map((file) => uploadAdminMedia(file, session, "products")));
+      if (!imageUrl.trim() && uploaded.length) {
+        onPrimaryChange(uploaded[0]);
+        onGalleryChange([...gallery, ...uploaded.slice(1)].join(", "));
+      } else {
+        onGalleryChange([...gallery, ...uploaded].join(", "));
+      }
+      setUploadMessage(`${uploaded.length} image(s) uploaded`);
+    } catch (error) {
+      setUploadMessage(error instanceof Error ? error.message : "Image upload failed");
+    } finally { setUploading(false); }
+  }
+
+  return <section className="space-y-3 border border-black/10 bg-white/45 p-3">
+    <div><p className="text-[10px] font-black uppercase tracking-[0.14em] text-black/55">Product media</p><p className="mt-1 text-[10px] text-black/40">Upload multiple images, choose the primary image, remove unwanted images, and add a product video.</p></div>
+    <Field label="Primary image URL" name="image_url" value={imageUrl} onChange={onPrimaryChange} />
+    <div className="flex flex-wrap items-center gap-2">
+      <label className={`${secondaryClass} cursor-pointer`}><ImagePlus className="h-4 w-4" /> Upload images<input type="file" accept="image/*" multiple className="hidden" disabled={uploading || busy} onChange={(event) => { void uploadImages(event.currentTarget.files); event.currentTarget.value = ""; }} /></label>
+      <span className="text-[9px] text-black/45">{uploading || busy ? "Uploading…" : uploadMessage || "Up to 12 MB per image"}</span>
+    </div>
+    {images.length ? <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+      {images.map((url) => {
+        const primary = url === imageUrl.trim();
+        return <div key={url} className={`relative min-w-0 border p-1.5 ${primary ? "border-black bg-[#D5FE00]/20" : "border-black/10 bg-white/70"}`}>
+          <img src={url} alt={primary ? "Primary product image" : "Product gallery image"} className="aspect-[4/5] w-full bg-[#E8E1D6] object-cover" />
+          {primary && <span className="mt-1 block text-[8px] font-black uppercase tracking-wide">Primary</span>}
+          <div className="mt-1 flex gap-1">
+            {!primary && <button type="button" className="min-w-0 flex-1 border border-black/15 px-1 py-1 text-[8px] font-bold" onClick={() => { onPrimaryChange(url); onGalleryChange([imageUrl, ...gallery.filter((item) => item !== url)].filter(Boolean).join(", ")); }}>Set primary</button>}
+            <button type="button" aria-label="Remove image from product" title="Remove image from product" className="grid h-6 w-7 shrink-0 place-items-center border border-red-200 text-red-700 hover:bg-red-50" onClick={() => onRemoveImage(url)}><Trash2 className="h-3 w-3" /></button>
+          </div>
+        </div>;
+      })}
+    </div> : <p className="border border-dashed border-black/15 px-3 py-6 text-center text-xs text-black/40">No product images added yet.</p>}
+    <div className="space-y-2 border-t border-black/10 pt-3">
+      <Field label="Product video URL" name="video_url" value={videoUrl} onChange={onVideoChange} />
+      <div className="flex flex-wrap items-center gap-2">
+        <VideoUploadField label="Upload product video" session={session} folder="products" busy={busy} onUploaded={onVideoChange} />
+        {videoUrl && <button type="button" className={secondaryClass} onClick={() => onVideoChange("")}><X className="h-3.5 w-3.5" /> Remove video</button>}
+      </div>
+      <p className="text-[9px] text-black/40">MP4 (H.264) or WebM · maximum 100 MB. The video URL is saved with this product.</p>
+      {videoUrl && <video src={videoUrl} controls muted playsInline preload="metadata" className="max-h-48 w-full bg-black object-contain" />}
+    </div>
+  </section>;
+}
+
+
 function ProductsPanel({ products, brands, initialBrandFilter, session, busy, perform }: { products: AdminProduct[]; brands: AdminBrand[]; initialBrandFilter: string; session: AdminSession; busy: boolean; perform: (action: () => Promise<unknown>, message: string) => Promise<void> }) {
   const [selected, setSelected] = useState<AdminProduct | null>(null);
   const [query, setQuery] = useState("");
@@ -237,10 +298,19 @@ function ProductsPanel({ products, brands, initialBrandFilter, session, busy, pe
         <div className="grid grid-cols-2 gap-3"><Field label="Product slug" name="slug" value={draft.slug} onChange={(v) => setDraft({ ...draft, slug: v })} /><div><Field label="Product code / SKU" name="sku" value={draft.sku} onChange={(v) => setDraft({ ...draft, sku: v })} /><p className="mt-1 text-[9px] text-black/40">Unique code used to find this product in order management. Leave blank to auto-generate from the slug.</p></div></div>
         <div className="grid grid-cols-2 gap-3"><label className={labelClass}>Brand<select className={inputClass} value={draft.brand_id} onChange={(e) => setDraft({ ...draft, brand_id: e.target.value })}>{brands.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}</select></label><label className={labelClass}>Category<select className={inputClass} value={draft.category} onChange={(e) => setDraft({ ...draft, category: e.target.value })}>{["Men","Women","Accessories","Traditional"].map((v) => <option key={v}>{v}</option>)}</select></label></div>
         <div className="grid grid-cols-2 gap-3"><Field label="Price (BDT)" name="price" type="number" value={draft.price} onChange={(v) => setDraft({ ...draft, price: v })} /><Field label="Stock quantity (blank = untracked)" name="stock_quantity" type="number" value={draft.stock_quantity} onChange={(v) => setDraft({ ...draft, stock_quantity: v })} /></div>
-        <ImageUrlField label="Primary image URL" name="image_url" value={draft.image_url} onChange={(v) => setDraft({ ...draft, image_url: v })} />
-        <UploadField label="Upload product image" session={session} folder="products" busy={busy} onUploaded={(url) => setDraft((d) => ({ ...d, image_url: url }))} />
-        <ImageUrlField label="Additional image URLs (comma separated)" name="image_urls" value={draft.image_urls} onChange={(v) => setDraft({ ...draft, image_urls: v })} multiple />
-        <UploadField label="Upload additional product image" session={session} folder="products" busy={busy} onUploaded={(url) => setDraft((d) => ({ ...d, image_urls: d.image_urls ? d.image_urls + ", " + url : url }))} /><VideoUrlField label="Product video URL" name="video_url" value={draft.video_url} onChange={(v) => setDraft({ ...draft, video_url: v })} /><VideoUploadField label="Upload product video" session={session} folder="products" busy={busy} onUploaded={(url) => setDraft((d) => ({ ...d, video_url: url }))} />
+        <ProductMediaManager
+          imageUrl={draft.image_url} imageUrls={draft.image_urls} videoUrl={draft.video_url}
+          session={session} busy={busy}
+          onPrimaryChange={(url) => setDraft((d) => ({ ...d, image_url: url }))}
+          onGalleryChange={(urls) => setDraft((d) => ({ ...d, image_urls: urls }))}
+          onVideoChange={(url) => setDraft((d) => ({ ...d, video_url: url }))}
+          onRemoveImage={(url) => setDraft((d) => {
+            const gallery = d.image_urls.split(",").map((item) => item.trim()).filter(Boolean);
+            const nextPrimary = d.image_url === url ? (gallery.find((item) => item !== url) ?? "") : d.image_url;
+            const nextGallery = gallery.filter((item) => item !== url && item !== nextPrimary);
+            return { ...d, image_url: nextPrimary, image_urls: nextGallery.join(", "), colors: d.colors.map((color) => ({ ...color, images: color.images.filter((image) => image !== url) })) };
+          })}
+        />
         <Field label="Available sizes (comma separated)" name="sizes" value={draft.sizes} onChange={(v) => setDraft({ ...draft, sizes: v })} />
         <section className="space-y-3 border border-black/10 bg-white/45 p-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
