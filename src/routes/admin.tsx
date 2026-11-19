@@ -31,6 +31,10 @@ import {
   restoreAdminSession,
   signOutAdmin,
   updateOrderStatus,
+  saveOrderEdits,
+  type EditableOrder,
+  type EditableOrderItem,
+  type ProductRecord,
   type AdminSession,
   type DashboardData,
   type OrderRecord,
@@ -435,7 +439,7 @@ function Dashboard({
                     <table className="w-full min-w-[980px] text-left text-xs">
                       <thead className="bg-black/[0.035] text-[9px] uppercase tracking-[0.14em] text-black/45"><tr><th className="px-4 py-3 font-bold">Order / Customer</th><th className="px-4 py-3 font-bold">Date</th><th className="px-4 py-3 font-bold">Products</th><th className="px-4 py-3 font-bold">Brand / Season</th><th className="px-4 py-3 font-bold">Payment</th><th className="px-4 py-3 font-bold">Fulfilment</th><th className="px-4 py-3 text-right font-bold">Amount</th></tr></thead>
                       <tbody className="divide-y divide-black/10">
-                        {visibleOrders.map((order) => <FragmentOrderRow key={order.id} order={order} expanded={expandedOrderId === order.id} saving={orderActionSaving === order.id} onToggle={() => setExpandedOrderId((current) => current === order.id ? null : order.id)} onStatusChange={(status) => void changeOrderStatus(order.id, status)} />)}
+                        {visibleOrders.map((order) => <FragmentOrderRow key={order.id} order={order} products={data?.products ?? []} session={session} expanded={expandedOrderId === order.id} saving={orderActionSaving === order.id} onToggle={() => setExpandedOrderId((current) => current === order.id ? null : order.id)} onStatusChange={(status) => void changeOrderStatus(order.id, status)} onSaved={onRefresh} />)}
                       </tbody>
                     </table>
                   </div> : <EmptyState title="No matching orders" detail={allOrders.length ? "Try another status view or clear one or more filters." : "New checkout submissions will appear here as soon as customers place orders."} />}
@@ -454,31 +458,129 @@ function Dashboard({
   );
 }
 
-function FragmentOrderRow({ order, expanded, saving, onToggle, onStatusChange }: {
+type OrderEditorItem = EditableOrderItem;
+
+function FragmentOrderRow({ order, products, session, expanded, saving, onToggle, onStatusChange, onSaved }: {
   order: OrderRecord;
+  products: ProductRecord[];
+  session: AdminSession;
   expanded: boolean;
   saving: boolean;
   onToggle: () => void;
   onStatusChange: (status: OrderRecord["fulfillment_status"]) => void;
+  onSaved: () => void;
 }) {
   const items = order.order_items ?? [];
-  const products = [...new Set(items.map((item) => item.product_name))];
+  const productNames = [...new Set(items.map((item) => item.product_name))];
   const brands = [...new Set(items.map((item) => item.brand_name))];
   const seasons = [...new Set(items.map((item) => item.season).filter(Boolean))];
+  const [editing, setEditing] = useState(false);
+  const [savingEdit, setSavingEdit] = useState(false);
+  const [saveError, setSaveError] = useState("");
+  const [newProductId, setNewProductId] = useState("");
+  const [draft, setDraft] = useState<EditableOrder>({
+    customer_name: order.customer_name,
+    customer_phone: order.customer_phone,
+    customer_email: order.customer_email,
+    shipping_address: order.shipping_address,
+    shipping_city: order.shipping_city,
+    shipping_postal: order.shipping_postal,
+    payment_method: order.payment_method,
+    payment_status: order.payment_status,
+    fulfillment_status: order.fulfillment_status,
+    shipping_fee: order.shipping_fee,
+    special_note: order.special_note,
+  });
+  const [draftItems, setDraftItems] = useState<OrderEditorItem[]>(items.map((item) => ({
+    product_id: item.product_id ?? "",
+    quantity: item.quantity,
+    size: item.size ?? "",
+    color: item.color ?? "",
+  })));
+
+  const beginEdit = () => {
+    setDraft({
+      customer_name: order.customer_name,
+      customer_phone: order.customer_phone,
+      customer_email: order.customer_email,
+      shipping_address: order.shipping_address,
+      shipping_city: order.shipping_city,
+      shipping_postal: order.shipping_postal,
+      payment_method: order.payment_method,
+      payment_status: order.payment_status,
+      fulfillment_status: order.fulfillment_status,
+      shipping_fee: order.shipping_fee,
+      special_note: order.special_note,
+    });
+    setDraftItems(items.map((item) => ({
+      product_id: item.product_id ?? "",
+      quantity: item.quantity,
+      size: item.size ?? "",
+      color: item.color ?? "",
+    })));
+    setSaveError("");
+    setEditing(true);
+  };
+  const updateDraft = (key: keyof EditableOrder, value: string | number | null) => setDraft((current) => ({ ...current, [key]: value }));
+  const updateItem = (index: number, patch: Partial<OrderEditorItem>) => setDraftItems((current) => current.map((item, i) => i === index ? { ...item, ...patch } : item));
+  const addProduct = () => {
+    if (!newProductId) return;
+    setDraftItems((current) => [...current, { product_id: newProductId, quantity: 1, size: "", color: "" }]);
+    setNewProductId("");
+  };
+  const save = async () => {
+    if (!draftItems.length) {
+      setSaveError("An order must contain at least one product. Remove the order by cancelling it instead.");
+      return;
+    }
+    if (draftItems.some((item) => !item.product_id)) {
+      setSaveError("One or more older order items are missing a product link. Remove those items and add the correct catalogue product before saving.");
+      return;
+    }
+    setSavingEdit(true);
+    setSaveError("");
+    try {
+      await saveOrderEdits(session, order.id, draft, draftItems);
+      setEditing(false);
+      onSaved();
+    } catch (error) {
+      setSaveError(error instanceof Error ? error.message : "Could not save order changes.");
+    } finally {
+      setSavingEdit(false);
+    }
+  };
+  const inputClass = "mt-1 h-10 w-full border border-black/15 bg-[#F7F3EC] px-3 text-xs text-[#171717] outline-none focus:border-black";
+  const labelClass = "block text-[9px] font-bold uppercase tracking-[0.12em] text-black/45";
   return <>
     <tr className="transition hover:bg-black/[0.025]">
       <td className="px-4 py-3"><button type="button" onClick={onToggle} className="text-left"><span className="block font-black underline decoration-black/20 underline-offset-4">{order.order_number}</span><span className="mt-1 block font-semibold">{order.customer_name}</span><span className="mt-0.5 block text-[10px] text-black/45">{order.customer_phone}</span></button></td>
       <td className="px-4 py-3 whitespace-nowrap text-black/60">{dateTime(order.created_at)}</td>
-      <td className="px-4 py-3"><span className="block max-w-[190px] truncate font-semibold">{products.join(", ") || "—"}</span><span className="mt-1 text-[10px] text-black/45">{items.reduce((sum, item) => sum + item.quantity, 0)} units</span></td>
+      <td className="px-4 py-3"><span className="block max-w-[190px] truncate font-semibold">{productNames.join(", ") || "—"}</span><span className="mt-1 text-[10px] text-black/45">{items.reduce((sum, item) => sum + item.quantity, 0)} units</span></td>
       <td className="px-4 py-3"><span className="block max-w-[150px] truncate">{brands.join(", ") || "—"}</span><span className="mt-1 block text-[10px] text-black/45">{seasons.join(", ") || "Season unassigned"}</span></td>
       <td className="px-4 py-3"><StatusPill value={order.payment_status} /><span className="mt-1 block text-[10px] text-black/45">{order.payment_method}</span></td>
-      <td className="px-4 py-3"><select aria-label={`Fulfilment status for ${order.order_number}`} value={order.fulfillment_status} disabled={saving} onChange={(event) => onStatusChange(event.target.value as OrderRecord["fulfillment_status"])} className="h-8 max-w-[140px] border border-black/15 bg-[#F7F3EC] px-2 text-[10px] font-bold uppercase outline-none focus:border-black disabled:opacity-50"><option value="new">New</option><option value="confirmed">Pending · Confirmed</option><option value="processing">Pending · Processing</option><option value="shipped">Pending · Shipped</option><option value="delivered">Delivered</option><option value="cancelled">Cancelled</option><option value="returned">Returned</option></select></td>
+      <td className="px-4 py-3"><select aria-label={`Fulfilment status for ${order.order_number}`} value={order.fulfillment_status} disabled={saving || savingEdit} onChange={(event) => onStatusChange(event.target.value as OrderRecord["fulfillment_status"])} className="h-8 max-w-[140px] border border-black/15 bg-[#F7F3EC] px-2 text-[10px] font-bold uppercase outline-none focus:border-black disabled:opacity-50"><option value="new">New</option><option value="confirmed">Pending · Confirmed</option><option value="processing">Pending · Processing</option><option value="shipped">Pending · Shipped</option><option value="delivered">Delivered</option><option value="cancelled">Cancelled</option><option value="returned">Returned</option></select></td>
       <td className="px-4 py-3 text-right font-black tabular-nums">{money(amount(order.total))}<button type="button" onClick={onToggle} className="mt-1 block w-full text-right text-[9px] font-bold uppercase tracking-wide text-black/40 underline underline-offset-2">{expanded ? "Hide details" : "View details"}</button></td>
     </tr>
-    {expanded && <tr className="bg-black/[0.025]"><td colSpan={7} className="px-5 py-5"><div className="grid gap-6 md:grid-cols-[1fr_1.4fr]">
-      <div><p className="text-[9px] font-bold uppercase tracking-[0.15em] text-black/40">Delivery details</p><p className="mt-2 text-xs font-bold">{order.customer_name}</p><p className="mt-1 text-xs">{order.shipping_address}</p><p className="mt-1 text-xs text-black/60">{[order.shipping_city, order.shipping_postal].filter(Boolean).join(" · ") || "City / postal not provided"}</p><p className="mt-1 text-xs text-black/60">{order.customer_phone}</p>{order.customer_email && <p className="mt-1 text-xs text-black/60">{order.customer_email}</p>}<p className="mt-3 text-[10px] text-black/45">Payment: {order.payment_method} · {order.payment_status}</p></div>
-      <div><p className="text-[9px] font-bold uppercase tracking-[0.15em] text-black/40">Order items</p><div className="mt-2 divide-y divide-black/10">{items.map((item, index) => <div key={item.product_id ?? item.product_name + index} className="flex flex-wrap items-center justify-between gap-2 py-2 text-xs"><div><p className="font-bold">{item.product_name}</p><p className="mt-0.5 text-[10px] text-black/45">{item.brand_name}{item.season ? ` · ${item.season}` : ""} · {[item.size, item.color].filter(Boolean).join(" / ")}</p></div><p className="font-semibold tabular-nums">{item.quantity} × {money(amount(item.unit_price))} <span className="ml-2">{money(amount(item.line_total))}</span></p></div>)}</div><div className="mt-3 flex justify-end gap-8 border-t border-black/10 pt-3 text-xs"><span>Subtotal {money(amount(order.subtotal))}</span><span>Delivery {money(amount(order.shipping_fee))}</span><b>Total {money(amount(order.total))}</b></div></div>
-    </div></td></tr>}
+    {expanded && <tr className="bg-black/[0.025]"><td colSpan={7} className="px-4 py-5 md:px-5">
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-3"><div><p className="text-[9px] font-bold uppercase tracking-[0.15em] text-black/40">Order workspace</p><h3 className="mt-1 text-sm font-black">{order.order_number}</h3></div>{!editing ? <button type="button" onClick={beginEdit} className="bg-[#171717] px-4 py-2.5 text-[10px] font-bold uppercase tracking-wide text-[#F0EAE0] hover:bg-black/80">Edit full order</button> : <span className="bg-[#D5FE00] px-3 py-2 text-[9px] font-black uppercase tracking-wide">Editing order</span>}</div>
+      {!editing ? <div className="grid gap-6 md:grid-cols-[0.9fr_1.1fr]">
+        <div><p className="text-[9px] font-bold uppercase tracking-[0.15em] text-black/40">Customer & delivery</p><p className="mt-2 text-xs font-bold">{order.customer_name}</p><p className="mt-1 text-xs">{order.shipping_address}</p><p className="mt-1 text-xs text-black/60">{[order.shipping_city, order.shipping_postal].filter(Boolean).join(" · ") || "City / postal not provided"}</p><p className="mt-1 text-xs text-black/60">{order.customer_phone}</p>{order.customer_email && <p className="mt-1 text-xs text-black/60">{order.customer_email}</p>}<p className="mt-3 text-[10px] text-black/45">Payment: {order.payment_method} · {order.payment_status}</p><div className="mt-5 border-l-2 border-[#D5FE00] bg-white/60 p-3"><p className="text-[9px] font-bold uppercase tracking-[0.12em] text-black/40">Special note · Admin only</p><p className="mt-1 whitespace-pre-wrap text-xs">{order.special_note || "No special note added."}</p></div></div>
+        <div><p className="text-[9px] font-bold uppercase tracking-[0.15em] text-black/40">Product preview</p><div className="mt-2 divide-y divide-black/10">{items.map((item, index) => <div key={item.product_id ?? item.product_name + index} className="flex items-center gap-3 py-3"><div className="h-16 w-14 shrink-0 overflow-hidden bg-[#E8E1D6]">{item.product?.image_url ? <img src={item.product.image_url} alt={item.product_name} className="h-full w-full object-cover" /> : <div className="grid h-full place-items-center text-[8px] font-bold uppercase text-black/30">No image</div>}</div><div className="min-w-0 flex-1"><p className="truncate text-xs font-bold">{item.product_name}</p><p className="mt-1 text-[10px] text-black/45">{item.brand_name}{item.season ? ` · ${item.season}` : ""}</p><p className="mt-1 text-[10px] text-black/55">{[item.size, item.color].filter(Boolean).join(" / ") || "No variant"} · Qty {item.quantity}</p></div><p className="text-xs font-bold tabular-nums">{money(amount(item.line_total))}</p></div>)}</div><div className="mt-3 flex flex-wrap justify-end gap-x-6 gap-y-2 border-t border-black/10 pt-3 text-xs"><span>Subtotal {money(amount(order.subtotal))}</span><span>Delivery {money(amount(order.shipping_fee))}</span><b>Total {money(amount(order.total))}</b></div></div>
+      </div> : <div className="grid gap-5 xl:grid-cols-[0.9fr_1.1fr]">
+        <div className="space-y-4">
+          <div className="grid gap-3 sm:grid-cols-2"><label className={labelClass}>Customer name<input className={inputClass} value={String(draft.customer_name)} onChange={(e) => updateDraft("customer_name", e.target.value)} /></label><label className={labelClass}>Mobile number<input className={inputClass} value={String(draft.customer_phone)} onChange={(e) => updateDraft("customer_phone", e.target.value)} /></label><label className={labelClass}>Email<input className={inputClass} value={draft.customer_email ?? ""} onChange={(e) => updateDraft("customer_email", e.target.value)} /></label><label className={labelClass}>City<input className={inputClass} value={draft.shipping_city ?? ""} onChange={(e) => updateDraft("shipping_city", e.target.value)} /></label><label className={`${labelClass} sm:col-span-2`}>Delivery address<textarea rows={2} className="mt-1 w-full border border-black/15 bg-[#F7F3EC] px-3 py-2 text-xs outline-none focus:border-black" value={draft.shipping_address} onChange={(e) => updateDraft("shipping_address", e.target.value)} /></label><label className={labelClass}>Postal code<input className={inputClass} value={draft.shipping_postal ?? ""} onChange={(e) => updateDraft("shipping_postal", e.target.value)} /></label><label className={labelClass}>Delivery fee (৳)<input type="number" min="0" className={inputClass} value={String(draft.shipping_fee)} onChange={(e) => updateDraft("shipping_fee", Number(e.target.value))} /></label></div>
+          <div className="grid gap-3 sm:grid-cols-3"><label className={labelClass}>Payment method<select className={inputClass} value={draft.payment_method} onChange={(e) => updateDraft("payment_method", e.target.value)}><option>Cash on Delivery</option><option>bKash</option><option>Nagad</option><option>Card Payment</option></select></label><label className={labelClass}>Payment status<select className={inputClass} value={draft.payment_status} onChange={(e) => updateDraft("payment_status", e.target.value)}><option value="pending">Pending</option><option value="paid">Paid</option><option value="failed">Failed</option><option value="refunded">Refunded</option></select></label><label className={labelClass}>Fulfilment status<select className={inputClass} value={draft.fulfillment_status} onChange={(e) => updateDraft("fulfillment_status", e.target.value)}><option value="new">New</option><option value="confirmed">Confirmed</option><option value="processing">Processing</option><option value="shipped">Shipped</option><option value="delivered">Delivered</option><option value="cancelled">Cancelled</option><option value="returned">Returned</option></select></label></div>
+          <label className={labelClass}>Special note · Admin only<textarea rows={4} maxLength={2000} className="mt-1 w-full resize-y border border-black/15 bg-[#F7F3EC] px-3 py-3 text-xs leading-5 outline-none focus:border-black" placeholder="Internal handling instructions, customer requests, delivery reminders…" value={draft.special_note ?? ""} onChange={(e) => updateDraft("special_note", e.target.value)} /></label>
+        </div>
+        <div><div className="flex flex-wrap items-center justify-between gap-2"><p className="text-[9px] font-bold uppercase tracking-[0.15em] text-black/40">Products in this order</p><span className="text-[10px] text-black/40">Prices update to current catalogue price</span></div>
+          <div className="mt-2 divide-y divide-black/10">{draftItems.map((item, index) => { const product = products.find((entry) => entry.id === item.product_id); const original = items[index]; return <div key={`${item.product_id}-${index}`} className="flex gap-3 py-3"><div className="h-16 w-14 shrink-0 overflow-hidden bg-[#E8E1D6]">{product?.image_url || original?.product?.image_url ? <img src={product?.image_url ?? original?.product?.image_url ?? ""} alt={product?.name ?? original?.product_name ?? "Order item"} className="h-full w-full object-cover" /> : <div className="grid h-full place-items-center text-[8px] text-black/30">No image</div>}</div><div className="min-w-0 flex-1"><p className="truncate text-xs font-bold">{product?.name ?? original?.product_name ?? "Unlinked product"}</p><div className="mt-2 grid grid-cols-3 gap-2"><label className={labelClass}>Qty<input type="number" min="1" max="99" className="mt-1 h-9 w-full border border-black/15 bg-[#F7F3EC] px-2 text-xs" value={item.quantity} onChange={(e) => updateItem(index, { quantity: Math.max(1, Math.min(99, Number(e.target.value) || 1)) })} /></label><label className={labelClass}>Size<input className="mt-1 h-9 w-full border border-black/15 bg-[#F7F3EC] px-2 text-xs" value={item.size} onChange={(e) => updateItem(index, { size: e.target.value })} /></label><label className={labelClass}>Colour<input className="mt-1 h-9 w-full border border-black/15 bg-[#F7F3EC] px-2 text-xs" value={item.color} onChange={(e) => updateItem(index, { color: e.target.value })} /></label></div></div><button type="button" onClick={() => setDraftItems((current) => current.filter((_, i) => i !== index))} className="self-start px-2 py-1 text-[9px] font-bold uppercase text-red-700 underline underline-offset-2">Remove</button></div>; })}</div>
+          <div className="mt-4 flex flex-wrap gap-2 border border-dashed border-black/20 p-3"><select value={newProductId} onChange={(e) => setNewProductId(e.target.value)} className="h-10 min-w-0 flex-1 border border-black/15 bg-[#F7F3EC] px-3 text-xs"><option value="">Choose a product to add…</option>{products.filter((product) => product.is_active).map((product) => <option key={product.id} value={product.id}>{product.name} · {money(amount(product.price))}</option>)}</select><button type="button" disabled={!newProductId} onClick={addProduct} className="bg-[#171717] px-4 py-2 text-[10px] font-bold uppercase text-[#F0EAE0] disabled:opacity-40">Add product</button></div>
+          {draftItems.some((item) => !item.product_id) && <p className="mt-2 text-[10px] text-amber-800">This order contains an older item without a catalogue link. Remove it and add the correct product before saving.</p>}
+          <div className="mt-4 flex flex-wrap justify-end gap-2 border-t border-black/10 pt-4"><button type="button" disabled={savingEdit} onClick={() => { setEditing(false); setSaveError(""); }} className="border border-black/20 px-4 py-2.5 text-[10px] font-bold uppercase">Discard</button><button type="button" disabled={savingEdit} onClick={() => void save()} className="bg-[#D5FE00] px-5 py-2.5 text-[10px] font-black uppercase disabled:opacity-50">{savingEdit ? "Saving order…" : "Save all changes"}</button></div>
+          {saveError && <p role="alert" className="mt-3 border border-red-300 bg-red-50 px-3 py-2 text-xs text-red-800">{saveError}</p>}
+        </div>
+      </div>}
+    </td></tr>}
   </>;
 }
 
