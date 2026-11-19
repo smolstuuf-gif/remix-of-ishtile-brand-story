@@ -18,6 +18,7 @@ import { useCart } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { fetchPublicProduct } from "@/lib/public-store";
 import { Stepper } from "@/components/ui/stepper";
+import { AnimatedImage } from "@/components/ui/animated-image";
 
 export const Route = createFileRoute("/shop/$productId")({
   loader: async ({ params }) => {
@@ -188,7 +189,7 @@ function ProductPage() {
 
             <figure className="min-w-0 flex-1">
               <div className="overflow-hidden rounded-xl bg-card">
-                {views[view] && "video" in views[view] && views[view].video ? <video src={views[view].src} controls autoPlay muted loop playsInline poster={product.image} className="aspect-[4/5] w-full object-cover md:aspect-[3/2.4]" /> : <img src={views[view]?.src ?? product.image} alt={product.alt} width={1024} height={640} className="aspect-[4/5] w-full object-cover transition-[object-position] duration-500 md:aspect-[3/2.4]" style={{ objectPosition: views[view]?.position ?? "50% 25%" }} />}
+                {views[view] && "video" in views[view] && views[view].video ? <video src={views[view].src} controls autoPlay muted loop playsInline poster={product.image} className="aspect-[4/5] w-full object-cover md:aspect-[3/2.4]" /> : <AnimatedImage src={views[view]?.src ?? product.image} alt={product.alt} width={1024} height={640} className="aspect-[4/5] w-full object-cover transition-[object-position] duration-500 md:aspect-[3/2.4]" style={{ objectPosition: views[view]?.position ?? "50% 25%" }} />}
               </div>
               <ul className="mt-3 flex gap-2 sm:hidden">
                 {views.map((v, i) => (
