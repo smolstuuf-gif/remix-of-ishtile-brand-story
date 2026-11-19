@@ -6,6 +6,7 @@ import { formatTaka } from "@/lib/catalog";
 import { FREE_SHIPPING_OVER, MAX_QTY } from "@/lib/commerce";
 import { useCart } from "@/lib/store";
 import { Stepper } from "@/components/ui/stepper";
+import { AnimatedImage } from "@/components/ui/animated-image";
 
 export function QtyStepper({
   qty,
@@ -72,7 +73,7 @@ export function CartDrawer() {
             <ul className="flex-1 divide-y divide-border overflow-y-auto px-6">
               {lines.map((l) => (
                 <li key={l.key} className="flex gap-4 py-4">
-                  <img
+                  <AnimatedImage
                     src={l.image}
                     alt={l.name}
                     width={96}
