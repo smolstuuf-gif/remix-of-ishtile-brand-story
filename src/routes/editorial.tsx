@@ -4,6 +4,7 @@ import { PageShell, pageHead } from "@/components/layout/PageShell";
 import fashion from "@/assets/editorial-fashion.jpg";
 import art from "@/assets/editorial-art.jpg";
 import { fetchPublicBrandInfo } from "@/lib/public-store";
+import { AnimatedImage } from "@/components/ui/animated-image";
 
 export const Route = createFileRoute("/editorial")({
   head: () => pageHead("Editorial", "Stories on fashion, culture and the people shaping style in Bangladesh."),
@@ -24,7 +25,7 @@ function EditorialPage() {
       <div className="grid gap-6 md:grid-cols-2">
         {storiesWithImages.map((s) => (
           <article key={s.title}>
-            <img src={s.image} alt={s.title} loading="lazy" className="aspect-[4/3] w-full rounded-2xl object-cover" />
+            <AnimatedImage src={s.image} alt={s.title} loading="lazy" className="aspect-[4/3] w-full rounded-2xl object-cover" />
             <p className="mt-4 text-sm uppercase tracking-[0.2em] text-muted-foreground">{s.tag}</p>
             <h2 className="mt-1 text-2xl font-semibold">{s.title}</h2>
           </article>
