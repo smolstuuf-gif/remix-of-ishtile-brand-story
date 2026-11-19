@@ -27,9 +27,10 @@ export type ProductRecord = {
   stock_quantity: number | null;
   is_active: boolean;
   image_url: string | null;
+  image_urls: string[];
   sku: string | null;
   sizes: string[];
-  colors: { name: string; hex: string }[];
+  colors: { name: string; hex: string; images?: string[] }[];
 };
 
 export type OrderItemRecord = {
@@ -42,7 +43,7 @@ export type OrderItemRecord = {
   season: string | null;
   size: string | null;
   color: string | null;
-  product?: { image_url: string | null } | null;
+  product?: { image_url: string | null; image_urls?: string[] | null; colors?: { name: string; hex: string; images?: string[] }[] | null } | null;
 };
 
 export type OrderRecord = {
@@ -272,11 +273,11 @@ export async function getDashboardData(session: AdminSession, _days: number): Pr
       session,
     ),
     getRows<ProductRecord>(
-      "/rest/v1/products?select=id,name,slug,brand_id,category,price,stock_quantity,is_active,image_url,sku,sizes,colors&order=name.asc",
+      "/rest/v1/products?select=id,name,slug,brand_id,category,price,stock_quantity,is_active,image_url,image_urls,sku,sizes,colors&order=name.asc",
       session,
     ),
     getAllRows<OrderRecord>(
-      "/rest/v1/orders?select=id,order_number,customer_name,customer_phone,customer_email,shipping_address,shipping_city,shipping_postal,special_note,payment_method,payment_status,fulfillment_status,subtotal,shipping_fee,total,created_at,order_items(product_id,product_name,brand_name,season,size,color,unit_price,quantity,line_total,product:products(image_url))&order=created_at.desc",
+      "/rest/v1/orders?select=id,order_number,customer_name,customer_phone,customer_email,shipping_address,shipping_city,shipping_postal,special_note,payment_method,payment_status,fulfillment_status,subtotal,shipping_fee,total,created_at,order_items(product_id,product_name,brand_name,season,size,color,unit_price,quantity,line_total,product:products(image_url,image_urls,colors))&order=created_at.desc",
       session,
     ),
   ]);
