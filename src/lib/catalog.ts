@@ -15,7 +15,7 @@ import brandMocha from "@/assets/brand-mocha.jpg";
 import brandOnen from "@/assets/brand-onen.jpg";
 import cardWinter from "@/assets/card-winter.jpg";
 
-export type ProductColor = { name: string; hex: string; images?: string[] };
+export type ProductColor = { name: string; hex: string; images?: string[]; videos?: string[] };
 
 export type Product = {
   id: string;
