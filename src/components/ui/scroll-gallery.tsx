@@ -487,7 +487,7 @@ export function ScrollGallery({
       }
 
       if (embedded && scrollerProp === undefined) {
-        if (process.env["NODE_ENV"] !== "production") {
+        if (import.meta.env.DEV) {
           console.warn(
             "[ScrollGallery] embedded=true requires a `scroller` prop — animation will not mount without it.",
           );

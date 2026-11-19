@@ -222,7 +222,7 @@ function Dashboard({
     setOrderFilters((current) => ({ ...current, [key]: value }));
     setOrderPage(1);
   };
-  const allOrders = data?.orders ?? [];
+  const allOrders = useMemo(() => data?.orders ?? [], [data?.orders]);
   const seasonOptions = [...new Set(allOrders.flatMap((order) => (order.order_items ?? []).map((item) => item.season).filter((season): season is string => Boolean(season))))].sort();
   const brandOptions = [...new Set(allOrders.flatMap((order) => (order.order_items ?? []).map((item) => item.brand_name).filter(Boolean)))].sort();
   const filteredOrders = useMemo(() => allOrders.filter((order) => {
@@ -411,10 +411,10 @@ function Dashboard({
                     <span className="bg-[#D5FE00] px-3 py-2 text-[10px] font-black uppercase tracking-wide">{number(allOrders.length)} total orders</span>
                   </div>
                   <div className="flex gap-1 overflow-x-auto border-b border-black/10 px-3 py-3 md:px-5">
-                    {[
+                    {([
                       ["new", "New orders"], ["pending", "Pending orders"], ["cancelled", "Cancelled"],
                       ["delivered", "Delivered"], ["returned", "Returned"], ["all", "All orders"],
-                    ].map(([key, label]) => (
+                    ] as const).map(([key, label]) => (
                       <button key={key} type="button" onClick={() => { setOrderStatusFilter(key); setOrderPage(1); }} className={`shrink-0 border px-3 py-2 text-[10px] font-bold uppercase tracking-wide transition ${orderStatusFilter === key ? "border-[#171717] bg-[#171717] text-[#F0EAE0]" : "border-black/10 text-black/55 hover:border-black/40"}`}>
                         {label}<span className={`ml-2 ${orderStatusFilter === key ? "text-[#D5FE00]" : "text-black/35"}`}>{number(orderCountFor(key))}</span>
                       </button>
@@ -426,7 +426,7 @@ function Dashboard({
                     <label className="text-[9px] font-bold uppercase tracking-[0.12em] text-black/45">Min amount<input type="number" min="0" value={orderFilters.minAmount} onChange={(event) => updateOrderFilter("minAmount", event.target.value)} placeholder="৳ Min" className="mt-1.5 h-10 w-full border border-black/15 bg-transparent px-3 text-xs font-medium outline-none focus:border-black" /></label>
                     <label className="text-[9px] font-bold uppercase tracking-[0.12em] text-black/45">Max amount<input type="number" min="0" value={orderFilters.maxAmount} onChange={(event) => updateOrderFilter("maxAmount", event.target.value)} placeholder="৳ Max" className="mt-1.5 h-10 w-full border border-black/15 bg-transparent px-3 text-xs font-medium outline-none focus:border-black" /></label>
                     <label className="text-[9px] font-bold uppercase tracking-[0.12em] text-black/45">Product<input type="search" value={orderFilters.product} onChange={(event) => updateOrderFilter("product", event.target.value)} placeholder="Search product" className="mt-1.5 h-10 w-full border border-black/15 bg-transparent px-3 text-xs font-medium outline-none focus:border-black" /></label>
-                    <label className="text-[9px] font-bold uppercase tracking-[0.12em] text-black/45">Season<select value={orderFilters.season} onChange={(event) => updateOrderFilter("season", event.target.value)} className="mt-1.5 h-10 w-full border border-black/15 bg-[#F7F3EC] px-2 text-xs font-medium outline-none focus:border-black"><option value="">All seasons</option>{seasonOptions.map((season) => <option key={season} value={season}>{season[0].toUpperCase() + season.slice(1)}</option>)}</select></label>
+                    <label className="text-[9px] font-bold uppercase tracking-[0.12em] text-black/45">Season<select value={orderFilters.season} onChange={(event) => updateOrderFilter("season", event.target.value)} className="mt-1.5 h-10 w-full border border-black/15 bg-[#F7F3EC] px-2 text-xs font-medium outline-none focus:border-black"><option value="">All seasons</option>{seasonOptions.map((season) => <option key={season} value={season}>{season.charAt(0).toUpperCase() + season.slice(1)}</option>)}</select></label>
                     <label className="text-[9px] font-bold uppercase tracking-[0.12em] text-black/45">Brand<select value={orderFilters.brand} onChange={(event) => updateOrderFilter("brand", event.target.value)} className="mt-1.5 h-10 w-full border border-black/15 bg-[#F7F3EC] px-2 text-xs font-medium outline-none focus:border-black"><option value="">All brands</option>{brandOptions.map((brand) => <option key={brand} value={brand}>{brand}</option>)}</select></label>
                     <div className="flex items-end xl:col-span-7"><button type="button" onClick={() => { setOrderFilters({ from: "", to: "", minAmount: "", maxAmount: "", product: "", season: "", brand: "" }); setOrderPage(1); }} className="text-[10px] font-bold uppercase tracking-wide text-black/50 underline underline-offset-4 hover:text-black">Clear all filters</button></div>
                   </div>
