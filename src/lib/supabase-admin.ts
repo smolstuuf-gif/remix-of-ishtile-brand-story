@@ -30,7 +30,7 @@ export type ProductRecord = {
   image_urls: string[];
   sku: string | null;
   sizes: string[];
-  colors: { name: string; hex: string; images?: string[] }[];
+  colors: { name: string; hex: string; images?: string[]; videos?: string[] }[];
 };
 
 export type OrderItemRecord = {
@@ -43,7 +43,7 @@ export type OrderItemRecord = {
   season: string | null;
   size: string | null;
   color: string | null;
-  product?: { image_url: string | null; image_urls?: string[] | null; colors?: { name: string; hex: string; images?: string[] }[] | null } | null;
+  product?: { image_url: string | null; image_urls?: string[] | null; colors?: { name: string; hex: string; images?: string[]; videos?: string[] }[] | null } | null;
 };
 
 export type OrderRecord = {
