@@ -92,7 +92,7 @@ export type AdminBrand = {
 export type AdminProduct = {
   id: string; slug: string; name: string; brand_id: string; category: string; price: number;
   image_url: string | null; image_urls: string[]; video_url: string | null; description: string | null; sizes: string[]; size_guide: { size: string; chest: string; length: string }[]; care_instructions: string | null;
-  colors: { name: string; hex: string }[]; stock_quantity: number | null; sku: string | null; is_active: boolean; is_featured: boolean; is_out_of_stock: boolean; tags: string[];
+  colors: { name: string; hex: string; images?: string[] }[]; stock_quantity: number | null; sku: string | null; is_active: boolean; is_featured: boolean; is_out_of_stock: boolean; tags: string[];
 };
 export type HeroSlide = {
   id: string; title: string | null; subtitle: string | null; image_url: string | null; mobile_image_url: string | null; video_url: string | null; mobile_video_url: string | null;
