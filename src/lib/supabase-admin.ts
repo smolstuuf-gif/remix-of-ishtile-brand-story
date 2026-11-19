@@ -28,6 +28,8 @@ export type ProductRecord = {
   is_active: boolean;
   image_url: string | null;
   sku: string | null;
+  sizes: string[];
+  colors: { name: string; hex: string }[];
 };
 
 export type OrderItemRecord = {
@@ -270,7 +272,7 @@ export async function getDashboardData(session: AdminSession, _days: number): Pr
       session,
     ),
     getRows<ProductRecord>(
-      "/rest/v1/products?select=id,name,slug,brand_id,category,price,stock_quantity,is_active,image_url,sku&order=name.asc",
+      "/rest/v1/products?select=id,name,slug,brand_id,category,price,stock_quantity,is_active,image_url,sku,sizes,colors&order=name.asc",
       session,
     ),
     getAllRows<OrderRecord>(
