@@ -27,6 +27,7 @@ export type ProductRecord = {
   stock_quantity: number | null;
   is_active: boolean;
   image_url: string | null;
+  sku: string | null;
 };
 
 export type OrderItemRecord = {
@@ -269,7 +270,7 @@ export async function getDashboardData(session: AdminSession, _days: number): Pr
       session,
     ),
     getRows<ProductRecord>(
-      "/rest/v1/products?select=id,name,slug,brand_id,category,price,stock_quantity,is_active,image_url&order=name.asc",
+      "/rest/v1/products?select=id,name,slug,brand_id,category,price,stock_quantity,is_active,image_url,sku&order=name.asc",
       session,
     ),
     getAllRows<OrderRecord>(
@@ -340,4 +341,19 @@ export async function saveOrderEdits(
     }),
   });
   await responseJson<unknown>(response);
+}
+
+export async function createStoreOrder(
+  session: AdminSession,
+  order: EditableOrder,
+  items: EditableOrderItem[],
+): Promise<{ id: string; order_number: string }> {
+  const { url, key } = config();
+  const current = await validSession(session);
+  const response = await fetch(`${url}/rest/v1/rpc/admin_create_store_order`, {
+    method: "POST",
+    headers: { apikey: key, Authorization: `Bearer ${current.access_token}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ p_order: { ...order, shipping_fee: Number(order.shipping_fee) }, p_items: items }),
+  });
+  return responseJson<{ id: string; order_number: string }>(response);
 }
