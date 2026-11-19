@@ -116,8 +116,15 @@ function ProductPage() {
   const allViews = galleryViews(product);
   const [size, setSize] = useState<string | null>(null);
   const [color, setColor] = useState(product.colors[0]?.name ?? "");
-  const assignedColourImages = product.colors.find((item) => item.name === color)?.images ?? [];
-  const views = assignedColourImages.length ? allViews.filter((item) => ("video" in item && item.video) || assignedColourImages.includes(item.src)) : allViews;
+  const selectedColour = product.colors.find((item) => item.name === color);
+  const assignedColourImages = selectedColour?.images ?? [];
+  const assignedColourVideos = selectedColour?.videos ?? [];
+  const colourHasMedia = assignedColourImages.length > 0 || assignedColourVideos.length > 0;
+  const colourViews = [
+    ...allViews.filter((item) => assignedColourImages.includes(item.src)),
+    ...assignedColourVideos.map((src, index) => ({ label: `Colour video ${index + 1}`, position: "50% 50%", src, video: true })),
+  ];
+  const views = colourHasMedia ? colourViews : allViews;
   const [view, setView] = useState(0);
   const [qty, setQty] = useState(1);
   const [sizeError, setSizeError] = useState(false);
