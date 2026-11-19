@@ -5,6 +5,7 @@ import { formatTaka, type Product } from "@/lib/catalog";
 import { useCart } from "@/lib/store";
 import { FavoriteButton } from "@/components/ui/favorite-button";
 import { AutoplayVideo } from "@/components/ui/autoplay-video";
+import { AnimatedImage } from "@/components/ui/animated-image";
 
 /** Product tile used on the catalog, the bag page and the product page's related row. */
 export function ProductCard({ product, className }: { product: Product; className?: string }) {
@@ -28,7 +29,7 @@ export function ProductCard({ product, className }: { product: Product; classNam
     >
       <div className="relative overflow-hidden">
         <Link to="/shop/$productId" params={{ productId: product.id }} aria-label={product.name}>
-          {product.videoUrl ? <video src={product.videoUrl} autoPlay muted loop playsInline poster={product.image} className="aspect-[1.75/1] w-full object-cover object-[50%_25%] transition-transform duration-500 group-hover:scale-[1.04] md:aspect-[2.3/1]" /> : <img src={product.image} alt={product.alt} width={1024} height={640} loading="lazy" className="aspect-[1.75/1] w-full object-cover object-[50%_25%] transition-transform duration-500 group-hover:scale-[1.04] md:aspect-[2.3/1]" />}
+          {product.videoUrl ? <video src={product.videoUrl} autoPlay muted loop playsInline poster={product.image} className="aspect-[1.75/1] w-full object-cover object-[50%_25%] transition-transform duration-500 group-hover:scale-[1.04] md:aspect-[2.3/1]" /> : <AnimatedImage src={product.image} alt={product.alt} width={1024} height={640} loading="lazy" className="aspect-[1.75/1] w-full object-cover object-[50%_25%] transition-transform duration-500 group-hover:scale-[1.04] md:aspect-[2.3/1]" />}
         </Link>
 
         {(product.isOutOfStock || product.isFeatured || product.tags?.length) && (
