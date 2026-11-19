@@ -641,6 +641,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_update_store_order: {
+        Args: { p_items: Json; p_order: Json; p_order_id: string }
+        Returns: undefined
+      }
       save_lookbook_look: {
         Args: { p_look: Json; p_products: Json }
         Returns: string
@@ -648,10 +652,6 @@ export type Database = {
       submit_store_order: {
         Args: { p_customer: Json; p_items: Json; p_payment_method: string }
         Returns: Json
-      }
-      admin_update_store_order: {
-        Args: { p_order_id: string; p_order: Json; p_items: Json }
-        Returns: undefined
       }
     }
     Enums: {
