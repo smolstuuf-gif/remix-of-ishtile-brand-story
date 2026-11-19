@@ -333,7 +333,35 @@ function ProductsPanel({ products, brands, initialBrandFilter, session, busy, pe
   const tagOptions = ["Best Seller", "Customer Favorite", "New Arrival", "Limited Edition", "Trending", "Staff Pick", "Exclusive", "Back in Stock"];
   const filtered = products.filter((p) => (brandFilter === "all" || p.brand_id === brandFilter) && `${p.name} ${p.sku ?? ""} ${p.slug} ${(p.tags ?? []).join(" ")}`.toLowerCase().includes(query.toLowerCase()));
   function reset() { setSelected(null); setDraft({ name: "", slug: "", sku: "", brand_id: brands[0]?.id ?? "", category: "Men", price: "0", stock_quantity: "", image_url: "", image_urls: "", video_url: "", description: "", sizes: "S, M, L, XL, XXL", colors: [{ name: "Black", hex: "#000000", images: [], videos: [] }], size_guide: [], care_instructions: "", is_active: true, is_featured: false, is_out_of_stock: false, tags: "" }); }
-  async function save(e: FormEvent) { e.preventDefault(); const payload = { ...draft, tags: draft.tags.split(",").map((tag) => tag.trim()).filter(Boolean), slug: slugify(draft.slug || draft.name), price: Number(draft.price), stock_quantity: draft.stock_quantity === "" ? null : Number(draft.stock_quantity), sizes: draft.sizes.split(",").map((v) => v.trim()).filter(Boolean), colors: draft.colors.map((color) => ({ name: color.name.trim(), hex: /^#[0-9a-fA-F]{6}$/.test(color.hex) ? color.hex : "#000000", images: color.images.filter((url) => [d.image_url, ...d.image_urls.split(",").map((v) => v.trim())].includes(url)), videos: color.videos })).filter((color) => color.name), image_urls: draft.image_urls.split(",").map((v) => v.trim()).filter(Boolean), size_guide: draft.size_guide.filter((row) => row.size.trim()).map((row) => ({ size: row.size.trim(), chest: row.chest.trim(), length: row.length.trim() })), care_instructions: draft.care_instructions.trim() || null }; await perform(() => selected ? adminWrite(`products?id=eq.${selected.id}`, session, "PATCH", payload) : adminWrite("products", session, "POST", payload), selected ? "Product updated." : "Product added."); if (!busy) reset(); }
+  async function save(e: FormEvent) {
+    e.preventDefault();
+    const availableImageUrls = new Set([draft.image_url.trim(), ...draft.image_urls.split(",").map((url) => url.trim())].filter(Boolean));
+    const payload = {
+      ...draft,
+      tags: draft.tags.split(",").map((tag) => tag.trim()).filter(Boolean),
+      slug: slugify(draft.slug || draft.name),
+      price: Number(draft.price),
+      stock_quantity: draft.stock_quantity === "" ? null : Number(draft.stock_quantity),
+      sizes: draft.sizes.split(",").map((value) => value.trim()).filter(Boolean),
+      colors: draft.colors.map((color) => ({
+        name: color.name.trim(),
+        hex: /^#[0-9a-fA-F]{6}$/.test(color.hex) ? color.hex : "#000000",
+        images: color.images.filter((url) => availableImageUrls.has(url)),
+        videos: color.videos,
+      })).filter((color) => color.name),
+      image_urls: [...new Set(draft.image_urls.split(",").map((url) => url.trim()).filter((url) => url && url !== draft.image_url.trim()))],
+      size_guide: draft.size_guide.filter((row) => row.size.trim()).map((row) => ({ size: row.size.trim(), chest: row.chest.trim(), length: row.length.trim() })),
+      care_instructions: draft.care_instructions.trim() || null,
+    };
+    let saved = false;
+    await perform(async () => {
+      await (selected
+        ? adminWrite(`products?id=eq.${selected.id}`, session, "PATCH", payload)
+        : adminWrite("products", session, "POST", payload));
+      saved = true;
+    }, selected ? "Product updated." : "Product added.");
+    if (saved) reset();
+  }
   return <div className="flex h-full min-h-0 flex-col gap-3"><div className="shrink-0"><PanelHeading eyebrow="Catalogue" title="Product management" detail="Select a product to edit. Each side scrolls independently while the workspace stays fixed." action={<span className="text-xs text-black/45">{products.length} products</span>} /></div>
     <div className="flex shrink-0 items-center gap-3 border border-black/10 bg-[#F7F3EC] px-3 py-2"><span className="shrink-0 text-[9px] font-black uppercase tracking-wider text-black/55">List</span><input aria-label="Resize product list and details panels" type="range" min="24" max="68" step="1" value={listWidth} onChange={(e) => setListWidth(Number(e.target.value))} className="min-w-0 flex-1 accent-[#171717]" /><span className="shrink-0 text-[9px] font-black uppercase tracking-wider text-black/55">Details</span><span className="w-12 text-right text-[10px] tabular-nums text-black/45">{listWidth}/{100-listWidth}</span><button type="button" className="text-[10px] font-bold underline" onClick={() => setListWidth(38)}>Reset</button></div>
     <div className="grid min-h-0 flex-1 gap-3 overflow-hidden xl:grid-cols-[minmax(0,var(--product-list-width))_minmax(340px,1fr)]" style={{ "--product-list-width": `${listWidth}%` } as React.CSSProperties}>
