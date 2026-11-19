@@ -6,6 +6,7 @@ import brandMocha from "@/assets/brand-mocha.jpg";
 import { cn } from "@/lib/utils";
 import { fetchPublicBrands } from "@/lib/public-store";
 import { Hanger, Sparkle, ThinPlus } from "./icons";
+import { AnimatedImage } from "@/components/ui/animated-image";
 
 type Tile =
   | { kind: "name"; name: string; plus: "after" | "above" }
@@ -29,7 +30,7 @@ function BrandTile({ tile }: { tile: Tile }) {
   if (tile.kind === "photo") {
     return (
       <a href="/brands" className={cn(tileBase, "group")}>
-        <img
+        <AnimatedImage
           src={tile.image}
           alt={tile.alt}
           width={816}
@@ -107,7 +108,7 @@ export function Brands() {
       >
         {liveBrands?.some((brand) => brand.video_url || brand.image_url || brand.logo_url) ? liveBrands.map((brand) => (
           <a key={brand.id} href="/brands" aria-label={`Explore ${brand.name}`} className={cn(tileBase, "group flex items-center justify-center bg-ink p-3 text-ink-foreground")}>
-            {brand.video_url ? <video src={brand.video_url} autoPlay muted loop playsInline poster={brand.image_url || undefined} className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" /> : brand.image_url ? <img src={brand.image_url} alt={brand.name} className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" /> : brand.logo_url ? <img src={brand.logo_url} alt={brand.name} className="max-h-[55%] max-w-[80%] object-contain" /> : <span className="text-center text-[clamp(.9rem,1.4vw,1.35rem)] font-semibold">{brand.name}</span>}
+            {brand.video_url ? <video src={brand.video_url} autoPlay muted loop playsInline poster={brand.image_url || undefined} className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" /> : brand.image_url ? <AnimatedImage src={brand.image_url} alt={brand.name} className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" /> : brand.logo_url ? <AnimatedImage src={brand.logo_url} alt={brand.name} className="max-h-[55%] max-w-[80%] object-contain" /> : <span className="text-center text-[clamp(.9rem,1.4vw,1.35rem)] font-semibold">{brand.name}</span>}
           </a>
         )) : tiles.map((t, i) => (
           <BrandTile key={i} tile={t} />
