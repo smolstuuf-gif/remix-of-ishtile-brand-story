@@ -115,7 +115,11 @@ function ProductPage() {
   const { addItem, openCart, toggleWish, isWished } = useCart();
   const views = galleryViews(product);
 
-  const [view, setView] = useState(0);
+  const [view, setView] = useState(() => {
+    const firstColourImage = product.colors[0]?.images?.[0];
+    const assignedIndex = firstColourImage ? views.findIndex((item) => item.src === firstColourImage) : -1;
+    return assignedIndex >= 0 ? assignedIndex : 0;
+  });
   const [size, setSize] = useState<string | null>(null);
   const [color, setColor] = useState(product.colors[0]?.name ?? "");
   const [qty, setQty] = useState(1);
@@ -253,7 +257,14 @@ function ProductPage() {
                   <li key={c.name}>
                     <button
                       type="button"
-                      onClick={() => setColor(c.name)}
+                      onClick={() => {
+                        setColor(c.name);
+                        const assignedImage = c.images?.[0];
+                        if (assignedImage) {
+                          const assignedIndex = views.findIndex((item) => item.src === assignedImage);
+                          if (assignedIndex >= 0) setView(assignedIndex);
+                        }
+                      }}
                       aria-label={c.name}
                       aria-pressed={color === c.name}
                       className={cn(
