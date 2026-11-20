@@ -19,7 +19,6 @@ import {
   filterProducts,
   formatTaka,
   priceCeiling,
-  products,
   sortLabels,
   sortProducts,
   type Filters,
@@ -52,8 +51,9 @@ export const Route = createFileRoute("/shop/")({
 
 function ShopPage() {
   const [liveProducts, setLiveProducts] = useState<Product[] | null>(null);
-  useEffect(() => { let live = true; fetchPublicProducts().then((items) => { if (live && items !== null) setLiveProducts(items); }).catch(() => undefined); return () => { live = false; }; }, []);
-  const catalogue = liveProducts ?? products;
+  const [loadError, setLoadError] = useState("");
+  useEffect(() => { let live = true; fetchPublicProducts().then((items) => { if (live) setLiveProducts(items); }).catch((error: unknown) => { if (live) setLoadError(error instanceof Error ? error.message : "The live catalogue is unavailable."); }); return () => { live = false; }; }, []);
+  const catalogue = liveProducts ?? [];
   const [filters, setFilters] = useState<Filters>(() => {
     const requestedBrand = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("brand") : null;
     return requestedBrand && (brands as readonly string[]).includes(requestedBrand)
@@ -149,7 +149,11 @@ function ShopPage() {
           </aside>
 
           <div>
-            {visible.length === 0 ? (
+            {loadError ? (
+              <div role="alert" className="rounded-xl border border-destructive/30 bg-card px-6 py-12 text-center"><p className="font-display text-xl font-semibold">The shop is temporarily unavailable.</p><p className="mt-2 text-sm text-muted-foreground">{loadError}</p><button type="button" onClick={() => window.location.reload()} className="mt-5 rounded-full bg-ink px-5 py-2.5 text-sm font-medium text-ink-foreground">Try again</button></div>
+            ) : liveProducts === null ? (
+              <div className="py-20 text-center text-sm text-muted-foreground" role="status">Loading the latest products…</div>
+            ) : visible.length === 0 ? (
               <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border py-20 text-center">
                 <p className="font-display text-xl font-semibold">No pieces match those filters.</p>
                 <p className="mt-1 max-w-xs text-sm text-muted-foreground">
