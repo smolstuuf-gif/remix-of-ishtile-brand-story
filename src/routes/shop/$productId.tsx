@@ -24,7 +24,7 @@ export const Route = createFileRoute("/shop/$productId")({
   loader: async ({ params }) => {
     const product = await fetchPublicProduct(params.productId);
     if (!product) throw notFound({ data: { productId: params.productId } });
-    const catalogue = await fetchPublicProducts();
+    const catalogue = await fetchPublicProducts().catch(() => []);
     const related = catalogue.filter((item) => item.category === product.category && item.id !== product.id).slice(0, 4);
     return { ...product, related };
   },
