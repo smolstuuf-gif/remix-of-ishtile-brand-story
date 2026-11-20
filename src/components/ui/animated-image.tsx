@@ -13,7 +13,14 @@ export function AnimatedImage({ src, className, alt = "", width, height, style, 
   const [incomingReady, setIncomingReady] = useState(false);
 
   useEffect(() => {
-    if (src === displayedSrc || src === incomingSrc) return;
+    if (src === displayedSrc) {
+      setIncomingSrc(null);
+      setIncomingReady(false);
+      return;
+    }
+    if (src === incomingSrc) return;
+    setIncomingSrc(null);
+    setIncomingReady(false);
     let active = true;
     const preload = new window.Image();
     preload.onload = () => {
