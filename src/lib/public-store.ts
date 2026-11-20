@@ -78,7 +78,7 @@ export async function fetchPublicProducts(): Promise<Product[]> {
 }
 export async function fetchPublicProduct(slug: string): Promise<Product | null> {
   if (!url || !key) throw new Error("The live product catalogue is not configured.");
-  const response = await fetch(`${url}/rest/v1/products?select=slug,name,price,image_url,image_urls,video_url,category,sizes,size_guide,care_instructions,colors,description,created_at,brands(name)&slug=eq.${encodeURIComponent(slug)}&is_active=eq.true&limit=1`, {
+  const response = await fetch(`${url}/rest/v1/products?select=slug,name,price,image_url,image_urls,video_url,category,sizes,size_guide,care_instructions,colors,description,created_at,is_featured,is_out_of_stock,stock_quantity,tags,brands(name)&slug=eq.${encodeURIComponent(slug)}&is_active=eq.true&limit=1`, {
     headers: publicApiHeaders(),
   });
   if (!response.ok) throw new Error("Could not load this product (" + response.status + ").");
