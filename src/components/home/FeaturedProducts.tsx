@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { formatTaka, products } from "@/lib/catalog";
+import { formatTaka } from "@/lib/catalog";
 import { useCart } from "@/lib/store";
 import { fetchPublicProducts } from "@/lib/public-store";
 import type { Product } from "@/lib/catalog";
@@ -10,10 +10,9 @@ import { FavoriteButton } from "@/components/ui/favorite-button";
 export function FeaturedProducts() {
   const { toggleWish, isWished } = useCart();
   const [liveProducts, setLiveProducts] = useState<Product[] | null>(null);
-  useEffect(() => { let live = true; fetchPublicProducts().then((items) => { if (live && items !== null) setLiveProducts(items); }).catch(() => undefined); return () => { live = false; }; }, []);
-  const liveFeaturedProducts = liveProducts?.filter((product) => product.isFeatured).slice(0, 8) ?? [];
-  // Keep the homepage section present even when the live catalogue has no featured products yet.
-  const visibleProducts = liveFeaturedProducts.length > 0 ? liveFeaturedProducts : products.slice(0, 8);
+  const [loadError, setLoadError] = useState("");
+  useEffect(() => { let live = true; fetchPublicProducts().then((items) => { if (live) setLiveProducts(items); }).catch((error: unknown) => { if (live) setLoadError(error instanceof Error ? error.message : "Featured products are unavailable."); }); return () => { live = false; }; }, []);
+  const visibleProducts = liveProducts?.filter((product) => product.isFeatured).slice(0, 8) ?? [];
 
   return (
     <section id="shop" aria-labelledby="featured-title" className="rounded-2xl md:border md:border-border/70 md:bg-panel/60 md:px-[4%] md:py-8">
@@ -27,8 +26,8 @@ export function FeaturedProducts() {
         </a>
       </div>
 
-      <ul className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-x-8 md:gap-y-4 lg:grid-cols-4">
-        {visibleProducts.slice(0, 8).map((p, i) => {
+      {loadError ? <p role="alert" className="px-1 py-8 text-sm text-muted-foreground">Featured products could not be loaded.</p> : liveProducts === null ? <p role="status" className="px-1 py-8 text-sm text-muted-foreground">Loading featured products…</p> : visibleProducts.length === 0 ? <p className="px-1 py-8 text-sm text-muted-foreground">No featured products right now. <a href="/shop" className="underline">Explore the shop</a>.</p> : <ul className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-x-8 md:gap-y-4 lg:grid-cols-4">
+        {visibleProducts.map((p, i) => {
           const wished = isWished(p.id);
           return (
             <li key={p.id} className={cn(i >= 6 && "hidden md:block")}>
@@ -54,7 +53,7 @@ export function FeaturedProducts() {
             </li>
           );
         })}
-      </ul>
+      </ul>}
     </section>
   );
 }
