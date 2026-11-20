@@ -54,7 +54,7 @@ export function Stepper({
         disabled={current <= min}
         aria-label={`Decrease ${label}`}
         className={cn(
-          "grid shrink-0 place-items-center rounded-full bg-secondary text-secondary-foreground transition-[transform,background-color,box-shadow] duration-200 hover:-translate-y-0.5 hover:bg-accent active:translate-y-px active:scale-90 disabled:cursor-not-allowed disabled:opacity-40",
+          "grid shrink-0 place-items-center rounded-full bg-secondary text-secondary-foreground transition-[transform,background-color,box-shadow] duration-200 hover:-translate-y-0.5 hover:bg-accent active:translate-y-px active:scale-[0.98] motion-reduce:transition-none motion-reduce:transform-none disabled:cursor-not-allowed disabled:opacity-40",
           compact ? "h-8 w-8" : "h-11 w-11",
         )}
       >
@@ -88,7 +88,7 @@ export function Stepper({
         disabled={current >= max}
         aria-label={`Increase ${label}`}
         className={cn(
-          "grid shrink-0 place-items-center rounded-full bg-secondary text-secondary-foreground transition-[transform,background-color,box-shadow] duration-200 hover:-translate-y-0.5 hover:bg-accent active:translate-y-px active:scale-90 disabled:cursor-not-allowed disabled:opacity-40",
+          "grid shrink-0 place-items-center rounded-full bg-secondary text-secondary-foreground transition-[transform,background-color,box-shadow] duration-200 hover:-translate-y-0.5 hover:bg-accent active:translate-y-px active:scale-[0.98] motion-reduce:transition-none motion-reduce:transform-none disabled:cursor-not-allowed disabled:opacity-40",
           compact ? "h-8 w-8" : "h-11 w-11",
         )}
       >

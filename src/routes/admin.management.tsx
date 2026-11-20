@@ -263,8 +263,9 @@ function ProductMediaManager({ imageUrl, imageUrls, videoUrl, colors, session, b
     setUploading(true); setUploadMessage("");
     try {
       const uploaded = await Promise.all(selectedFiles.map((file) => uploadAdminMedia(file, session, "products")));
-      if (!imageUrl.trim() && uploaded.length) {
-        onPrimaryChange(uploaded[0]);
+      const firstUploaded = uploaded[0];
+      if (!imageUrl.trim() && firstUploaded) {
+        onPrimaryChange(firstUploaded);
         onGalleryChange([...gallery, ...uploaded.slice(1)].join(", "));
       } else {
         onGalleryChange([...gallery, ...uploaded].join(", "));

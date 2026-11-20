@@ -87,7 +87,7 @@ export function CartDrawer() {
                         type="button"
                         onClick={() => removeLine(l.key)}
                         aria-label={`Remove ${l.name} from bag`}
-                        className="shrink-0 text-muted-foreground transition-colors hover:text-foreground"
+                        className="shrink-0 text-muted-foreground transition-colors hover:text-foreground active:scale-[0.98] motion-reduce:transition-none motion-reduce:transform-none"
                       >
                         <Trash2 className="h-4 w-4" strokeWidth={1.6} />
                       </button>
@@ -131,7 +131,7 @@ export function CartDrawer() {
               <Link
                 to="/checkout"
                 onClick={closeCart}
-                className="mt-4 block rounded-full bg-lime py-3 text-center text-sm font-semibold text-primary-foreground transition-transform hover:scale-[1.01]"
+                className="mt-4 block rounded-full bg-lime py-3 text-center text-sm font-semibold text-primary-foreground transition-transform hover:scale-[1.01] active:scale-[0.98] motion-reduce:transition-none motion-reduce:transform-none"
               >
                 Checkout
               </Link>

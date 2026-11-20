@@ -29,7 +29,7 @@ export function ProductCard({ product, className }: { product: Product; classNam
     >
       <div className="relative overflow-hidden">
         <Link to="/shop/$productId" params={{ productId: product.id }} aria-label={product.name}>
-          {product.videoUrl ? <video src={product.videoUrl} autoPlay muted loop playsInline poster={product.image} className="aspect-[1.75/1] w-full object-cover object-[50%_25%] transition-transform duration-500 group-hover:scale-[1.04] md:aspect-[2.3/1]" /> : <AnimatedImage src={product.image} alt={product.alt} width={1024} height={640} loading="lazy" className="aspect-[1.75/1] w-full object-cover object-[50%_25%] transition-transform duration-500 group-hover:scale-[1.04] md:aspect-[2.3/1]" />}
+          {product.videoUrl ? <video src={product.videoUrl} autoPlay muted loop playsInline poster={product.image} className="aspect-[1.75/1] w-full object-cover object-[50%_25%] transition-transform duration-500 group-hover:scale-[1.04] motion-reduce:transition-none motion-reduce:transform-none md:aspect-[2.3/1]" /> : <AnimatedImage src={product.image} alt={product.alt} width={1024} height={640} loading="lazy" className="aspect-[1.75/1] w-full object-cover object-[50%_25%] transition-transform duration-500 group-hover:scale-[1.04] motion-reduce:transition-none motion-reduce:transform-none md:aspect-[2.3/1]" />}
         </Link>
 
         {(product.isOutOfStock || product.isFeatured || product.tags?.length) && (
@@ -50,7 +50,7 @@ export function ProductCard({ product, className }: { product: Product; classNam
           type="button"
           onClick={add}
           disabled={product.isOutOfStock}
-          className="absolute bottom-2.5 right-2.5 inline-flex items-center gap-1.5 rounded-full bg-ink px-3.5 py-2 text-[13px] font-medium text-ink-foreground opacity-0 transition-[opacity,transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:shadow-lg active:translate-y-px active:scale-[0.97] group-hover:opacity-100 focus-visible:opacity-100 disabled:cursor-not-allowed disabled:opacity-100"
+          className="absolute bottom-2.5 right-2.5 inline-flex items-center gap-1.5 rounded-full bg-ink px-3.5 py-2 text-[13px] font-medium text-ink-foreground opacity-0 transition-[opacity,transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:shadow-lg active:translate-y-px active:scale-[0.98] motion-reduce:transition-none motion-reduce:transform-none group-hover:opacity-100 focus-visible:opacity-100 disabled:cursor-not-allowed disabled:opacity-100"
         >
           <Plus className="h-3.5 w-3.5" strokeWidth={2.4} />
           {product.isOutOfStock ? "Out of Stock" : "Add to Bag"}
