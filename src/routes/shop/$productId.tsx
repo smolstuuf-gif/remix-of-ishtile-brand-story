@@ -12,7 +12,7 @@ import { Footer } from "@/components/home/Footer";
 import { Logo } from "@/components/home/Logo";
 import { Hanger } from "@/components/home/icons";
 import { ProductCard } from "@/components/shop/ProductCard";
-import { formatTaka, galleryViews, productById, products } from "@/lib/catalog";
+import { formatTaka, galleryViews, products } from "@/lib/catalog";
 import { MAX_QTY } from "@/lib/commerce";
 import { useCart } from "@/lib/store";
 import { cn } from "@/lib/utils";
@@ -22,9 +22,7 @@ import { AnimatedImage } from "@/components/ui/animated-image";
 
 export const Route = createFileRoute("/shop/$productId")({
   loader: async ({ params }) => {
-    const remoteProduct = await fetchPublicProduct(params.productId);
-    if (remoteProduct === null) throw notFound({ data: { productId: params.productId } });
-    const product = remoteProduct ?? productById(params.productId);
+    const product = await fetchPublicProduct(params.productId);
     if (!product) throw notFound({ data: { productId: params.productId } });
     return product;
   },
