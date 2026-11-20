@@ -452,6 +452,7 @@ export type Database = {
           subtotal: number
           total: number
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           created_at?: string
@@ -471,6 +472,7 @@ export type Database = {
           subtotal: number
           total: number
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           created_at?: string
@@ -490,6 +492,7 @@ export type Database = {
           subtotal?: number
           total?: number
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -641,10 +644,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_create_store_order: {
+        Args: { p_items: Json; p_order: Json }
+        Returns: Json
+      }
       admin_update_store_order: {
         Args: { p_items: Json; p_order: Json; p_order_id: string }
         Returns: undefined
       }
+      claim_guest_orders_for_verified_phone: { Args: never; Returns: number }
       save_lookbook_look: {
         Args: { p_look: Json; p_products: Json }
         Returns: string
