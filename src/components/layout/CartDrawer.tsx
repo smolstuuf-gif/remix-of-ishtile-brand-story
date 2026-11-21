@@ -46,14 +46,17 @@ export function CartDrawer() {
 
   return (
     <Sheet open={cartOpen} onOpenChange={(open) => (open ? undefined : closeCart())}>
-      <SheetContent side="right" className="flex w-full flex-col gap-0 p-0 sm:max-w-md">
-        <SheetTitle className="border-b border-border px-6 pb-4 pt-5 pr-12 text-lg font-semibold">
+      <SheetContent
+        side="right"
+        className="flex h-[100dvh] max-h-[100dvh] min-h-0 w-full flex-col gap-0 overflow-hidden p-0 sm:max-w-md"
+      >
+        <SheetTitle className="shrink-0 border-b border-border px-5 pb-4 pt-[calc(1.25rem+env(safe-area-inset-top))] pr-16 text-lg font-semibold sm:px-6 sm:pr-16">
           Your Bag {count > 0 && <span className="text-muted-foreground">({count})</span>}
         </SheetTitle>
 
         {lines.length === 0 ? (
-          <div className="flex flex-1 flex-col items-center justify-center gap-4 px-8 text-center">
-            <Sparkle className="h-10 w-10 text-lime" />
+          <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-4 overflow-y-auto px-8 text-center">
+            <Sparkle className="h-10 w-10 shrink-0 text-lime" />
             <div>
               <p className="font-display text-xl font-semibold">Nothing in the bag yet.</p>
               <p className="mt-1 text-sm text-muted-foreground">
@@ -70,9 +73,9 @@ export function CartDrawer() {
           </div>
         ) : (
           <>
-            <ul className="flex-1 divide-y divide-border overflow-y-auto px-6">
+            <ul className="min-h-0 flex-1 divide-y divide-border overflow-x-hidden overflow-y-auto overscroll-contain px-5 sm:px-6">
               {lines.map((l) => (
-                <li key={l.key} className="flex gap-4 py-4">
+                <li key={l.key} className="flex gap-3 py-4 sm:gap-4">
                   <AnimatedImage
                     src={l.image}
                     alt={l.name}
@@ -82,12 +85,12 @@ export function CartDrawer() {
                   />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-start justify-between gap-2">
-                      <p className="text-sm font-medium leading-snug">{l.name}</p>
+                      <p className="min-w-0 break-words text-sm font-medium leading-snug">{l.name}</p>
                       <button
                         type="button"
                         onClick={() => removeLine(l.key)}
                         aria-label={`Remove ${l.name} from bag`}
-                        className="shrink-0 text-muted-foreground transition-colors hover:text-foreground active:scale-[0.98] motion-reduce:transition-none motion-reduce:transform-none"
+                        className="flex h-10 w-10 shrink-0 -mr-2 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
                       >
                         <Trash2 className="h-4 w-4" strokeWidth={1.6} />
                       </button>
@@ -95,7 +98,7 @@ export function CartDrawer() {
                     <p className="mt-0.5 text-xs text-muted-foreground">
                       {l.color} · Size {l.size}
                     </p>
-                    <div className="mt-2 flex items-center justify-between gap-2">
+                    <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
                       <QtyStepper qty={l.qty} onChange={(n) => setQty(l.key, n)} label={l.name} />
                       <p className="text-sm font-medium tabular-nums">{formatTaka(l.price * l.qty)}</p>
                     </div>
@@ -104,7 +107,7 @@ export function CartDrawer() {
               ))}
             </ul>
 
-            <div className="border-t border-border px-6 pb-6 pt-4">
+            <div className="shrink-0 border-t border-border bg-background px-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] pt-4 sm:px-6 sm:pb-6">
               {toFreeShipping > 0 ? (
                 <p className="mb-3 rounded-lg bg-panel px-3 py-2 text-xs text-muted-foreground">
                   Add {formatTaka(toFreeShipping)} more for free delivery.
@@ -131,7 +134,7 @@ export function CartDrawer() {
               <Link
                 to="/checkout"
                 onClick={closeCart}
-                className="mt-4 block rounded-full bg-lime py-3 text-center text-sm font-semibold text-primary-foreground transition-transform hover:scale-[1.01] active:scale-[0.98] motion-reduce:transition-none motion-reduce:transform-none"
+                className="mt-4 block rounded-full bg-lime py-3 text-center text-sm font-semibold text-primary-foreground transition-transform hover:scale-[1.01]"
               >
                 Checkout
               </Link>
