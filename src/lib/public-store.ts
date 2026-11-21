@@ -104,6 +104,58 @@ export async function fetchPublicProduct(slug: string): Promise<Product | null |
   return rows[0] ? toCatalogProduct(rows[0]) : null;
 }
 
+export type PublicProductCollection = {
+  id: string;
+  title: string;
+  slug: string;
+  image_url: string | null;
+  description: string | null;
+  campaign_label: string | null;
+  products: Product[];
+  photoshoot: { id: string; title: string; description: string | null; image_url: string; video_url: string | null; alt_text: string | null; sort_order: number }[];
+};
+
+type ProductCollectionRow = {
+  sort_order: number;
+  products: DatabaseProduct | null;
+  collections: {
+    id: string; title: string; slug: string; image_url: string | null;
+    description: string | null; campaign_label: string | null;
+  } | null;
+};
+
+/** Returns only active collections explicitly linked to this product, plus their products and collection photoshoot looks. */
+export async function fetchProductCollections(productSlug: string): Promise<PublicProductCollection[]> {
+  if (!url || !key || !productSlug) return [];
+  const rows = await publicRows<ProductCollectionRow>(
+    `collection_products?select=sort_order,products(slug,name,price,image_url,image_urls,video_url,category,sizes,size_guide,care_instructions,colors,description,created_at,is_featured,is_out_of_stock,stock_quantity,tags,brands(name)),collections(id,title,slug,image_url,description,campaign_label)&products.slug=eq.${encodeURIComponent(productSlug)}&order=sort_order.asc`
+  );
+  const grouped = new Map<string, PublicProductCollection>();
+  for (const row of rows) {
+    if (!row.collections || !row.products) continue;
+    const collection = row.collections;
+    const current = grouped.get(collection.id) ?? {
+      ...collection,
+      products: [],
+      photoshoot: [],
+    };
+    if (!current.products.some((item) => item.id === row.products!.slug)) {
+      current.products.push(toCatalogProduct(row.products));
+    }
+    grouped.set(collection.id, current);
+  }
+  await Promise.all([...grouped.values()].map(async (collection) => {
+    const looks = await publicRows<{
+      id: string; title: string; description: string | null; image_url: string;
+      video_url: string | null; alt_text: string | null; sort_order: number;
+    }>(
+      `lookbook_looks?select=id,title,description,image_url,video_url,alt_text,sort_order&collection_id=eq.${collection.id}&is_active=eq.true&order=sort_order.asc`
+    );
+    collection.photoshoot = looks;
+  }));
+  return [...grouped.values()];
+}
+
 export type PublicBrandInfo = {
   social_links: Record<string, string>;
   contact_numbers: string[];
