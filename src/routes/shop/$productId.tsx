@@ -466,7 +466,7 @@ function ProductPage() {
             <div key={collection.id} className="mt-16">
               {collectionProducts.length > 0 && (
                 <section aria-labelledby={`complete-look-${collection.id}`}>
-                  <div className="flex items-end justify-between border-b border-foreground pb-3">
+                  <div className="mb-3 flex items-end justify-between border-b border-foreground pb-3">
                     <div>
                       <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
                         {collection.campaign_label || collection.title}
@@ -479,13 +479,35 @@ function ProductPage() {
                       Shop collection
                     </Link>
                   </div>
-                  <ul className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 lg:gap-5">
-                    {collectionProducts.map((item) => (
-                      <li key={item.id}>
-                        <ProductCard product={item} />
-                      </li>
-                    ))}
-                  </ul>
+                  <div className="grid gap-4 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-6">
+                    <div className="min-h-[360px] overflow-hidden bg-card sm:min-h-[480px] lg:min-h-[560px]">
+                      {photoshoot[0]?.video_url ? (
+                        <video
+                          src={photoshoot[0].video_url}
+                          poster={photoshoot[0].image_url}
+                          muted
+                          loop
+                          autoPlay
+                          playsInline
+                          className="h-full max-h-[720px] min-h-[360px] w-full object-cover sm:min-h-[480px] lg:min-h-[560px]"
+                        />
+                      ) : (
+                        <img
+                          src={photoshoot[0]?.image_url || collection.image_url || product.image}
+                          alt={photoshoot[0]?.alt_text || collection.title}
+                          loading="lazy"
+                          className="h-full max-h-[720px] min-h-[360px] w-full object-cover sm:min-h-[480px] lg:min-h-[560px]"
+                        />
+                      )}
+                    </div>
+                    <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3">
+                      {collectionProducts.map((item) => (
+                        <li key={item.id} className="min-w-0">
+                          <ProductCard product={item} />
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 </section>
               )}
 
