@@ -1,4 +1,4 @@
-import { productById, type Product } from "@/lib/catalog";
+import type { Product } from "@/lib/catalog";
 
 const url = (import.meta.env["VITE_SUPABASE_URL"] as string | undefined)?.replace(/\/$/, "");
 const key = import.meta.env["VITE_SUPABASE_PUBLISHABLE_KEY"] as string | undefined;
@@ -45,61 +45,46 @@ export async function fetchPublicBrands() {
 }
 
 type DatabaseProduct = {
-  slug: string; name: string; price: number | string; image_url: string | null; image_urls: string[] | null; video_url: string | null;
+  slug: string; previous_slugs?: string[]; name: string; price: number | string; image_url: string | null; image_urls: string[] | null; video_url: string | null;
   category: string; sizes: string[] | null; size_guide: { size: string; chest: string; length: string }[] | null; care_instructions: string | null; colors: { name: string; hex: string; images?: string[]; videos?: string[] }[] | null;
   description: string | null; created_at: string; is_featured: boolean; is_out_of_stock: boolean; stock_quantity: number | null; tags: string[]; brands?: { name: string } | null;
 };
 function toCatalogProduct(row: DatabaseProduct): Product {
-  const fallback = productById(row.slug);
   const allowed = ["Men", "Women", "Accessories", "Traditional"] as const;
   const galleryImages = [row.image_url, ...(row.image_urls ?? [])].filter((image): image is string => Boolean(image));
   return {
-    ...(fallback ?? {
-      id: row.slug, name: row.name, price: Number(row.price), image: "", alt: row.name,
-      category: "Men" as const, brand: "ISHTILE" as const, sizes: [], colors: [],
-      rating: 0, reviews: 0, blurb: "", details: [], care: "", added: row.created_at,
-      isFeatured: row.is_featured, isOutOfStock: row.is_out_of_stock, stockQuantity: row.stock_quantity ?? null, tags: row.tags ?? [],
-    }),
-    id: row.slug,
-    name: row.name,
-    price: Number(row.price),
-    image: row.image_url || row.image_urls?.[0] || fallback?.image || "",
+    id: row.slug, name: row.name, price: Number(row.price),
+    image: row.image_url || row.image_urls?.[0] || "",
     ...(galleryImages.length > 1 ? { galleryImages } : {}),
     ...(row.video_url ? { videoUrl: row.video_url } : {}),
     alt: row.name,
-    category: allowed.includes(row.category as (typeof allowed)[number]) ? row.category as Product["category"] : fallback?.category ?? "Men",
-    brand: (row.brands?.name || fallback?.brand || "ISHTILE") as Product["brand"],
-    sizes: row.sizes?.length ? row.sizes : fallback?.sizes ?? [],
-    colors: row.colors?.length ? row.colors : fallback?.colors ?? [],
-    rating: fallback?.rating ?? 0,
-    reviews: fallback?.reviews ?? 0,
-    blurb: row.description || fallback?.blurb || "",
-    details: fallback?.details ?? (row.description ? [row.description] : []),
-    sizeGuide: row.size_guide ?? [],
-    care: row.care_instructions || fallback?.care || "",
-    added: row.created_at || fallback?.added || "",
+    category: allowed.includes(row.category as (typeof allowed)[number]) ? row.category as Product["category"] : "Men",
+    brand: (row.brands?.name || "ISHTILE") as Product["brand"],
+    sizes: row.sizes ?? [], colors: row.colors ?? [], rating: 0, reviews: 0,
+    blurb: row.description || "", details: row.description ? [row.description] : [],
+    sizeGuide: row.size_guide ?? [], care: row.care_instructions || "", added: row.created_at || "",
     isFeatured: row.is_featured, isOutOfStock: row.is_out_of_stock, stockQuantity: row.stock_quantity ?? null, tags: row.tags ?? [],
-    ...(() => {
-      const badge = (row.tags ?? []).find((tag) => ["Best Seller", "Customer Favorite", "New Arrival", "Limited Edition", "Trending", "Staff Pick", "Exclusive"].includes(tag));
-      return badge ? { badge } : {};
-    })(),
+    ...(() => { const badge = (row.tags ?? []).find((tag) => ["Best Seller", "Customer Favorite", "New Arrival", "Limited Edition", "Trending", "Staff Pick", "Exclusive"].includes(tag)); return badge ? { badge } : {}; })(),
   };
 }
-export async function fetchPublicProducts(): Promise<Product[] | null> {
-  if (!url || !key) return null;
+export async function fetchPublicProducts(): Promise<Product[]> {
+  if (!url || !key) throw new Error("The live product catalogue is not configured.");
   const response = await fetch(`${url}/rest/v1/products?select=slug,name,price,image_url,image_urls,video_url,category,sizes,size_guide,care_instructions,colors,description,created_at,is_featured,is_out_of_stock,stock_quantity,tags,brands(name)&is_active=eq.true&order=created_at.desc`, {
     headers: publicApiHeaders(),
   });
-  if (!response.ok) return null;
+  if (!response.ok) throw new Error("Could not load live products (" + response.status + ").");
   const rows = await response.json() as DatabaseProduct[];
   return rows.map(toCatalogProduct);
 }
-export async function fetchPublicProduct(slug: string): Promise<Product | null | undefined> {
-  if (!url || !key) return undefined;
-  const response = await fetch(`${url}/rest/v1/products?select=slug,name,price,image_url,image_urls,video_url,category,sizes,size_guide,care_instructions,colors,description,created_at,brands(name)&slug=eq.${encodeURIComponent(slug)}&is_active=eq.true&limit=1`, {
+export async function fetchPublicProduct(slug: string): Promise<Product | null> {
+  if (!url || !key) throw new Error("The live product catalogue is not configured.");
+  // Match the current slug or a preserved historical slug so old cards and bookmarks still work.
+  const productSlugFilter = encodeURIComponent("(slug.eq." + slug + ",previous_slugs.cs.{" + slug + "})");
+  const productUrl = url + "/rest/v1/products?select=slug,previous_slugs,name,price,image_url,image_urls,video_url,category,sizes,size_guide,care_instructions,colors,description,created_at,is_featured,is_out_of_stock,stock_quantity,tags,brands(name)&or=" + productSlugFilter + "&is_active=eq.true&limit=1";
+  const response = await fetch(productUrl, {
     headers: publicApiHeaders(),
   });
-  if (!response.ok) return undefined;
+  if (!response.ok) throw new Error("Could not load this product (" + response.status + ").");
   const rows = await response.json() as DatabaseProduct[];
   return rows[0] ? toCatalogProduct(rows[0]) : null;
 }
