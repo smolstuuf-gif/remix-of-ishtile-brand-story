@@ -514,17 +514,18 @@ function ProductPage() {
         {productCollections.map((collection) => {
           const collectionProducts = collection.products
             .filter((item) => item.id !== product.id)
-            .slice(0, 3);
+            .slice(0, 6);
           const photoshoot = collection.photoshoot.length > 0
             ? collection.photoshoot
             : collection.image_url
-              ? [{ id: collection.id, title: collection.title, description: collection.description, image_url: collection.image_url, video_url: null, alt_text: collection.title, sort_order: 0 }]
+              ? [{ id: collection.id, title: collection.title, description: collection.description, image_url: collection.image_url, video_url: collection.video_url, alt_text: collection.title, sort_order: 0 }]
               : [];
+          const leadFrame = photoshoot[0];
           return (
-            <div key={collection.id} className="mt-16">
+            <div key={collection.id} className="mt-16 md:mt-20">
               {collectionProducts.length > 0 && (
                 <section aria-labelledby={`complete-look-${collection.id}`}>
-                  <div className="mb-3 flex items-end justify-between border-b border-foreground pb-3">
+                  <div className="mb-4 flex flex-wrap items-end justify-between gap-3 border-b border-foreground pb-3">
                     <div>
                       <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
                         {collection.campaign_label || collection.title}
@@ -533,94 +534,186 @@ function ProductPage() {
                         Complete the look.
                       </h2>
                     </div>
-                    <Link to="/shop" className="text-xs font-medium underline underline-offset-4">
-                      Shop collection
+                    <Link to="/collections" className="text-xs font-medium underline underline-offset-4">
+                      Explore collection
                     </Link>
                   </div>
-                  <div className="grid gap-4 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-6">
-                    <div className="min-h-[360px] overflow-hidden bg-card sm:min-h-[480px] lg:min-h-[560px]">
-                      {photoshoot[0]?.video_url ? (
+
+                  <div className="grid gap-4 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:gap-6">
+                    <div className="relative aspect-[4/5] min-h-0 overflow-hidden bg-card lg:aspect-auto lg:min-h-[620px]">
+                      {leadFrame?.video_url || collection.video_url ? (
                         <video
-                          src={photoshoot[0].video_url}
-                          poster={photoshoot[0].image_url}
+                          src={leadFrame?.video_url || collection.video_url || undefined}
+                          poster={leadFrame?.image_url || collection.image_url || product.image}
                           muted
                           loop
                           autoPlay
                           playsInline
-                          className="h-full max-h-[720px] min-h-[360px] w-full object-cover sm:min-h-[480px] lg:min-h-[560px]"
+                          className="absolute inset-0 h-full w-full object-cover"
                         />
                       ) : (
                         <img
-                          src={photoshoot[0]?.image_url || collection.image_url || product.image}
-                          alt={photoshoot[0]?.alt_text || collection.title}
+                          src={leadFrame?.image_url || collection.image_url || product.image}
+                          alt={leadFrame?.alt_text || collection.title}
                           loading="lazy"
-                          className="h-full max-h-[720px] min-h-[360px] w-full object-cover sm:min-h-[480px] lg:min-h-[560px]"
+                          className="absolute inset-0 h-full w-full object-cover"
                         />
                       )}
+                      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/55 to-transparent px-5 pb-5 pt-16 text-white md:px-7 md:pb-7">
+                        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/75">
+                          {collection.campaign_label || "The collection edit"}
+                        </p>
+                        <p className="mt-1 font-display text-2xl font-bold tracking-tight md:text-3xl">
+                          {collection.title}
+                        </p>
+                      </div>
                     </div>
-                    <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3">
+
+                    <div className="grid grid-cols-2 content-center gap-3 sm:grid-cols-3 lg:gap-4">
                       {collectionProducts.map((item) => (
-                        <li key={item.id} className="min-w-0">
-                          <ProductCard product={item} />
-                        </li>
+                        <article key={item.id} className="group min-w-0">
+                          <Link
+                            to="/shop/$productId"
+                            params={{ productId: item.id }}
+                            className="relative block overflow-hidden bg-card"
+                            aria-label={item.name}
+                          >
+                            {item.videoUrl ? (
+                              <video
+                                src={item.videoUrl}
+                                poster={item.image}
+                                muted
+                                loop
+                                autoPlay
+                                playsInline
+                                className="aspect-[3/4] w-full object-cover transition-transform duration-500 group-hover:scale-[1.025]"
+                              />
+                            ) : (
+                              <img
+                                src={item.image}
+                                alt={item.alt || item.name}
+                                loading="lazy"
+                                className="aspect-[3/4] w-full object-cover transition-transform duration-500 group-hover:scale-[1.025]"
+                              />
+                            )}
+                            {item.isOutOfStock && (
+                              <span className="absolute left-2 top-2 bg-[#171717] px-2 py-1 text-[9px] font-bold uppercase tracking-wide text-white">
+                                Sold out
+                              </span>
+                            )}
+                          </Link>
+                          <div className="border-t border-foreground px-1.5 pb-2 pt-2">
+                            <Link
+                              to="/shop/$productId"
+                              params={{ productId: item.id }}
+                              className="block text-[10px] font-bold uppercase leading-snug tracking-wide hover:underline md:text-[11px]"
+                            >
+                              {item.name}
+                            </Link>
+                            <p className="mt-1 text-xs tabular-nums">{formatTaka(item.price)}</p>
+                            {item.colors.length > 0 && (
+                              <div className="mt-2 flex flex-wrap gap-1">
+                                {item.colors.slice(0, 5).map((swatch) => (
+                                  <span
+                                    key={swatch.name}
+                                    title={swatch.name}
+                                    aria-label={swatch.name}
+                                    className="h-3 w-3 rounded-full border border-foreground/20"
+                                    style={{ backgroundColor: swatch.hex }}
+                                  />
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </article>
                       ))}
-                    </ul>
+                    </div>
                   </div>
                 </section>
               )}
 
               {photoshoot.length > 0 && (
-                <section className="mt-14" aria-label={`${collection.title} photoshoot`}>
-                  <div className="mb-3 flex items-end justify-between border-b border-foreground pb-3">
+                <section className={collectionProducts.length > 0 ? "mt-12 md:mt-16" : ""} aria-labelledby={`photoshoot-${collection.id}`}>
+                  <div className="mb-3 flex items-end justify-between gap-3 border-b border-foreground pb-3">
                     <div>
                       <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
                         {collection.campaign_label || "Collection editorial"}
                       </p>
-                      <h2 className="mt-1 font-display text-[1.7rem] font-bold tracking-[-0.03em]">
+                      <h2 id={`photoshoot-${collection.id}`} className="mt-1 font-display text-[1.7rem] font-bold tracking-[-0.03em]">
                         The photoshoot.
                       </h2>
                     </div>
-                    <span className="text-xs text-muted-foreground">{collection.title}</span>
+                    <span className="shrink-0 text-xs text-muted-foreground">{collection.title}</span>
                   </div>
-                  <div className="no-scrollbar flex snap-x snap-mandatory gap-3 overflow-x-auto overscroll-x-contain">
-                    {photoshoot.map((look) => (
-                      <figure key={look.id} className="relative min-w-full snap-center overflow-hidden bg-card">
-                        {look.video_url ? (
-                          <video
-                            src={look.video_url}
-                            poster={look.image_url}
-                            controls
-                            muted
-                            playsInline
-                            className="aspect-[16/8] max-h-[760px] w-full object-cover"
-                          />
-                        ) : (
-                          <img
-                            src={look.image_url}
-                            alt={look.alt_text || look.title || collection.title}
-                            loading="lazy"
-                            className="aspect-[16/8] max-h-[760px] w-full object-cover"
-                          />
-                        )}
-                        {(look.title || look.description) && (
-                          <figcaption className="flex flex-wrap items-center justify-between gap-2 border-b border-x border-border px-4 py-3">
-                            <span className="text-xs font-semibold uppercase tracking-wide">{look.title}</span>
-                            {look.description && <span className="text-xs text-muted-foreground">{look.description}</span>}
-                          </figcaption>
-                        )}
-                      </figure>
-                    ))}
+                  <div className="group relative">
+                    <div
+                      data-photoshoot-track
+                      className="no-scrollbar flex snap-x snap-mandatory gap-2 overflow-x-auto overscroll-x-contain scroll-smooth"
+                    >
+                      {photoshoot.map((frame) => (
+                        <figure key={frame.id} className="relative min-w-full snap-center overflow-hidden bg-card">
+                          {frame.video_url ? (
+                            <video
+                              src={frame.video_url}
+                              poster={frame.image_url}
+                              controls
+                              muted
+                              playsInline
+                              className="aspect-[4/3] w-full object-cover md:aspect-[16/7]"
+                            />
+                          ) : (
+                            <img
+                              src={frame.image_url}
+                              alt={frame.alt_text || frame.title || collection.title}
+                              loading="lazy"
+                              className="aspect-[4/3] w-full object-cover md:aspect-[16/7]"
+                            />
+                          )}
+                          {(frame.title || frame.description) && (
+                            <figcaption className="flex flex-wrap items-center justify-between gap-2 border-b border-x border-border px-4 py-3">
+                              <span className="text-xs font-semibold uppercase tracking-wide">{frame.title}</span>
+                              {frame.description && <span className="text-xs text-muted-foreground">{frame.description}</span>}
+                            </figcaption>
+                          )}
+                        </figure>
+                      ))}
+                    </div>
+                    {photoshoot.length > 1 && (
+                      <>
+                        <button
+                          type="button"
+                          aria-label="Previous photoshoot image"
+                          onClick={(event) => {
+                            const track = event.currentTarget.parentElement?.querySelector("[data-photoshoot-track]");
+                            track?.scrollBy({ left: -track.clientWidth, behavior: "smooth" });
+                          }}
+                          className="absolute left-3 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-full border border-black/15 bg-white/90 text-foreground shadow-sm transition hover:bg-white"
+                        >
+                          <ChevronRight className="h-4 w-4 rotate-180" />
+                        </button>
+                        <button
+                          type="button"
+                          aria-label="Next photoshoot image"
+                          onClick={(event) => {
+                            const track = event.currentTarget.parentElement?.querySelector("[data-photoshoot-track]");
+                            track?.scrollBy({ left: track.clientWidth, behavior: "smooth" });
+                          }}
+                          className="absolute right-3 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-full border border-black/15 bg-white/90 text-foreground shadow-sm transition hover:bg-white"
+                        >
+                          <ChevronRight className="h-4 w-4" />
+                        </button>
+                        <p className="mt-2 text-right text-[10px] uppercase tracking-widest text-muted-foreground">
+                          Swipe to explore · {photoshoot.length} campaign frames
+                        </p>
+                      </>
+                    )}
                   </div>
-                  {photoshoot.length > 1 && (
-                    <p className="mt-2 text-right text-[10px] uppercase tracking-widest text-muted-foreground">
-                      Swipe to explore · {photoshoot.length} campaign frames
-                    </p>
-                  )}
                 </section>
               )}
             </div>
           );
-        })}      </main>
+        })}
+      </main>
 
       <div className="mt-4 flex items-center justify-center gap-3 py-6 text-muted-foreground">
         <ShieldCheck className="h-4 w-4" strokeWidth={1.6} />
