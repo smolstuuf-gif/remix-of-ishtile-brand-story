@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createFileRoute, Link, notFound, useRouter, type ErrorComponentProps } from "@tanstack/react-router";
 import { Check, ChevronRight, Heart, RotateCcw, ShieldCheck, Star, Truck } from "lucide-react";
 import { toast } from "sonner";
@@ -16,7 +16,7 @@ import { formatTaka, galleryViews, productById, products } from "@/lib/catalog";
 import { MAX_QTY } from "@/lib/commerce";
 import { useCart } from "@/lib/store";
 import { cn } from "@/lib/utils";
-import { fetchPublicProduct } from "@/lib/public-store";
+import { fetchProductCollections, fetchPublicProduct, type PublicProductCollection } from "@/lib/public-store";
 import { Stepper } from "@/components/ui/stepper";
 import { AnimatedImage } from "@/components/ui/animated-image";
 
@@ -128,6 +128,14 @@ function ProductPage() {
   const [view, setView] = useState(0);
   const [qty, setQty] = useState(1);
   const [sizeError, setSizeError] = useState(false);
+  const [productCollections, setProductCollections] = useState<PublicProductCollection[]>([]);
+  useEffect(() => {
+    let active = true;
+    fetchProductCollections(product.id)
+      .then((collections) => { if (active) setProductCollections(collections); })
+      .catch(() => { if (active) setProductCollections([]); });
+    return () => { active = false; };
+  }, [product.id]);
 
   const wished = isWished(product.id);
   const related = products
@@ -444,6 +452,95 @@ function ProductPage() {
             </ul>
           </section>
         )}
+
+        {productCollections.map((collection) => {
+          const collectionProducts = collection.products
+            .filter((item) => item.id !== product.id)
+            .slice(0, 3);
+          const photoshoot = collection.photoshoot.length > 0
+            ? collection.photoshoot
+            : collection.image_url
+              ? [{ id: collection.id, title: collection.title, description: collection.description, image_url: collection.image_url, video_url: null, alt_text: collection.title, sort_order: 0 }]
+              : [];
+          return (
+            <div key={collection.id} className="mt-16">
+              {collectionProducts.length > 0 && (
+                <section aria-labelledby={`complete-look-${collection.id}`}>
+                  <div className="flex items-end justify-between border-b border-foreground pb-3">
+                    <div>
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                        {collection.campaign_label || collection.title}
+                      </p>
+                      <h2 id={`complete-look-${collection.id}`} className="mt-1 font-display text-[1.7rem] font-bold tracking-[-0.03em]">
+                        Complete the look.
+                      </h2>
+                    </div>
+                    <Link to="/shop" className="text-xs font-medium underline underline-offset-4">
+                      Shop collection
+                    </Link>
+                  </div>
+                  <ul className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 lg:gap-5">
+                    {collectionProducts.map((item) => (
+                      <li key={item.id}>
+                        <ProductCard product={item} />
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              )}
+
+              {photoshoot.length > 0 && (
+                <section className="mt-14" aria-label={`${collection.title} photoshoot`}>
+                  <div className="mb-3 flex items-end justify-between border-b border-foreground pb-3">
+                    <div>
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                        {collection.campaign_label || "Collection editorial"}
+                      </p>
+                      <h2 className="mt-1 font-display text-[1.7rem] font-bold tracking-[-0.03em]">
+                        The photoshoot.
+                      </h2>
+                    </div>
+                    <span className="text-xs text-muted-foreground">{collection.title}</span>
+                  </div>
+                  <div className="no-scrollbar flex snap-x snap-mandatory gap-3 overflow-x-auto overscroll-x-contain">
+                    {photoshoot.map((look) => (
+                      <figure key={look.id} className="relative min-w-full snap-center overflow-hidden bg-card">
+                        {look.video_url ? (
+                          <video
+                            src={look.video_url}
+                            poster={look.image_url}
+                            controls
+                            muted
+                            playsInline
+                            className="aspect-[16/8] max-h-[760px] w-full object-cover"
+                          />
+                        ) : (
+                          <img
+                            src={look.image_url}
+                            alt={look.alt_text || look.title || collection.title}
+                            loading="lazy"
+                            className="aspect-[16/8] max-h-[760px] w-full object-cover"
+                          />
+                        )}
+                        {(look.title || look.description) && (
+                          <figcaption className="flex flex-wrap items-center justify-between gap-2 border-b border-x border-border px-4 py-3">
+                            <span className="text-xs font-semibold uppercase tracking-wide">{look.title}</span>
+                            {look.description && <span className="text-xs text-muted-foreground">{look.description}</span>}
+                          </figcaption>
+                        )}
+                      </figure>
+                    ))}
+                  </div>
+                  {photoshoot.length > 1 && (
+                    <p className="mt-2 text-right text-[10px] uppercase tracking-widest text-muted-foreground">
+                      Swipe to explore · {photoshoot.length} campaign frames
+                    </p>
+                  )}
+                </section>
+              )}
+            </div>
+          );
+        })}
       </main>
 
       <div className="mt-4 flex items-center justify-center gap-3 py-6 text-muted-foreground">
