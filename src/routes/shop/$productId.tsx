@@ -260,7 +260,7 @@ function ProductPage() {
                       loop
                       playsInline
                       poster={product.image}
-                      className="h-full w-full object-cover"
+                      className="h-full w-full object-contain bg-card md:object-cover"
                     />
                   ) : (
                     <img
@@ -269,7 +269,7 @@ function ProductPage() {
                       width={1200}
                       height={1600}
                       loading={index < 2 ? "eager" : "lazy"}
-                      className="h-full w-full object-cover"
+                      className="h-full w-full object-contain bg-card md:object-cover"
                       style={{ objectPosition: item.position }}
                     />
                   )}
