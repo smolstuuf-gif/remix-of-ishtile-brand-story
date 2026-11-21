@@ -561,8 +561,22 @@ function ProductPage() {
                       )}
                       <button
                         type="button"
-                        onClick={() => document.getElementById(`complete-look-products-${collection.id}`)?.scrollIntoView({ behavior: "smooth", block: "center" })}
-                        className="absolute bottom-4 right-4 z-10 inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/95 px-4 py-2.5 text-[10px] font-bold uppercase tracking-[0.12em] text-[#171717] shadow-lg transition-transform hover:-translate-y-0.5 hover:bg-white active:translate-y-0 md:bottom-6 md:right-6 md:px-5 md:py-3"
+                        disabled={!collection.products.some((item) => !item.isOutOfStock)}
+                        onClick={() => {
+                          const availableItems = collection.products.filter((item) => !item.isOutOfStock);
+                          availableItems.forEach((item) => addItem(item, {
+                            size: item.sizes[0] ?? "One Size",
+                            color: item.colors[0]?.name ?? "Default",
+                            qty: 1,
+                          }));
+                          if (availableItems.length) {
+                            toast.success(`${availableItems.length} item${availableItems.length === 1 ? "" : "s"} from the look added to your bag`);
+                            openCart();
+                          } else {
+                            toast.error("This look is currently unavailable");
+                          }
+                        }}
+                        className="absolute bottom-4 right-4 z-10 inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/95 px-4 py-2.5 text-[10px] font-bold uppercase tracking-[0.12em] text-[#171717] shadow-lg transition-transform hover:-translate-y-0.5 hover:bg-white active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50 md:bottom-6 md:right-6 md:px-5 md:py-3"
                       >
                         Buy the look <ChevronRight className="h-3.5 w-3.5" />
                       </button>
@@ -640,22 +654,17 @@ function ProductPage() {
               )}
 
               {photoshoot.length > 0 && (
-                <section className={collectionProducts.length > 0 ? "mt-12 md:mt-16" : ""} aria-labelledby={`photoshoot-${collection.id}`}>
-                  <div className="mb-3 flex items-end justify-between gap-3 border-b border-foreground pb-3">
-                    <div>
-                      <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                        {collection.campaign_label || "Collection editorial"}
-                      </p>
-                      <h2 id={`photoshoot-${collection.id}`} className="mt-1 font-display text-[1.7rem] font-bold tracking-[-0.03em]">
-                        The photoshoot.
-                      </h2>
-                    </div>
-                    <span className="shrink-0 text-xs text-muted-foreground">{collection.title}</span>
-                  </div>
-                  <div className="group relative">
+                <section
+                  className={cn(
+                    "relative left-1/2 mt-12 w-screen -translate-x-1/2 md:mt-16",
+                    "overflow-hidden"
+                  )}
+                  aria-label={`Collection photoshoot: ${collection.title}`}
+                >
+                  <div className="group relative w-full">
                     <div
                       data-photoshoot-track
-                      className="no-scrollbar flex snap-x snap-mandatory gap-2 overflow-x-auto overscroll-x-contain scroll-smooth"
+                      className="no-scrollbar flex snap-x snap-mandatory overflow-x-auto overscroll-x-contain scroll-smooth"
                     >
                       {photoshoot.map((frame) => (
                         <figure key={frame.id} className="relative min-w-full snap-center overflow-hidden bg-card">
@@ -666,21 +675,15 @@ function ProductPage() {
                               controls
                               muted
                               playsInline
-                              className="aspect-[4/3] w-full object-cover md:aspect-[16/7]"
+                              className="aspect-[2.35/1] w-full object-cover md:aspect-[21/9]"
                             />
                           ) : (
                             <img
                               src={frame.image_url}
-                              alt={frame.alt_text || frame.title || collection.title}
+                              alt={frame.alt_text || collection.title}
                               loading="lazy"
-                              className="aspect-[4/3] w-full object-cover md:aspect-[16/7]"
+                              className="aspect-[2.35/1] w-full object-cover md:aspect-[21/9]"
                             />
-                          )}
-                          {(frame.title || frame.description) && (
-                            <figcaption className="flex flex-wrap items-center justify-between gap-2 border-b border-x border-border px-4 py-3">
-                              <span className="text-xs font-semibold uppercase tracking-wide">{frame.title}</span>
-                              {frame.description && <span className="text-xs text-muted-foreground">{frame.description}</span>}
-                            </figcaption>
                           )}
                         </figure>
                       ))}
@@ -694,7 +697,7 @@ function ProductPage() {
                             const track = event.currentTarget.parentElement?.querySelector("[data-photoshoot-track]");
                             track?.scrollBy({ left: -track.clientWidth, behavior: "smooth" });
                           }}
-                          className="absolute left-3 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-full border border-black/15 bg-white/90 text-foreground shadow-sm transition hover:bg-white"
+                          className="absolute left-3 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-full border border-black/15 bg-white/90 text-foreground shadow-sm transition hover:bg-white md:left-6"
                         >
                           <ChevronRight className="h-4 w-4 rotate-180" />
                         </button>
@@ -705,18 +708,16 @@ function ProductPage() {
                             const track = event.currentTarget.parentElement?.querySelector("[data-photoshoot-track]");
                             track?.scrollBy({ left: track.clientWidth, behavior: "smooth" });
                           }}
-                          className="absolute right-3 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-full border border-black/15 bg-white/90 text-foreground shadow-sm transition hover:bg-white"
+                          className="absolute right-3 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-full border border-black/15 bg-white/90 text-foreground shadow-sm transition hover:bg-white md:right-6"
                         >
                           <ChevronRight className="h-4 w-4" />
                         </button>
-                        <p className="mt-2 text-right text-[10px] uppercase tracking-widest text-muted-foreground">
-                          Swipe to explore · {photoshoot.length} campaign frames
-                        </p>
                       </>
                     )}
                   </div>
                 </section>
               )}
+
             </div>
           );
         })}
