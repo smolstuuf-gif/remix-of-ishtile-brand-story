@@ -145,14 +145,21 @@ function ProductPage() {
   const goToView = (index: number) => {
     const gallery = galleryRef.current;
     if (!gallery || !views[index]) return;
-    gallery.scrollTo({ top: index * gallery.clientHeight, behavior: "smooth" });
+    const target = gallery.children[index] as HTMLElement | undefined;
+    if (!target) return;
+    gallery.scrollTo({ top: target.offsetTop - gallery.offsetTop, behavior: "smooth" });
     setView(index);
     if (views[index].colorName) setColor(views[index].colorName!);
   };
   const handleGalleryScroll = () => {
     const gallery = galleryRef.current;
     if (!gallery || !gallery.clientHeight) return;
-    const nextView = Math.min(views.length - 1, Math.max(0, Math.round(gallery.scrollTop / gallery.clientHeight)));
+    const slides = Array.from(gallery.children) as HTMLElement[];
+    const nextView = slides.reduce((closest, slide, index) => {
+      const currentDistance = Math.abs(slide.offsetTop - gallery.offsetTop - gallery.scrollTop);
+      const closestDistance = Math.abs(slides[closest].offsetTop - gallery.offsetTop - gallery.scrollTop);
+      return currentDistance < closestDistance ? index : closest;
+    }, 0);
     setView((current) => current === nextView ? current : nextView);
     if (views[nextView]?.colorName) setColor((current) => current === views[nextView].colorName ? current : views[nextView].colorName!);
   };
@@ -248,10 +255,10 @@ function ProductPage() {
               ref={galleryRef}
               onScroll={handleGalleryScroll}
               aria-label="Product images"
-              className="h-[min(76svh,820px)] min-h-[420px] flex-1 snap-y snap-mandatory overflow-y-auto overflow-x-hidden overscroll-contain scroll-smooth rounded-xl bg-card [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              className="h-auto max-h-[min(76svh,820px)] min-h-0 flex-1 snap-y snap-mandatory overflow-y-auto overflow-x-hidden overscroll-contain scroll-smooth rounded-xl bg-card [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:h-[min(76svh,820px)] md:min-h-[420px]"
             >
               {views.map((item, index) => (
-                <figure key={`${item.src}-${index}`} className="relative h-full min-h-full w-full snap-start snap-always overflow-hidden">
+                <figure key={`${item.src}-${index}`} className="relative h-auto min-h-0 w-full snap-start snap-always overflow-hidden md:h-full md:min-h-full">
                   {item.video ? (
                     <video
                       src={item.src}
@@ -260,7 +267,7 @@ function ProductPage() {
                       loop
                       playsInline
                       poster={product.image}
-                      className="h-full w-full object-contain bg-card md:object-cover"
+                      className="h-auto w-full object-contain bg-card md:h-full md:object-cover"
                     />
                   ) : (
                     <img
@@ -269,7 +276,7 @@ function ProductPage() {
                       width={1200}
                       height={1600}
                       loading={index < 2 ? "eager" : "lazy"}
-                      className="h-full w-full object-contain bg-card md:object-cover"
+                      className="h-auto w-full object-contain bg-card md:h-full md:object-cover"
                       style={{ objectPosition: item.position }}
                     />
                   )}
