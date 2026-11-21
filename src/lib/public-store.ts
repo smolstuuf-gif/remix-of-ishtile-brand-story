@@ -45,7 +45,7 @@ export async function fetchPublicBrands() {
 }
 
 type DatabaseProduct = {
-  slug: string; name: string; price: number | string; image_url: string | null; image_urls: string[] | null; video_url: string | null;
+  slug: string; previous_slugs?: string[]; name: string; price: number | string; image_url: string | null; image_urls: string[] | null; video_url: string | null;
   category: string; sizes: string[] | null; size_guide: { size: string; chest: string; length: string }[] | null; care_instructions: string | null; colors: { name: string; hex: string; images?: string[]; videos?: string[] }[] | null;
   description: string | null; created_at: string; is_featured: boolean; is_out_of_stock: boolean; stock_quantity: number | null; tags: string[]; brands?: { name: string } | null;
 };
@@ -78,7 +78,10 @@ export async function fetchPublicProducts(): Promise<Product[]> {
 }
 export async function fetchPublicProduct(slug: string): Promise<Product | null> {
   if (!url || !key) throw new Error("The live product catalogue is not configured.");
-  const response = await fetch(`${url}/rest/v1/products?select=slug,name,price,image_url,image_urls,video_url,category,sizes,size_guide,care_instructions,colors,description,created_at,is_featured,is_out_of_stock,stock_quantity,tags,brands(name)&slug=eq.${encodeURIComponent(slug)}&is_active=eq.true&limit=1`, {
+  // Match the current slug or a preserved historical slug so old cards and bookmarks still work.
+  const productSlugFilter = encodeURIComponent("(slug.eq." + slug + ",previous_slugs.cs.{" + slug + "})");
+  const productUrl = url + "/rest/v1/products?select=slug,previous_slugs,name,price,image_url,image_urls,video_url,category,sizes,size_guide,care_instructions,colors,description,created_at,is_featured,is_out_of_stock,stock_quantity,tags,brands(name)&or=" + productSlugFilter + "&is_active=eq.true&limit=1";
+  const response = await fetch(productUrl, {
     headers: publicApiHeaders(),
   });
   if (!response.ok) throw new Error("Could not load this product (" + response.status + ").");
