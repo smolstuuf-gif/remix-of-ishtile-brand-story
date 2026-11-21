@@ -559,6 +559,13 @@ function ProductPage() {
                           className="absolute inset-0 h-full w-full object-cover"
                         />
                       )}
+                      <button
+                        type="button"
+                        onClick={() => document.getElementById(`complete-look-products-${collection.id}`)?.scrollIntoView({ behavior: "smooth", block: "center" })}
+                        className="absolute bottom-4 right-4 z-10 inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/95 px-4 py-2.5 text-[10px] font-bold uppercase tracking-[0.12em] text-[#171717] shadow-lg transition-transform hover:-translate-y-0.5 hover:bg-white active:translate-y-0 md:bottom-6 md:right-6 md:px-5 md:py-3"
+                      >
+                        Buy the look <ChevronRight className="h-3.5 w-3.5" />
+                      </button>
                       <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/55 to-transparent px-5 pb-5 pt-16 text-white md:px-7 md:pb-7">
                         <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/75">
                           {collection.campaign_label || "The collection edit"}
@@ -569,7 +576,7 @@ function ProductPage() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 content-center gap-3 sm:grid-cols-3 lg:gap-4">
+                    <div id={`complete-look-products-${collection.id}`} className="grid grid-cols-2 content-center gap-3 sm:grid-cols-3 lg:gap-4">
                       {collectionProducts.map((item) => (
                         <article key={item.id} className="group min-w-0">
                           <Link
