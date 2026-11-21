@@ -1,3 +1,4 @@
+import { supabase } from "@/integrations/supabase/client";
 import type { CartLine } from "@/lib/commerce";
 
 const SUPABASE_URL = import.meta.env["VITE_SUPABASE_URL"] as string | undefined;
@@ -21,13 +22,10 @@ export async function submitStoreOrder(
     throw new Error("Checkout is temporarily unavailable. Please try again in a moment.");
   }
 
-  const headers: Record<string, string> = {
-    apikey: SUPABASE_KEY,
-    "Content-Type": "application/json",
-  };
-  if (!SUPABASE_KEY.startsWith("sb_publishable_")) {
-    headers["Authorization"] = `Bearer ${SUPABASE_KEY}`;
-  }
+  const headers: Record<string, string> = { apikey: SUPABASE_KEY, "Content-Type": "application/json" };
+  const { data: sessionData } = await supabase.auth.getSession();
+  if (sessionData.session?.access_token) headers["Authorization"] = "Bearer " + sessionData.session.access_token;
+  else if (!SUPABASE_KEY.startsWith("sb_publishable_")) headers["Authorization"] = "Bearer " + SUPABASE_KEY;
 
   const response = await fetch(`${SUPABASE_URL.replace(/\/$/, "")}/rest/v1/rpc/submit_store_order`, {
     method: "POST",

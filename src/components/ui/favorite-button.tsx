@@ -16,7 +16,7 @@ export function FavoriteButton({ active, label, onToggle, className }: FavoriteB
       aria-label={label}
       aria-pressed={active}
       className={cn(
-        "favorite-button group/favorite absolute right-2.5 top-2.5 grid h-9 w-9 place-items-center rounded-full bg-background/75 text-foreground shadow-sm backdrop-blur-sm transition-[background-color,transform,box-shadow] duration-200 hover:bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-90",
+        "favorite-button group/favorite absolute right-2.5 top-2.5 grid h-9 w-9 place-items-center rounded-full bg-background/75 text-foreground shadow-sm backdrop-blur-sm transition-[background-color,transform,box-shadow] duration-200 hover:bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.98] motion-reduce:transition-none motion-reduce:transform-none",
         className,
       )}
     >

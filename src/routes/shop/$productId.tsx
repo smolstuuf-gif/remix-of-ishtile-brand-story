@@ -12,21 +12,21 @@ import { Footer } from "@/components/home/Footer";
 import { Logo } from "@/components/home/Logo";
 import { Hanger } from "@/components/home/icons";
 import { ProductCard } from "@/components/shop/ProductCard";
-import { formatTaka, galleryViews, productById, products } from "@/lib/catalog";
+import { formatTaka, galleryViews } from "@/lib/catalog";
 import { MAX_QTY } from "@/lib/commerce";
 import { useCart } from "@/lib/store";
 import { cn } from "@/lib/utils";
-import { fetchPublicProduct } from "@/lib/public-store";
+import { fetchPublicProduct, fetchPublicProducts } from "@/lib/public-store";
 import { Stepper } from "@/components/ui/stepper";
 import { AnimatedImage } from "@/components/ui/animated-image";
 
 export const Route = createFileRoute("/shop/$productId")({
   loader: async ({ params }) => {
-    const remoteProduct = await fetchPublicProduct(params.productId);
-    if (remoteProduct === null) throw notFound({ data: { productId: params.productId } });
-    const product = remoteProduct ?? productById(params.productId);
+    const product = await fetchPublicProduct(params.productId);
     if (!product) throw notFound({ data: { productId: params.productId } });
-    return product;
+    const catalogue = await fetchPublicProducts().catch(() => []);
+    const related = catalogue.filter((item) => item.category === product.category && item.id !== product.id).slice(0, 4);
+    return { ...product, related };
   },
   head: ({ loaderData }) => {
     const name = loaderData?.name ?? "Product";
@@ -112,6 +112,7 @@ const sizeGuide = [
 
 function ProductPage() {
   const product = Route.useLoaderData();
+  const related = product.related;
   const { addItem, openCart, toggleWish, isWished } = useCart();
   const allViews = galleryViews(product);
   const [size, setSize] = useState<string | null>(null);
@@ -130,10 +131,6 @@ function ProductPage() {
   const [sizeError, setSizeError] = useState(false);
 
   const wished = isWished(product.id);
-  const related = products
-    .filter((p) => p.category === product.category && p.id !== product.id)
-    .slice(0, 4);
-
   const addToBag = () => {
     if (product.isOutOfStock) return;
     if (!size) {
