@@ -248,7 +248,7 @@ function ProductPage() {
               ref={galleryRef}
               onScroll={handleGalleryScroll}
               aria-label="Product images"
-              className="h-[min(76svh,820px)] min-h-[420px] flex-1 snap-y snap-mandatory overflow-y-auto overflow-x-hidden overscroll-contain scroll-smooth rounded-xl bg-card [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              className="h-[min(76svh,calc((100vw-4.5rem)*1.333333))] min-h-0 flex-1 snap-y snap-mandatory overflow-y-auto overflow-x-hidden overscroll-contain scroll-smooth rounded-xl bg-card [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:h-[min(76svh,820px)] md:min-h-[420px]"
             >
               {views.map((item, index) => (
                 <figure key={`${item.src}-${index}`} className="relative h-full min-h-full w-full snap-start snap-always overflow-hidden">
